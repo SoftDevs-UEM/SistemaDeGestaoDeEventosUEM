@@ -1,0 +1,314 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .login-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, 
+      #03492A 0%,   /* verde escuro */
+      #0F9257 40%,  /* verde médio */
+      #109659 70%,  /* verde institucional */
+      #119358 100%  /* verde padrão */
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .login-wrapper {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 
+      0 25px 50px rgba(3, 73, 42, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 10;
+    animation: slideUp 0.6s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .login-header {
+    text-align: center;
+    margin-bottom: 35px;
+  }
+  
+  .university-logo {
+    margin-bottom: 20px;
+  }
+  
+  .logo-circle {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #03492A, #109659);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 8px 25px rgba(3, 73, 42, 0.4);
+    position: relative;
+  }
+  
+  .logo-circle::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    background: linear-gradient(135deg, #FFCC00, #F3F3F4, #119358);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0.7;
+  }
+  
+  .logo-text {
+    color: white;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 2px;
+  }
+  
+  .login-title {
+    color: #03492A;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  
+  .university-name {
+    color: #666;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .form-label {
+    color: #03492A;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .icon-email,
+  .icon-password {
+    font-size: 16px;
+  }
+  
+  .form-input {
+    padding: 16px 20px;
+    border: 2px solid #e1e8f0;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: #fafbfc;
+    color: #333;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #109659;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(16, 150, 89, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  .form-input::placeholder {
+    color: #999;
+  }
+  
+  .form-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+  }
+  
+  .checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #109659;
+    cursor: pointer;
+  }
+  
+  .checkbox-label {
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  .btn-login {
+    background: linear-gradient(135deg, #03492A, #109659);
+    color: white;
+    border: none;
+    padding: 18px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-login::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #109659, #119358);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .btn-login:hover::before {
+    opacity: 1;
+  }
+  
+  .btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(3, 73, 42, 0.4);
+  }
+  
+  .btn-login span,
+  .arrow-icon {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .arrow-icon {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+  
+  .btn-login:hover .arrow-icon {
+    transform: translateX(4px);
+  }
+  
+  .login-footer {
+    text-align: center;
+    margin-top: 24px;
+  }
+  
+  .forgot-link {
+    color: #109659;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  
+  .forgot-link:hover {
+    color: #03492A;
+    text-decoration: underline;
+  }
+  
+  .background-elements {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+  }
+  
+  .floating-element {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .element-1 {
+    width: 200px;
+    height: 200px;
+    top: 10%;
+    left: -5%;
+    animation-delay: 0s;
+  }
+  
+  .element-2 {
+    width: 150px;
+    height: 150px;
+    top: 60%;
+    right: -10%;
+    animation-delay: 2s;
+  }
+  
+  .element-3 {
+    width: 100px;
+    height: 100px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    33% {
+      transform: translateY(-20px) rotate(120deg);
+    }
+    66% {
+      transform: translateY(10px) rotate(240deg);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .login-wrapper {
+      padding: 30px 24px;
+      margin: 20px;
+    }
+  
+    .login-title {
+      font-size: 20px;
+    }
+  
+    .university-name {
+      font-size: 14px;
+    }
+  
+    .form-input {
+      padding: 14px 16px;
+    }
+  
+    .btn-login {
+      padding: 16px 20px;
+    }
+  }
+  
