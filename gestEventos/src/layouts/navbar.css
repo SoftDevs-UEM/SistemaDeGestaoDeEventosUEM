@@ -1,0 +1,79 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 200vh; /* só para mostrar o efeito scroll */
+}
+
+/* Navbar - SEMPRE com fundo verde */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 60px;
+    z-index: 1000;
+    background: #03492A; /* Verde escuro institucional permanente */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Logo - Estilo para a imagem */
+.navbar .logo img {
+    height: 85px; /* Ajuste conforme necessário */
+    width: auto;
+}
+
+/* Links */
+.navbar .nav-links {
+    display: flex;
+    gap: 28px;
+}
+
+.navbar .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    transition: color 0.3s ease;
+}
+
+.navbar .nav-links a:hover {
+    color: #FFD700; /* Amarelo destaque */
+}
+
+/* Botão */
+.navbar .btn-login {
+    background: #FFD700;
+    color: #03492A;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.navbar .btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+
+/* Para simular fundo */
+.hero {
+    height: 100vh;
+    background: linear-gradient(135deg, #109659, #0F9257);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    padding-top: 80px; /* Adicionado padding para compensar a navbar fixa */
+}
