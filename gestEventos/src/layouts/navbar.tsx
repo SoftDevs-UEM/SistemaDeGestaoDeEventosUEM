@@ -19,6 +19,18 @@ export default function Navbar() {
 
   return (
     <>
+{/* 
+<nav className="navbar" id="navbar">
+        <div className="logo">
+          <Link to="/">
+            <img src="src/assets/logo.png" alt="UEM Logo" />
+          </Link>
+        </div>
+       
+     
+      </nav> */}
+
+
       <nav className="navbar" id="navbar">
         <div className="logo">
           <Link to="/">
