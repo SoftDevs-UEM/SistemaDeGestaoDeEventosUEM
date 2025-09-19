@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 
@@ -7,8 +8,18 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [popularEvents, setPopularEvents] = useState([]);
 
+  const navigate = useNavigate();
+  const [ setIsVisible] = useState(true);
+  
+  const handleLoginClick = () => {
+    navigate("/Eventos"); // redireciona para a rota /login
+  };
+
   // Dados de exemplo
   useEffect(() => {
+
+
+
     const featuredEvents = [
       {
         id: 1,
@@ -109,7 +120,7 @@ const Home = () => {
         <h1>Universidade Eduardo Mondlane</h1>
         <p>Bem-vindo ao portal de eventos da UEM</p>
         <div className="hero-buttons">
-          <button className="btn-primary">Explorar Eventos</button>
+          <button className="btn-primary"onClick={handleLoginClick}>Explorar Eventos</button>
           <button className="btn-secondary">Saber Mais</button>
         </div>
       </div>
