@@ -1,4 +1,4 @@
-// Eventos.tsx (com a newsletter adicionada)
+// Eventos.tsx
 import React, { useState, useEffect } from 'react';
 import './Eventos.css';
 
@@ -41,7 +41,7 @@ const Eventos = () => {
         image: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
         category: "culturais",
         attendees: 180,
-        description: "Celebração da diversidade cultural com música, dança, comida e exposições de arte."
+        description: "Celebração da diversidade cultural com música, dança, comida and exposições de arte."
       },
       {
         id: 3,
@@ -60,7 +60,7 @@ const Eventos = () => {
         date: "5-7 Nov 2023",
         time: "14:00 - 18:00",
         location: "Laboratório de Informática",
-        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
+        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=c crop&w=600&q=80",
         category: "cursos",
         attendees: 90,
         description: "Curso intensivo para iniciantes que desejam aprender os fundamentos da programação."
@@ -100,7 +100,7 @@ const Eventos = () => {
       },
       {
         id: 8,
-        title: "Noite de Poesia and Música",
+        title: "Noite de Poesia e Música",
         date: "3 Dez 2023",
         time: "19:00 - 23:00",
         location: "Jardim das Letras",
@@ -130,121 +130,133 @@ const Eventos = () => {
 
   return (
     <div className="eventos-container">
-      {/* Showcase/Banner */}
+      {/* Hero Section */}
       <section className="eventos-hero">
         <div className="eventos-hero-content">
           <h1>Eventos UEM</h1>
           <p>Descubra e participe nos eventos da Universidade Eduardo Mondlane</p>
+          <div className="hero-buttons">
+            <button className="btn-primary">Explorar Eventos</button>
+            <button className="btn-secondary">Criar Evento</button>
+          </div>
         </div>
       </section>
 
-      <div className="eventos-content">
-        {/* Categorias de Eventos */}
-        <section className="eventos-categories">
+      {/* Categorias de Eventos */}
+      <section className="eventos-categories">
+        <div className="container">
           <h2 className="section-title">Explore por <span className="highlight">Categorias</span></h2>
           <p className="section-subtitle">Filtre os eventos por área de interesse</p>
           
-          <div className="categories-filter">
+          <div className="categories-grid">
             {categories.map(category => (
-              <button
-                key={category.id}
-                className={`category-filter-btn ${activeCategory === category.id ? 'active' : ''}`}
+              <div 
+                key={category.id} 
+                className={`category-card ${activeCategory === category.id ? 'active' : ''}`}
                 onClick={() => setActiveCategory(category.id)}
               >
-                <span className="category-icon">{category.icon}</span>
-                <span className="category-name">{category.name}</span>
-                <span className="event-count">{category.count} eventos</span>
-              </button>
+                <div className="category-icon">
+                  {category.icon}
+                </div>
+                <h3>{category.name}</h3>
+                <p>{category.count} eventos</p>
+              </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <div className="eventos-layout">
-          {/* Lista de Eventos */}
-          <section className="eventos-list">
-            <h2 className="section-title">
-              {activeCategory === 'todos' ? 'Todos os Eventos' : categories.find(c => c.id === activeCategory)?.name}
-            </h2>
-            
-            <div className="events-grid">
-              {filteredEvents.map(event => (
-                <div key={event.id} className="event-card">
-                  <div className="event-image">
-                    <img src={event.image} alt={event.title} />
-                    <div className="event-category-badge">
-                      {categories.find(c => c.id === event.category)?.icon} 
-                      {categories.find(c => c.id === event.category)?.name}
-                    </div>
-                  </div>
-                  <div className="event-info">
-                    <h3>{event.title}</h3>
-                    <p className="event-description">{event.description}</p>
-                    <div className="event-details">
-                      <div className="event-detail">
-                        <i className="fas fa-calendar-alt"></i>
-                        <span>{event.date}</span>
-                      </div>
-                      <div className="event-detail">
-                        <i className="fas fa-clock"></i>
-                        <span>{event.time}</span>
-                      </div>
-                      <div className="event-detail">
-                        <i className="fas fa-map-marker-alt"></i>
-                        <span>{event.location}</span>
-                      </div>
-                      <div className="event-detail">
-                        <i className="fas fa-users"></i>
-                        <span>{event.attendees} participantes</span>
-                      </div>
-                    </div>
-                    <div className="event-actions">
-                      <button className="btn-primary">Participar</button>
-                      <button className="btn-secondary">Detalhes</button>
-                    </div>
+      {/* Lista de Eventos */}
+      <section className="eventos-list-section">
+        <div className="container">
+          <h2 className="section-title">
+            {activeCategory === 'todos' ? 'Todos os Eventos' : categories.find(c => c.id === activeCategory)?.name}
+          </h2>
+          <p className="section-subtitle">Confira nossa agenda completa de eventos acadêmicos</p>
+          
+          <div className="events-grid">
+            {filteredEvents.map(event => (
+              <div key={event.id} className="event-card">
+                <div className="event-image">
+                  <img src={event.image} alt={event.title} />
+                  <div className="event-category-badge">
+                    {categories.find(c => c.id === event.category)?.icon} 
+                    {categories.find(c => c.id === event.category)?.name}
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Sidebar com Eventos Populares e Últimos Eventos */}
-          <aside className="eventos-sidebar">
-            {/* Eventos Mais Participados (Top 5) */}
-            <div className="sidebar-section">
-              <h3>Eventos Mais Participados</h3>
-              <div className="popular-events-list">
-                {popularEvents.map((event, index) => (
-                  <div key={event.id} className="popular-event-item">
-                    <span className="popular-event-rank">{index + 1}</span>
-                    <div className="popular-event-info">
-                      <h4>{event.title}</h4>
-                      <p>{event.attendees} participantes</p>
+                <div className="event-info">
+                  <h3>{event.title}</h3>
+                  <p className="event-description">{event.description}</p>
+                  <div className="event-meta">
+                    <div className="event-detail">
+                      <i className="fas fa-calendar-alt"></i>
+                      <span>{event.date}</span>
+                    </div>
+                    <div className="event-detail">
+                      <i className="fas fa-clock"></i>
+                      <span>{event.time}</span>
+                    </div>
+                    <div className="event-detail">
+                      <i className="fas fa-map-marker-alt"></i>
+                      <span>{event.location}</span>
+                    </div>
+                    <div className="event-detail">
+                      <i className="fas fa-users"></i>
+                      <span>{event.attendees} participantes</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Últimos Eventos */}
-            <div className="sidebar-section">
-              <h3>Últimos Eventos</h3>
-              <div className="recent-events-list">
-                {events.slice(0, 4).map(event => (
-                  <div key={event.id} className="recent-event-item">
-                    <img src={event.image} alt={event.title} />
-                    <div className="recent-event-info">
-                      <h4>{event.title}</h4>
-                      <p>{event.date}</p>
-                    </div>
+                  <div className="event-actions">
+                    <button className="btn-primary">Participar</button>
+                    <button className="btn-secondary">Detalhes</button>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          </aside>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Newsletter Section - EXATAMENTE como na Home */}
+      {/* Eventos Populares */}
+      <section className="popular-events">
+        <div className="container">
+          <h2 className="section-title">Eventos <span className="highlight">Populares</span></h2>
+          <p className="section-subtitle">Os eventos mais procurados pela comunidade académica</p>
+          
+          <div className="events-grid">
+            {popularEvents.map(event => (
+              <div key={event.id} className="event-card">
+                <div className="event-image">
+                  <img src={event.image} alt={event.title} />
+                  <div className="event-category-badge">
+                    {categories.find(c => c.id === event.category)?.icon} 
+                    {categories.find(c => c.id === event.category)?.name}
+                  </div>
+                </div>
+                <div className="event-info">
+                  <h3>{event.title}</h3>
+                  <div className="event-meta">
+                    <div className="event-detail">
+                      <i className="fas fa-calendar-alt"></i>
+                      <span>{event.date}</span>
+                    </div>
+                    <div className="event-detail">
+                      <i className="fas fa-map-marker-alt"></i>
+                      <span>{event.location}</span>
+                    </div>
+                    <div className="event-detail">
+                      <i className="fas fa-users"></i>
+                      <span>{event.attendees} participantes</span>
+                    </div>
+                  </div>
+                  <button className="event-btn">Participar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
       <section className="newsletter">
         <div className="container">
           <div className="newsletter-content">

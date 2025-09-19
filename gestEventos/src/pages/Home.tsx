@@ -9,7 +9,7 @@ const Home = () => {
   const [popularEvents, setPopularEvents] = useState([]);
 
   const navigate = useNavigate();
-  const [ setIsVisible] = useState(true);
+  
   
   const handleLoginClick = () => {
     navigate("/Eventos"); // redireciona para a rota /login
