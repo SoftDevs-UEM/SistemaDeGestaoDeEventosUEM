@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import './Home.css';
+import Footer from "../layouts/footer";
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -223,19 +224,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="newsletter">
-        <div className="container">
-          <div className="newsletter-content">
-            <h2>Fique por dentro dos eventos</h2>
-            <p>Inscreva-se na nossa newsletter para receber atualizações sobre eventos</p>
-            <div className="newsletter-form">
-              <input type="email" placeholder="Seu melhor e-mail" />
-              <button className="newsletter-btn">Subscrever</button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Footer />
     </div>
   );
 };

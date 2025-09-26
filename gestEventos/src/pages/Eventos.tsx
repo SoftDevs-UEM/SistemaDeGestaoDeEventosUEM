@@ -1,6 +1,7 @@
 // Eventos.tsx
 import React, { useState, useEffect } from 'react';
 import './Eventos.css';
+import Footer from '../layouts/footer';
 
 const Eventos = () => {
   const [activeCategory, setActiveCategory] = useState('todos');
@@ -256,19 +257,7 @@ const Eventos = () => {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="newsletter">
-        <div className="container">
-          <div className="newsletter-content">
-            <h2>Fique por dentro dos eventos</h2>
-            <p>Inscreva-se na nossa newsletter para receber atualizações sobre eventos</p>
-            <div className="newsletter-form">
-              <input type="email" placeholder="Seu melhor e-mail" />
-              <button className="newsletter-btn">Subscrever</button>
-            </div>
-          </div>
-        </div>
-      </section>
+       <Footer/>
     </div>
   );
 };

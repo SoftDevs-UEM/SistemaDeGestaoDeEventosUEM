@@ -1,5 +1,6 @@
 import React from 'react'
 import './Sobre.css'
+import Footer from '../layouts/footer'
 
 const Sobre = () => {
   return (
@@ -174,14 +175,7 @@ const Sobre = () => {
           </div>
         </div>
       </section>
-
-      {/* Footer da Página Sobre */}
-      <footer className="sobre-footer">
-        <div className="container">
-          <p>© 2023 Universidade Eduardo Mondlane. Todos os direitos reservados.</p>
-          <p>Construindo o futuro da educação em Moçambique</p>
-        </div>
-      </footer>
+<Footer/>
     </div>
   )
 }
