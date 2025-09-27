@@ -1,15 +1,15 @@
-import { useNavigate } from "react-router-dom";
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import './navbar.css'
+import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import './navbar.css';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
-  
+
   const handleLoginClick = () => {
     setIsVisible(false); // Faz a navbar desaparecer
-    navigate("/login"); // redireciona para a rota /login
+    navigate('/login'); // redireciona para a rota /login
   };
 
   // Se a navbar não estiver visível, retorna null
@@ -19,7 +19,7 @@ export default function Navbar() {
 
   return (
     <>
-{/* 
+      {/* 
 <nav className="navbar" id="navbar">
         <div className="logo">
           <Link to="/">
@@ -29,7 +29,6 @@ export default function Navbar() {
        
      
       </nav> */}
-
 
       <nav className="navbar" id="navbar">
         <div className="logo">

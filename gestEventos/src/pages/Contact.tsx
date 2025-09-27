@@ -8,13 +8,13 @@ const Contact = () => {
     nome: '',
     email: '',
     assunto: '',
-    mensagem: ''
+    mensagem: '',
   });
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -28,19 +28,21 @@ const Contact = () => {
       nome: '',
       email: '',
       assunto: '',
-      mensagem: ''
+      mensagem: '',
     });
   };
 
   return (
-   <div className="contact-page">
-  {/* Hero Section */}
-  <section className="contact-hero">
-    <div className="container">
-      <h1>Contacto</h1>
-      <p className="hero-subtitle">Estamos aqui para ajudar. Entre em contacto connosco</p>
-    </div>
-  </section>
+    <div className="contact-page">
+      {/* Hero Section */}
+      <section className="contact-hero">
+        <div className="container">
+          <h1>Contacto</h1>
+          <p className="hero-subtitle">
+            Estamos aqui para ajudar. Entre em contacto connosco
+          </p>
+        </div>
+      </section>
 
       {/* Contact Content */}
       <section className="contact-content">
@@ -49,7 +51,7 @@ const Contact = () => {
             {/* Informações de Contacto */}
             <div className="contact-info">
               <h2>Informações de Contacto</h2>
-              
+
               <div className="contact-item">
                 <div className="contact-icon">📞</div>
                 <div className="contact-details">
@@ -70,9 +72,13 @@ const Contact = () => {
                 <div className="contact-icon">📍</div>
                 <div className="contact-details">
                   <h3>Localização</h3>
-                  <p>Campus Universitário Principal<br />
-                  Av. Julius Nyerere, nr. 3463<br />
-                  Maputo, Moçambique</p>
+                  <p>
+                    Campus Universitário Principal
+                    <br />
+                    Av. Julius Nyerere, nr. 3463
+                    <br />
+                    Maputo, Moçambique
+                  </p>
                 </div>
               </div>
             </div>
@@ -80,8 +86,10 @@ const Contact = () => {
             {/* Formulário de Contacto */}
             <div className="contact-form-section">
               <h2>DEIXE A SUA MENSAGEM AQUI</h2>
-              <p className="form-subtitle">Preencha com clareza os campos abaixo</p>
-              
+              <p className="form-subtitle">
+                Preencha com clareza os campos abaixo
+              </p>
+
               <form className="contact-form" onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label htmlFor="nome">Nome *</label>
@@ -131,7 +139,9 @@ const Contact = () => {
                   ></textarea>
                 </div>
 
-                <button type="submit" className="submit-btn">ENVIAR</button>
+                <button type="submit" className="submit-btn">
+                  ENVIAR
+                </button>
               </form>
             </div>
           </div>

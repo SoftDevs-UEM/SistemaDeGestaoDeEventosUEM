@@ -1,8 +1,8 @@
 /* Eventos.css */
 :root {
-  --primary-color: #03492A;
-  --secondary-color: #0F9257;
-  --accent-color: #FFD700;
+  --primary-color: #03492a;
+  --secondary-color: #0f9257;
+  --accent-color: #ffd700;
   --light-color: #f8f9fa;
   --dark-color: #212529;
   --gray-color: #6c757d;
@@ -26,7 +26,11 @@
 /* Hero Section - Ajustada para começar imediatamente após a navbar */
 .eventos-hero {
   height: 80vh; /* Altura reduzida para eventos */
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
   display: flex;
   justify-content: center;
   align-items: center;
@@ -44,7 +48,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover;
+  background: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80')
+    no-repeat center center/cover;
   opacity: 0.2;
 }
 
@@ -74,7 +79,8 @@
   gap: 20px;
 }
 
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
   padding: 15px 30px;
   border-radius: 50px;
   font-weight: 600;
@@ -343,7 +349,11 @@ section {
 
 /* Newsletter */
 .newsletter {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
   color: white;
   text-align: center;
   padding: 80px 0;
@@ -405,7 +415,7 @@ section {
   .eventos-hero h1 {
     font-size: 2.8rem;
   }
-  
+
   .section-title {
     font-size: 2.2rem;
   }
@@ -415,20 +425,20 @@ section {
   .eventos-hero {
     height: 70vh;
   }
-  
+
   .eventos-hero h1 {
     font-size: 2.2rem;
   }
-  
+
   .eventos-hero p {
     font-size: 1.2rem;
   }
-  
+
   .hero-buttons {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .categories-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
@@ -438,29 +448,30 @@ section {
   .eventos-hero {
     height: 60vh;
   }
-  
+
   .eventos-hero h1 {
     font-size: 1.8rem;
   }
-  
+
   .section-title {
     font-size: 1.8rem;
   }
-  
+
   .newsletter-form {
     flex-direction: column;
   }
-  
+
   .newsletter-form input {
     max-width: 100%;
     margin-bottom: 15px;
   }
-  
+
   .event-actions {
     flex-direction: column;
   }
-  
-  .btn-primary, .btn-secondary {
+
+  .btn-primary,
+  .btn-secondary {
     width: 100%;
   }
 }

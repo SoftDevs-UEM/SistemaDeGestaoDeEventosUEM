@@ -18,103 +18,121 @@ const Eventos = () => {
       { id: 'cursos', name: 'Cursos', icon: '📚', count: 15 },
       { id: 'workshops', name: 'Workshops', icon: '🛠️', count: 10 },
       { id: 'palestras', name: 'Palestras', icon: '🎤', count: 20 },
-      { id: 'desportivos', name: 'Desportivos', icon: '⚽', count: 7 }
+      { id: 'desportivos', name: 'Desportivos', icon: '⚽', count: 7 },
     ];
 
     const allEvents = [
       {
         id: 1,
-        title: "Conferência de Ciência e Tecnologia",
-        date: "15 Out 2023",
-        time: "09:00 - 17:00",
-        location: "Auditório Principal",
-        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
-        category: "cientificos",
+        title: 'Conferência de Ciência e Tecnologia',
+        date: '15 Out 2023',
+        time: '09:00 - 17:00',
+        location: 'Auditório Principal',
+        image:
+          'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+        category: 'cientificos',
         attendees: 250,
-        description: "Uma conferência sobre os avanços mais recentes em ciência e tecnologia com palestrantes internacionais."
+        description:
+          'Uma conferência sobre os avanços mais recentes em ciência e tecnologia com palestrantes internacionais.',
       },
       {
         id: 2,
-        title: "Festival Cultural Universitário",
-        date: "22 Out 2023",
-        time: "14:00 - 22:00",
-        location: "Pátio Central",
-        image: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
-        category: "culturais",
+        title: 'Festival Cultural Universitário',
+        date: '22 Out 2023',
+        time: '14:00 - 22:00',
+        location: 'Pátio Central',
+        image:
+          'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+        category: 'culturais',
         attendees: 180,
-        description: "Celebração da diversidade cultural com música, dança, comida and exposições de arte."
+        description:
+          'Celebração da diversidade cultural com música, dança, comida and exposições de arte.',
       },
       {
         id: 3,
-        title: "Workshop de Empreendedorismo",
-        date: "30 Out 2023",
-        time: "10:00 - 16:00",
-        location: "Sala de Conferências",
-        image: "https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
-        category: "workshops",
+        title: 'Workshop de Empreendedorismo',
+        date: '30 Out 2023',
+        time: '10:00 - 16:00',
+        location: 'Sala de Conferências',
+        image:
+          'https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+        category: 'workshops',
         attendees: 120,
-        description: "Aprenda a transformar suas ideias em negócios de sucesso com especialistas em empreendedorismo."
+        description:
+          'Aprenda a transformar suas ideias em negócios de sucesso com especialistas em empreendedorismo.',
       },
       {
         id: 4,
-        title: "Curso de Introdução à Programação",
-        date: "5-7 Nov 2023",
-        time: "14:00 - 18:00",
-        location: "Laboratório de Informática",
-        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=c crop&w=600&q=80",
-        category: "cursos",
+        title: 'Curso de Introdução à Programação',
+        date: '5-7 Nov 2023',
+        time: '14:00 - 18:00',
+        location: 'Laboratório de Informática',
+        image:
+          'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=c crop&w=600&q=80',
+        category: 'cursos',
         attendees: 90,
-        description: "Curso intensivo para iniciantes que desejam aprender os fundamentos da programação."
+        description:
+          'Curso intensivo para iniciantes que desejam aprender os fundamentos da programação.',
       },
       {
         id: 5,
-        title: "Palestra sobre Sustentabilidade",
-        date: "12 Nov 2023",
-        time: "18:00 - 20:00",
-        location: "Auditório de Ciências",
-        image: "https://images.unsplash.com/photo-1569163139394-de44aa9a21dc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
-        category: "palestras",
+        title: 'Palestra sobre Sustentabilidade',
+        date: '12 Nov 2023',
+        time: '18:00 - 20:00',
+        location: 'Auditório de Ciências',
+        image:
+          'https://images.unsplash.com/photo-1569163139394-de44aa9a21dc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+        category: 'palestras',
         attendees: 150,
-        description: "Discussão sobre práticas sustentáveis e seu impacto no meio ambiente e na sociedade."
+        description:
+          'Discussão sobre práticas sustentáveis e seu impacto no meio ambiente e na sociedade.',
       },
       {
         id: 6,
-        title: "Torneio de Futebol Universitário",
-        date: "19 Nov 2023",
-        time: "09:00 - 17:00",
-        location: "Campo Desportivo",
-        image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
-        category: "desportivos",
+        title: 'Torneio de Futebol Universitário',
+        date: '19 Nov 2023',
+        time: '09:00 - 17:00',
+        location: 'Campo Desportivo',
+        image:
+          'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+        category: 'desportivos',
         attendees: 200,
-        description: "Competição entre faculdades para determinar a melhor equipa de futebol da universidade."
+        description:
+          'Competição entre faculdades para determinar a melhor equipa de futebol da universidade.',
       },
       {
         id: 7,
-        title: "Feira de Emprego e Estágios",
-        date: "25 Nov 2023",
-        time: "10:00 - 16:00",
-        location: "Pavilhão Multiusos",
-        image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
-        category: "workshops",
+        title: 'Feira de Emprego e Estágios',
+        date: '25 Nov 2023',
+        time: '10:00 - 16:00',
+        location: 'Pavilhão Multiusos',
+        image:
+          'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+        category: 'workshops',
         attendees: 300,
-        description: "Conheça as melhores oportunidades de emprego e estágio com empresas líderes do mercado."
+        description:
+          'Conheça as melhores oportunidades de emprego e estágio com empresas líderes do mercado.',
       },
       {
         id: 8,
-        title: "Noite de Poesia e Música",
-        date: "3 Dez 2023",
-        time: "19:00 - 23:00",
-        location: "Jardim das Letras",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
-        category: "culturais",
+        title: 'Noite de Poesia e Música',
+        date: '3 Dez 2023',
+        time: '19:00 - 23:00',
+        location: 'Jardim das Letras',
+        image:
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+        category: 'culturais',
         attendees: 120,
-        description: "Uma noite especial dedicada à poesia, música acústica e expressões artísticas."
-      }
+        description:
+          'Uma noite especial dedicada à poesia, música acústica e expressões artísticas.',
+      },
     ];
 
     // Ordenar eventos por data (mais recentes primeiro)
-    const sortedEvents = [...allEvents].sort((a, b) => new Date(b.date) - new Date(a.date));
-    
+    const sortedEvents = [...allEvents].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
+
     // Top 5 eventos mais participados
     const topEvents = [...allEvents]
       .sort((a, b) => b.attendees - a.attendees)
@@ -125,9 +143,10 @@ const Eventos = () => {
     setPopularEvents(topEvents);
   }, []);
 
-  const filteredEvents = activeCategory === 'todos' 
-    ? events 
-    : events.filter(event => event.category === activeCategory);
+  const filteredEvents =
+    activeCategory === 'todos'
+      ? events
+      : events.filter((event) => event.category === activeCategory);
 
   return (
     <div className="eventos-container">
@@ -135,7 +154,9 @@ const Eventos = () => {
       <section className="eventos-hero">
         <div className="eventos-hero-content">
           <h1>Eventos UEM</h1>
-          <p>Descubra e participe nos eventos da Universidade Eduardo Mondlane</p>
+          <p>
+            Descubra e participe nos eventos da Universidade Eduardo Mondlane
+          </p>
           <div className="hero-buttons">
             <button className="btn-primary">Explorar Eventos</button>
             <button className="btn-secondary">Criar Evento</button>
@@ -146,19 +167,21 @@ const Eventos = () => {
       {/* Categorias de Eventos */}
       <section className="eventos-categories">
         <div className="container">
-          <h2 className="section-title">Explore por <span className="highlight">Categorias</span></h2>
-          <p className="section-subtitle">Filtre os eventos por área de interesse</p>
-          
+          <h2 className="section-title">
+            Explore por <span className="highlight">Categorias</span>
+          </h2>
+          <p className="section-subtitle">
+            Filtre os eventos por área de interesse
+          </p>
+
           <div className="categories-grid">
-            {categories.map(category => (
-              <div 
-                key={category.id} 
+            {categories.map((category) => (
+              <div
+                key={category.id}
                 className={`category-card ${activeCategory === category.id ? 'active' : ''}`}
                 onClick={() => setActiveCategory(category.id)}
               >
-                <div className="category-icon">
-                  {category.icon}
-                </div>
+                <div className="category-icon">{category.icon}</div>
                 <h3>{category.name}</h3>
                 <p>{category.count} eventos</p>
               </div>
@@ -171,18 +194,22 @@ const Eventos = () => {
       <section className="eventos-list-section">
         <div className="container">
           <h2 className="section-title">
-            {activeCategory === 'todos' ? 'Todos os Eventos' : categories.find(c => c.id === activeCategory)?.name}
+            {activeCategory === 'todos'
+              ? 'Todos os Eventos'
+              : categories.find((c) => c.id === activeCategory)?.name}
           </h2>
-          <p className="section-subtitle">Confira nossa agenda completa de eventos acadêmicos</p>
-          
+          <p className="section-subtitle">
+            Confira nossa agenda completa de eventos acadêmicos
+          </p>
+
           <div className="events-grid">
-            {filteredEvents.map(event => (
+            {filteredEvents.map((event) => (
               <div key={event.id} className="event-card">
                 <div className="event-image">
                   <img src={event.image} alt={event.title} />
                   <div className="event-category-badge">
-                    {categories.find(c => c.id === event.category)?.icon} 
-                    {categories.find(c => c.id === event.category)?.name}
+                    {categories.find((c) => c.id === event.category)?.icon}
+                    {categories.find((c) => c.id === event.category)?.name}
                   </div>
                 </div>
                 <div className="event-info">
@@ -220,17 +247,21 @@ const Eventos = () => {
       {/* Eventos Populares */}
       <section className="popular-events">
         <div className="container">
-          <h2 className="section-title">Eventos <span className="highlight">Populares</span></h2>
-          <p className="section-subtitle">Os eventos mais procurados pela comunidade académica</p>
-          
+          <h2 className="section-title">
+            Eventos <span className="highlight">Populares</span>
+          </h2>
+          <p className="section-subtitle">
+            Os eventos mais procurados pela comunidade académica
+          </p>
+
           <div className="events-grid">
-            {popularEvents.map(event => (
+            {popularEvents.map((event) => (
               <div key={event.id} className="event-card">
                 <div className="event-image">
                   <img src={event.image} alt={event.title} />
                   <div className="event-category-badge">
-                    {categories.find(c => c.id === event.category)?.icon} 
-                    {categories.find(c => c.id === event.category)?.name}
+                    {categories.find((c) => c.id === event.category)?.icon}
+                    {categories.find((c) => c.id === event.category)?.name}
                   </div>
                 </div>
                 <div className="event-info">
@@ -257,7 +288,7 @@ const Eventos = () => {
         </div>
       </section>
 
-       <Footer/>
+      <Footer />
     </div>
   );
 };

@@ -1,6 +1,6 @@
-import React from 'react'
-import './Sobre.css'
-import Footer from '../layouts/footer'
+import React from 'react';
+import './Sobre.css';
+import Footer from '../layouts/footer';
 
 const Sobre = () => {
   return (
@@ -9,7 +9,9 @@ const Sobre = () => {
       <section className="sobre-hero">
         <div className="sobre-hero-content">
           <h1>Universidade Eduardo Mondlane</h1>
-          <p>Excelência Académica, Inovação e Transformação Social desde 1962</p>
+          <p>
+            Excelência Académica, Inovação e Transformação Social desde 1962
+          </p>
         </div>
       </section>
 
@@ -18,24 +20,26 @@ const Sobre = () => {
         <div className="container">
           <div className="historia-content">
             <div className="historia-text">
-              <h2>Nossa <span className="highlight">História</span></h2>
+              <h2>
+                Nossa <span className="highlight">História</span>
+              </h2>
               <p>
-                Fundada em 1962, a Universidade Eduardo Mondlane é a instituição de ensino superior 
-                mais antiga e prestigiada de Moçambique. Nomeada em homenagem ao líder histórico da 
-                FRELIMO, a UEM tem sido um pilar fundamental no desenvolvimento do país, formando 
-                gerações de profissionais e líderes que contribuem para o progresso nacional.
+                Fundada em 1962, a Universidade Eduardo Mondlane é a instituição
+                de ensino superior mais antiga e prestigiada de Moçambique.
+                Nomeada em homenagem ao líder histórico da FRELIMO, a UEM tem
+                sido um pilar fundamental no desenvolvimento do país, formando
+                gerações de profissionais e líderes que contribuem para o
+                progresso nacional.
               </p>
               <p>
-                Ao longo dos anos, expandimos nossas faculdades, investimos em pesquisa de ponta e 
-                estabelecemos parcerias internacionais, mantendo sempre o compromisso com a excelência 
-                académica e a relevância social.
+                Ao longo dos anos, expandimos nossas faculdades, investimos em
+                pesquisa de ponta e estabelecemos parcerias internacionais,
+                mantendo sempre o compromisso com a excelência académica e a
+                relevância social.
               </p>
             </div>
             <div className="historia-image">
-              <img 
-                src="src/assets/campus.jpg" 
-                alt="Campus da UEM" 
-              />
+              <img src="src/assets/campus.jpg" alt="Campus da UEM" />
             </div>
           </div>
         </div>
@@ -44,29 +48,33 @@ const Sobre = () => {
       {/* Missão, Visão e Valores */}
       <section className="mvv-section">
         <div className="container">
-          <h2 className="section-title">Nossa <span className="highlight">Identidade</span></h2>
-          
+          <h2 className="section-title">
+            Nossa <span className="highlight">Identidade</span>
+          </h2>
+
           <div className="mvv-grid">
             <div className="mvv-card">
               <div className="mvv-icon">🎯</div>
               <h3>Missão</h3>
               <p>
-                Produzir, disseminar e aplicar conhecimento científico e tecnológico 
-                para a formação de cidadãos competentes, éticos e inovadores, capazes 
-                de contribuir para o desenvolvimento sustentável de Moçambique.
+                Produzir, disseminar e aplicar conhecimento científico e
+                tecnológico para a formação de cidadãos competentes, éticos e
+                inovadores, capazes de contribuir para o desenvolvimento
+                sustentável de Moçambique.
               </p>
             </div>
-            
+
             <div className="mvv-card">
               <div className="mvv-icon">👁️</div>
               <h3>Visão</h3>
               <p>
-                Ser uma universidade de excelência, reconhecida nacional e 
-                internacionalmente pela qualidade do ensino, pesquisa e extensão, 
-                contribuindo para a transformação da sociedade moçambicana.
+                Ser uma universidade de excelência, reconhecida nacional e
+                internacionalmente pela qualidade do ensino, pesquisa e
+                extensão, contribuindo para a transformação da sociedade
+                moçambicana.
               </p>
             </div>
-            
+
             <div className="mvv-card">
               <div className="mvv-icon">💎</div>
               <h3>Valores</h3>
@@ -85,8 +93,10 @@ const Sobre = () => {
       {/* Números e Estatísticas */}
       <section className="estatisticas-section">
         <div className="container">
-          <h2 className="section-title">UEM em <span className="highlight">Números</span></h2>
-          
+          <h2 className="section-title">
+            UEM em <span className="highlight">Números</span>
+          </h2>
+
           <div className="estatisticas-grid">
             <div className="estatistica-item">
               <div className="numero">50,000+</div>
@@ -111,16 +121,17 @@ const Sobre = () => {
       {/* Equipe de Desenvolvimento */}
       <section className="desenvolvedores-section">
         <div className="container">
-          <h2 className="section-title">Equipe de <span className="highlight">Desenvolvimento</span></h2>
-          <p className="section-subtitle">Os talentosos desenvolvedores por trás desta plataforma</p>
-          
+          <h2 className="section-title">
+            Equipe de <span className="highlight">Desenvolvimento</span>
+          </h2>
+          <p className="section-subtitle">
+            Os talentosos desenvolvedores por trás desta plataforma
+          </p>
+
           <div className="desenvolvedores-grid">
             <div className="desenvolvedor-card">
               <div className="dev-avatar">
-                <img 
-                  src="src/assets/frank.jpeg" 
-                  alt="Frank Francisco " 
-                />
+                <img src="src/assets/frank.jpeg" alt="Frank Francisco " />
               </div>
               <h3>Frenk Francisco</h3>
               <p className="dev-role">Admistrador de Base de Dados</p>
@@ -128,38 +139,44 @@ const Sobre = () => {
                 Especialista em Admistracao de Base de dados
               </p>
               <div className="dev-social">
-                <a href="#" className="social-link">📧</a>
-                <a href="#" className="social-link">💼</a>
-                <a href="#" className="social-link">🐱</a>
+                <a href="#" className="social-link">
+                  📧
+                </a>
+                <a href="#" className="social-link">
+                  💼
+                </a>
+                <a href="#" className="social-link">
+                  🐱
+                </a>
               </div>
             </div>
-            
+
             <div className="desenvolvedor-card">
               <div className="dev-avatar">
-                <img 
-                  src="src/assets/joao.jpeg" 
-                  alt="João Langa" 
-                />
+                <img src="src/assets/joao.jpeg" alt="João Langa" />
               </div>
               <h3>João Langa</h3>
               <p className="dev-role">FullStack Developer</p>
               <p className="dev-desc">
-                Especialista em Node.js e bancos de dados, garantindo a performance 
-                e segurança da plataforma.
+                Especialista em Node.js e bancos de dados, garantindo a
+                performance e segurança da plataforma.
               </p>
               <div className="dev-social">
-                <a href="#" className="social-link">📧</a>
-                <a href="#" className="social-link">💼</a>
-                <a href="#" className="social-link">🐱</a>
+                <a href="#" className="social-link">
+                  📧
+                </a>
+                <a href="#" className="social-link">
+                  💼
+                </a>
+                <a href="#" className="social-link">
+                  🐱
+                </a>
               </div>
             </div>
-            
+
             <div className="desenvolvedor-card">
               <div className="dev-avatar">
-                <img 
-                  src="src/assets/ussene.jpeg" 
-                  alt="João Langa" 
-                />
+                <img src="src/assets/ussene.jpeg" alt="João Langa" />
               </div>
               <h3>Ussene Matato</h3>
               <p className="dev-role">Gestor do Projecto</p>
@@ -167,17 +184,23 @@ const Sobre = () => {
                 Responsável por arquitetura e o desenho do sistema
               </p>
               <div className="dev-social">
-                <a href="#" className="social-link">📧</a>
-                <a href="#" className="social-link">💼</a>
-                <a href="#" className="social-link">🐱</a>
+                <a href="#" className="social-link">
+                  📧
+                </a>
+                <a href="#" className="social-link">
+                  💼
+                </a>
+                <a href="#" className="social-link">
+                  🐱
+                </a>
               </div>
             </div>
           </div>
         </div>
       </section>
-<Footer/>
+      <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default Sobre
+export default Sobre;
