@@ -2,12 +2,32 @@
 import React, { useState, useEffect } from 'react';
 import './Eventos.css';
 import Footer from '../layouts/footer';
+import EventModal from '../components/EventModal';
+import { useNavigate } from 'react-router-dom';
 
 const Eventos = () => {
   const [activeCategory, setActiveCategory] = useState('todos');
   const [events, setEvents] = useState([]);
   const [categories, setCategories] = useState([]);
   const [popularEvents, setPopularEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showEventModal, setShowEventModal] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleParticiparClick = (event) => {
+    navigate('/registrar', { state: { event } });
+  };
+
+  const handleVerDetalhes = (event) => {
+    setSelectedEvent(event);
+    setShowEventModal(true);
+  };
+
+  const closeModal = () => {
+    setShowEventModal(false);
+    setSelectedEvent(null);
+  };
 
   // Dados de exemplo
   useEffect(() => {
@@ -32,8 +52,9 @@ const Eventos = () => {
           'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         category: 'cientificos',
         attendees: 250,
-        description:
-          'Uma conferência sobre os avanços mais recentes em ciência e tecnologia com palestrantes internacionais.',
+        description: 'Uma conferência sobre os avanços mais recentes em ciência e tecnologia com palestrantes internacionais.',
+        participants: 45,
+        maxParticipants: 200
       },
       {
         id: 2,
@@ -45,8 +66,9 @@ const Eventos = () => {
           'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         category: 'culturais',
         attendees: 180,
-        description:
-          'Celebração da diversidade cultural com música, dança, comida and exposições de arte.',
+        description: 'Celebração da diversidade cultural com música, dança, comida and exposições de arte.',
+        participants: 28,
+        maxParticipants: 150
       },
       {
         id: 3,
@@ -58,8 +80,9 @@ const Eventos = () => {
           'https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         category: 'workshops',
         attendees: 120,
-        description:
-          'Aprenda a transformar suas ideias em negócios de sucesso com especialistas em empreendedorismo.',
+        description: 'Aprenda a transformar suas ideias em negócios de sucesso com especialistas em empreendedorismo.',
+        participants: 32,
+        maxParticipants: 50
       },
       {
         id: 4,
@@ -68,11 +91,12 @@ const Eventos = () => {
         time: '14:00 - 18:00',
         location: 'Laboratório de Informática',
         image:
-          'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=c crop&w=600&q=80',
+          'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         category: 'cursos',
         attendees: 90,
-        description:
-          'Curso intensivo para iniciantes que desejam aprender os fundamentos da programação.',
+        description: 'Curso intensivo para iniciantes que desejam aprender os fundamentos da programação.',
+        participants: 25,
+        maxParticipants: 30
       },
       {
         id: 5,
@@ -84,8 +108,9 @@ const Eventos = () => {
           'https://images.unsplash.com/photo-1569163139394-de44aa9a21dc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         category: 'palestras',
         attendees: 150,
-        description:
-          'Discussão sobre práticas sustentáveis e seu impacto no meio ambiente e na sociedade.',
+        description: 'Discussão sobre práticas sustentáveis e seu impacto no meio ambiente e na sociedade.',
+        participants: 85,
+        maxParticipants: 200
       },
       {
         id: 6,
@@ -97,8 +122,9 @@ const Eventos = () => {
           'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         category: 'desportivos',
         attendees: 200,
-        description:
-          'Competição entre faculdades para determinar a melhor equipa de futebol da universidade.',
+        description: 'Competição entre faculdades para determinar a melhor equipa de futebol da universidade.',
+        participants: 150,
+        maxParticipants: 200
       },
       {
         id: 7,
@@ -110,8 +136,9 @@ const Eventos = () => {
           'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         category: 'workshops',
         attendees: 300,
-        description:
-          'Conheça as melhores oportunidades de emprego e estágio com empresas líderes do mercado.',
+        description: 'Conheça as melhores oportunidades de emprego e estágio com empresas líderes do mercado.',
+        participants: 120,
+        maxParticipants: 300
       },
       {
         id: 8,
@@ -123,8 +150,9 @@ const Eventos = () => {
           'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         category: 'culturais',
         attendees: 120,
-        description:
-          'Uma noite especial dedicada à poesia, música acústica e expressões artísticas.',
+        description: 'Uma noite especial dedicada à poesia, música acústica e expressões artísticas.',
+        participants: 45,
+        maxParticipants: 100
       },
     ];
 
@@ -233,9 +261,13 @@ const Eventos = () => {
                       <span>{event.attendees} participantes</span>
                     </div>
                   </div>
-                  <div className="event-actions">
-                    <button className="btn-primary">Participar</button>
-                    <button className="btn-secondary">Detalhes</button>
+                  <div className="event-buttons">
+                    <button className="event-btn" onClick={() => handleParticiparClick(event)}>
+                      Participar
+                    </button>
+                    <button className="btn-secondary" onClick={() => handleVerDetalhes(event)}>
+                      Detalhes
+                    </button>
                   </div>
                 </div>
               </div>
@@ -280,13 +312,28 @@ const Eventos = () => {
                       <span>{event.attendees} participantes</span>
                     </div>
                   </div>
-                  <button className="event-btn">Participar</button>
+                  <div className="event-buttons">
+                    <button className="event-btn" onClick={() => handleParticiparClick(event)}>
+                      Participar
+                    </button>
+                    <button className="btn-secondary" onClick={() => handleVerDetalhes(event)}>
+                      Detalhes
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Modal de Detalhes do Evento */}
+      <EventModal
+        event={selectedEvent}
+        isOpen={showEventModal}
+        onClose={closeModal}
+        onRegister={() => handleParticiparClick(selectedEvent)}
+      />
 
       <Footer />
     </div>

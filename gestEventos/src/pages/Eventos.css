@@ -1,4 +1,3 @@
-/* Eventos.css */
 :root {
   --primary-color: #03492a;
   --secondary-color: #0f9257;
@@ -13,7 +12,6 @@
 
 /* CORREÇÃO PRINCIPAL: Remover o padding-top do container */
 .eventos-container {
-  /* padding-top: 120px; REMOVIDO para eliminar o espaço branco */
   overflow-x: hidden;
 }
 
@@ -197,6 +195,7 @@ section {
 .category-card.active {
   border-color: var(--accent-color);
   background-color: rgba(255, 215, 0, 0.1);
+  transform: translateY(-5px);
 }
 
 .category-icon {
@@ -297,6 +296,10 @@ section {
   color: var(--gray-color);
   margin-bottom: 20px;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .event-meta {
@@ -319,9 +322,11 @@ section {
   width: 16px;
 }
 
-.event-actions {
+/* CORREÇÃO: Botões sempre visíveis */
+.event-buttons {
   display: flex;
   gap: 12px;
+  margin-top: 20px;
 }
 
 .event-btn {
@@ -334,6 +339,10 @@ section {
   cursor: pointer;
   transition: var(--transition);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  flex: 1;
 }
 
 .event-btn:hover {
@@ -442,6 +451,14 @@ section {
   .categories-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
+
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event-buttons {
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 576px) {
@@ -466,7 +483,7 @@ section {
     margin-bottom: 15px;
   }
 
-  .event-actions {
+  .event-buttons {
     flex-direction: column;
   }
 
@@ -474,4 +491,53 @@ section {
   .btn-secondary {
     width: 100%;
   }
+
+  .event-info {
+    padding: 20px;
+  }
+
+  .event-meta {
+    gap: 8px;
+  }
+}
+
+/* Estados vazios */
+.no-events {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--gray-color);
+}
+
+.no-events i {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  color: var(--secondary-color);
+}
+
+.no-events h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  color: var(--primary-color);
+}
+
+/* Loading states */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--light-color);
+  border-top: 4px solid var(--secondary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

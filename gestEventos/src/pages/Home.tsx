@@ -2,17 +2,34 @@ import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 import Footer from '../layouts/footer';
+import EventModal from '../components/EventModal';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [events, setEvents] = useState([]);
   const [categories, setCategories] = useState([]);
   const [popularEvents, setPopularEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showEventModal, setShowEventModal] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    navigate('/Eventos'); // redireciona para a rota /login
+    navigate('/Eventos');
+  };
+
+  const handleParticiparClick = (event) => {
+    navigate('/registrar', { state: { event } });
+  };
+
+  const handleVerDetalhes = (event) => {
+    setSelectedEvent(event);
+    setShowEventModal(true);
+  };
+
+  const closeModal = () => {
+    setShowEventModal(false);
+    setSelectedEvent(null);
   };
 
   // Dados de exemplo
@@ -26,6 +43,9 @@ const Home = () => {
         image:
           'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
         category: 'Científico',
+        description: 'Uma conferência abrangente sobre os últimos avanços em ciência e tecnologia, com palestrantes renomados e discussões sobre inovação.',
+        participants: 45,
+        maxParticipants: 200
       },
       {
         id: 2,
@@ -35,6 +55,9 @@ const Home = () => {
         image:
           'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
         category: 'Cultural',
+        description: 'Celebração da diversidade cultural com apresentações de música, dança, teatro e exposições de arte da comunidade universitária.',
+        participants: 28,
+        maxParticipants: 150
       },
       {
         id: 3,
@@ -44,6 +67,9 @@ const Home = () => {
         image:
           'https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
         category: 'Workshop',
+        description: 'Workshop prático sobre empreendedorismo, com foco no desenvolvimento de startups e plano de negócios.',
+        participants: 32,
+        maxParticipants: 50
       },
     ];
 
@@ -64,7 +90,11 @@ const Home = () => {
         location: 'Faculdade de Engenharia',
         image:
           'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-        attendees: 250,
+        attendees: 85,
+        category: 'Científico',
+        description: 'Evento anual da Faculdade de Engenharia com palestras, workshops e competições tecnológicas.',
+        participants: 85,
+        maxParticipants: 250
       },
       {
         id: 2,
@@ -73,7 +103,11 @@ const Home = () => {
         location: 'Pavilhão Desportivo',
         image:
           'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-        attendees: 180,
+        attendees: 62,
+        category: 'Profissional',
+        description: 'Feira de emprego com participação das maiores empresas do país, oportunidades de estágio e emprego.',
+        participants: 62,
+        maxParticipants: 180
       },
       {
         id: 3,
@@ -82,7 +116,11 @@ const Home = () => {
         location: 'Jardim das Letras',
         image:
           'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-        attendees: 120,
+        attendees: 45,
+        category: 'Cultural',
+        description: 'Noite especial dedicada à poesia, com recitais, música acústica e performances artísticas.',
+        participants: 45,
+        maxParticipants: 120
       },
       {
         id: 4,
@@ -91,7 +129,11 @@ const Home = () => {
         location: 'Laboratório de Informática',
         image:
           'https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-        attendees: 90,
+        attendees: 35,
+        category: 'Tecnologia',
+        description: 'Maratona de programação de 48 horas para desenvolvimento de soluções tecnológicas inovadoras.',
+        participants: 35,
+        maxParticipants: 90
       },
     ];
 
@@ -120,7 +162,7 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      {/* Hero Section - SEM padding-top para remover o espaço branco */}
+      {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">
           <h1>Universidade Eduardo Mondlane</h1>
@@ -172,7 +214,11 @@ const Home = () => {
                         {event.location}
                       </span>
                     </div>
-                    <button className="event-btn">Ver Detalhes</button>
+                    <div className="event-buttons">
+                      <button className="event-btn" onClick={() => handleVerDetalhes(event)}>
+                        Ver Detalhes
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -251,17 +297,31 @@ const Home = () => {
                       <i className="fas fa-map-marker-alt"></i> {event.location}
                     </span>
                     <span>
-                      <i className="fas fa-users"></i> {event.attendees}{' '}
-                      participantes
+                      <i className="fas fa-users"></i> {event.participants} participantes
                     </span>
                   </div>
-                  <button className="event-btn">Participar</button>
+                  <div className="event-buttons">
+                    <button className="event-btn" onClick={() => handleParticiparClick(event)}>
+                      Participar
+                    </button>
+                    <button className="btn-secondary" onClick={() => handleVerDetalhes(event)}>
+                      Detalhes
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Modal de Detalhes do Evento */}
+      <EventModal
+  event={selectedEvent}
+  isOpen={showEventModal}
+  onClose={closeModal}
+  onRegister={() => handleParticiparClick(selectedEvent)}
+/>
 
       <Footer />
     </div>
