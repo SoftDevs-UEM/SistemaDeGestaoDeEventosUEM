@@ -6,13 +6,8 @@
 
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(
-    135deg,
-    #03492a 0%,
-    /* verde escuro */ #0f9257 40%,
-    /* verde médio */ #109659 70%,
-    /* verde institucional */ #119358 100% /* verde padrão */
-  );
+ 
+  
   display: flex;
   align-items: center;
   justify-content: center;
