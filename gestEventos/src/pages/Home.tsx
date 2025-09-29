@@ -1,15 +1,39 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import { useEventos } from '../context/EventosContext';
+import { useAuth } from '../context/AuthContext';
 import './Home.css';
 import Footer from '../layouts/footer';
 import EventModal from '../components/EventModal';
 
+type EventType = {
+  id: number;
+  title: string;
+  date: string;
+  location: string;
+  image: string;
+  category: string;
+  description: string;
+  participants: number;
+  maxParticipants: number;
+  attendees?: number;
+};
+
+type CategoryType = {
+  id: number;
+  name: string;
+  icon: string;
+  count: number;
+  color: string;
+};
+
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [events, setEvents] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [popularEvents, setPopularEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [events, setEvents] = useState<EventType[]>([]);
+  const { eventos } = useEventos();
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [popularEvents, setPopularEvents] = useState<EventType[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
 
   const navigate = useNavigate();
@@ -18,11 +42,16 @@ const Home = () => {
     navigate('/Eventos');
   };
 
-  const handleParticiparClick = (event) => {
-    navigate('/registrar', { state: { event } });
+  const { isAuthenticated, userType } = useAuth();
+  const handleParticiparClick = (event: EventType) => {
+    if (isAuthenticated && userType === 'estudante') {
+      navigate('/registrar', { state: { event } });
+    } else {
+      navigate('/login');
+    }
   };
 
-  const handleVerDetalhes = (event) => {
+  const handleVerDetalhes = (event: EventType) => {
     setSelectedEvent(event);
     setShowEventModal(true);
   };
@@ -137,10 +166,10 @@ const Home = () => {
       },
     ];
 
-    setEvents(featuredEvents);
+  setEvents([...featuredEvents, ...eventos]);
     setCategories(eventCategories);
     setPopularEvents(popularEventsData);
-  }, []);
+  }, [eventos]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -254,7 +283,7 @@ const Home = () => {
               <div
                 key={category.id}
                 className="category-card"
-                style={{ '--category-color': category.color }}
+                style={{ ['--category-color' as any]: category.color }}
               >
                 <div
                   className="category-icon"
@@ -320,7 +349,7 @@ const Home = () => {
   event={selectedEvent}
   isOpen={showEventModal}
   onClose={closeModal}
-  onRegister={() => handleParticiparClick(selectedEvent)}
+  onRegister={() => selectedEvent && handleParticiparClick(selectedEvent)}
 />
 
       <Footer />

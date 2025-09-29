@@ -1,25 +1,35 @@
 // Eventos.tsx
 import React, { useState, useEffect } from 'react';
+import { useEventos } from '../context/EventosContext';
+import type { EventoType } from '../context/EventosContext';
 import './Eventos.css';
 import Footer from '../layouts/footer';
 import EventModal from '../components/EventModal';
 import { useNavigate } from 'react-router-dom';
 
+type CategoryType = {
+  id: string;
+  name: string;
+  icon: string;
+  count: number;
+};
+
 const Eventos = () => {
-  const [activeCategory, setActiveCategory] = useState('todos');
-  const [events, setEvents] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [popularEvents, setPopularEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [activeCategory, setActiveCategory] = useState<string>('todos');
+  const [events, setEvents] = useState<EventoType[]>([]);
+  const { eventos } = useEventos();
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [popularEvents, setPopularEvents] = useState<EventoType[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<EventoType | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleParticiparClick = (event) => {
+  const handleParticiparClick = (event: EventoType) => {
     navigate('/registrar', { state: { event } });
   };
 
-  const handleVerDetalhes = (event) => {
+  const handleVerDetalhes = (event: EventoType) => {
     setSelectedEvent(event);
     setShowEventModal(true);
   };
@@ -158,7 +168,11 @@ const Eventos = () => {
 
     // Ordenar eventos por data (mais recentes primeiro)
     const sortedEvents = [...allEvents].sort(
-      (a, b) => new Date(b.date) - new Date(a.date)
+      (a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateB - dateA;
+      }
     );
 
     // Top 5 eventos mais participados
@@ -167,9 +181,9 @@ const Eventos = () => {
       .slice(0, 5);
 
     setCategories(eventCategories);
-    setEvents(sortedEvents);
+  setEvents([...sortedEvents, ...eventos]);
     setPopularEvents(topEvents);
-  }, []);
+  }, [eventos]);
 
   const filteredEvents =
     activeCategory === 'todos'
@@ -332,7 +346,7 @@ const Eventos = () => {
         event={selectedEvent}
         isOpen={showEventModal}
         onClose={closeModal}
-        onRegister={() => handleParticiparClick(selectedEvent)}
+  onRegister={() => selectedEvent && handleParticiparClick(selectedEvent)}
       />
 
       <Footer />

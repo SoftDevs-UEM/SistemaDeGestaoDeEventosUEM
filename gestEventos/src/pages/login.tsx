@@ -1,11 +1,30 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React from 'react';
+import React, { useRef } from 'react';
 import './login.css';
 
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+
 export default function Login() {
-  const handleSubmit = (e) => {
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+  const { login, isAuthenticated, userType } = useAuth();
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login submitted');
+    const email = emailRef.current?.value || '';
+    login(email);
+    if (email === 'admin@uem.ac.mz') {
+      navigate('/admin');
+    } else if (email === 'estudante@uem.ac.mz') {
+      navigate('/estudante');
+    } else if (email === 'promotor@uem.ac.mz') {
+      navigate('/promotor');
+    } else {
+      alert('Email inválido! Use estudante@uem.ac.mz, promotor@uem.ac.mz ou admin@uem.ac.mz');
+    }
   };
 
   return (
@@ -32,6 +51,8 @@ export default function Login() {
               className="form-input"
               id="email"
               placeholder="exemplo@uem.ac.mz"
+              ref={emailRef}
+              autoComplete="username"
             />
           </div>
 
@@ -45,6 +66,8 @@ export default function Login() {
               className="form-input"
               id="password"
               placeholder="Digite sua palavra-passe"
+              ref={passwordRef}
+              autoComplete="current-password"
             />
           </div>
 

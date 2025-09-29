@@ -4,6 +4,9 @@ import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
 import Navbar from './layouts/navbar';
+import { AuthProvider } from './context/AuthContext';
+import { EventosProvider } from './context/EventosContext';
+
 import Contact from './pages/Contact';
 import Home from './pages/Home';
 import Sobre from './pages/Sobre';
@@ -11,23 +14,34 @@ import Eventos from './pages/Eventos';
 import Login from './pages/Login';
 import EventModal from './components/EventModal';
 import RegistrarEvento from './components/RegistrarEvento';
+import HomeAdmin from './pages/HomeAdmin';
+import HomePromotor from './pages/HomePromotor';
+import HomeEstudante from './pages/HomeEstudante';
+
 
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/sobre" element={<Sobre />} />
-          <Route path="/contacto" element={<Contact />} />
-          <Route path="/eventos" element={<Eventos />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/registrar" element={<RegistrarEvento />} />
-        </Routes>
-      </div>
-    </Router>
+    <EventosProvider>
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/sobre" element={<Sobre />} />
+              <Route path="/contacto" element={<Contact />} />
+              <Route path="/eventos" element={<Eventos />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/registrar" element={<RegistrarEvento />} />
+              <Route path="/admin" element={<HomeAdmin />} />
+              <Route path="/promotor" element={<HomePromotor />} />
+              <Route path="/estudante" element={<HomeEstudante />} />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
+    </EventosProvider>
   );
 }
 

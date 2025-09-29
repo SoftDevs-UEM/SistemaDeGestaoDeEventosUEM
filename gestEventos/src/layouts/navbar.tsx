@@ -1,35 +1,33 @@
 import { useNavigate } from 'react-router-dom';
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import './navbar.css';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(true);
+  const { isAuthenticated, logout } = useAuth();
 
   const handleLoginClick = () => {
-    setIsVisible(false); // Faz a navbar desaparecer
-    navigate('/login'); // redireciona para a rota /login
+    navigate('/login');
   };
 
-  // Se a navbar não estiver visível, retorna null
-  if (!isVisible) {
-    return null;
-  }
+  const handleLogoutClick = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <>
       {/* 
-<nav className="navbar" id="navbar">
+      <nav className="navbar" id="navbar">
         <div className="logo">
           <Link to="/">
             <img src="src/assets/logo.png" alt="UEM Logo" />
           </Link>
         </div>
-       
-     
-      </nav> */}
-
+      </nav> 
+      */}
       <nav className="navbar" id="navbar">
         <div className="logo">
           <Link to="/">
@@ -42,9 +40,15 @@ export default function Navbar() {
           <Link to="/sobre">Sobre Nós</Link>
           <Link to="/contacto">Contacto</Link>
         </div>
-        <button className="btn-login" onClick={handleLoginClick}>
-          Entrar
-        </button>
+        {isAuthenticated ? (
+          <button className="btn-login" onClick={handleLogoutClick}>
+            Sair
+          </button>
+        ) : (
+          <button className="btn-login" onClick={handleLoginClick}>
+            Entrar
+          </button>
+        )}
       </nav>
     </>
   );
