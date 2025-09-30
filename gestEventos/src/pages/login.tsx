@@ -64,7 +64,11 @@ export default function Login() {
             <a href="#" className="forgot-link">
               Esqueceu a palavra-passe?
             </a>
+               <button className="modal-close" onClick={onClose}>
+          <i className="fas fa-times"></i>
+        </button>
           </div>
+          
         </div>
       </div>
 

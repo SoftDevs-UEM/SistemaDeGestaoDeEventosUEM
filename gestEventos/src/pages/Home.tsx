@@ -11,6 +11,7 @@ const Home = () => {
   const [popularEvents, setPopularEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [heroEvents, setHeroEvents] = useState([]);
 
   const navigate = useNavigate();
 
@@ -34,16 +35,39 @@ const Home = () => {
 
   // Dados de exemplo
   useEffect(() => {
+    const heroEventsData = [
+      {
+        id: 1,
+        title: 'Conferência de Ciência e Tecnologia',
+        subtitle: 'Inovação e Descobertas Científicas',
+        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+        buttonText: 'Inscrever-se'
+      },
+      {
+        id: 2,
+        title: 'Festival Cultural Universitário',
+        subtitle: 'Celebrando a Diversidade Cultural',
+        image: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+        buttonText: 'Explorar'
+      },
+      {
+        id: 3,
+        title: 'Workshop de Empreendedorismo',
+        subtitle: 'Desenvolva Sua Ideia de Negócio',
+        image: 'https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+        buttonText: 'Participar'
+      }
+    ];
+
     const featuredEvents = [
       {
         id: 1,
         title: 'Conferência de Ciência e Tecnologia',
         date: '15 Out 2023',
         location: 'Auditório Principal',
-        image:
-          'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
         category: 'Científico',
-        description: 'Uma conferência abrangente sobre os últimos avanços em ciência e tecnologia, com palestrantes renomados e discussões sobre inovação.',
+        description: 'Uma conferência abrangente sobre os últimos avanços em ciência e tecnologia.',
         participants: 45,
         maxParticipants: 200
       },
@@ -52,10 +76,9 @@ const Home = () => {
         title: 'Festival Cultural Universitário',
         date: '22 Out 2023',
         location: 'Pátio Central',
-        image:
-          'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
         category: 'Cultural',
-        description: 'Celebração da diversidade cultural com apresentações de música, dança, teatro e exposições de arte da comunidade universitária.',
+        description: 'Celebração da diversidade cultural com apresentações de música, dança e arte.',
         participants: 28,
         maxParticipants: 150
       },
@@ -64,23 +87,23 @@ const Home = () => {
         title: 'Workshop de Empreendedorismo',
         date: '30 Out 2023',
         location: 'Sala de Conferências',
-        image:
-          'https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+        image: 'https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
         category: 'Workshop',
-        description: 'Workshop prático sobre empreendedorismo, com foco no desenvolvimento de startups e plano de negócios.',
+        description: 'Workshop prático sobre empreendedorismo e desenvolvimento de startups.',
         participants: 32,
         maxParticipants: 50
       },
     ];
 
-    const eventCategories = [
-      { id: 1, name: 'Científicos', icon: '🔬', count: 12, color: '#4CAF50' },
-      { id: 2, name: 'Culturais', icon: '🎭', count: 8, color: '#9C27B0' },
-      { id: 3, name: 'Cursos', icon: '📚', count: 15, color: '#2196F3' },
-      { id: 4, name: 'Workshops', icon: '🛠️', count: 10, color: '#FF9800' },
-      { id: 5, name: 'Palestras', icon: '🎤', count: 20, color: '#F44336' },
-      { id: 6, name: 'Desportivos', icon: '⚽', count: 7, color: '#3F51B5' },
-    ];
+  // No useEffect, atualize as categorias para usar apenas cores UEM:
+const eventCategories = [
+  { id: 1, name: 'Científicos', icon: '🔬', count: 12, color: '#03492a' },
+  { id: 2, name: 'Culturais', icon: '🎭', count: 8, color: '#03492a' },
+  { id: 3, name: 'Cursos', icon: '📚', count: 15, color: '#03492a' },
+  { id: 4, name: 'Workshops', icon: '🛠️', count: 10, color: '#03492a' },
+  { id: 5, name: 'Palestras', icon: '🎤', count: 20, color: '#03492a' },
+  { id: 6, name: 'Desportivos', icon: '⚽', count: 7, color: '#03492a' },
+];
 
     const popularEventsData = [
       {
@@ -88,11 +111,10 @@ const Home = () => {
         title: 'Semana de Engenharia 2023',
         date: '5-9 Nov 2023',
         location: 'Faculdade de Engenharia',
-        image:
-          'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         attendees: 85,
         category: 'Científico',
-        description: 'Evento anual da Faculdade de Engenharia com palestras, workshops e competições tecnológicas.',
+        description: 'Evento anual da Faculdade de Engenharia.',
         participants: 85,
         maxParticipants: 250
       },
@@ -101,11 +123,10 @@ const Home = () => {
         title: 'Feira de Emprego',
         date: '18 Nov 2023',
         location: 'Pavilhão Desportivo',
-        image:
-          'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         attendees: 62,
         category: 'Profissional',
-        description: 'Feira de emprego com participação das maiores empresas do país, oportunidades de estágio e emprego.',
+        description: 'Feira de emprego com oportunidades de estágio.',
         participants: 62,
         maxParticipants: 180
       },
@@ -114,132 +135,89 @@ const Home = () => {
         title: 'Noite de Poesia',
         date: '12 Nov 2023',
         location: 'Jardim das Letras',
-        image:
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
         attendees: 45,
         category: 'Cultural',
-        description: 'Noite especial dedicada à poesia, com recitais, música acústica e performances artísticas.',
+        description: 'Noite especial dedicada à poesia.',
         participants: 45,
         maxParticipants: 120
       },
-      {
-        id: 4,
-        title: 'Hackathon UEM 2023',
-        date: '25-26 Nov 2023',
-        location: 'Laboratório de Informática',
-        image:
-          'https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-        attendees: 35,
-        category: 'Tecnologia',
-        description: 'Maratona de programação de 48 horas para desenvolvimento de soluções tecnológicas inovadoras.',
-        participants: 35,
-        maxParticipants: 90
-      },
     ];
 
+    setHeroEvents(heroEventsData);
     setEvents(featuredEvents);
     setCategories(eventCategories);
     setPopularEvents(popularEventsData);
   }, []);
 
+  // Auto-rotate para hero carousel
   useEffect(() => {
     const timer = setTimeout(() => {
-      setCurrentSlide((prevSlide) => (prevSlide + 1) % events.length);
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % heroEvents.length);
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [currentSlide, events.length]);
+  }, [currentSlide, heroEvents.length]);
 
-  const nextSlide = () => {
-    setCurrentSlide((prevSlide) => (prevSlide + 1) % events.length);
+  const nextHeroSlide = () => {
+    setCurrentSlide((prevSlide) => (prevSlide + 1) % heroEvents.length);
   };
 
-  const prevSlide = () => {
-    setCurrentSlide(
-      (prevSlide) => (prevSlide - 1 + events.length) % events.length
-    );
+  const prevHeroSlide = () => {
+    setCurrentSlide((prevSlide) => (prevSlide - 1 + heroEvents.length) % heroEvents.length);
+  };
+
+  const handleHeroButtonClick = (event) => {
+    // Aqui você pode adicionar lógica específica para cada evento do hero
+    handleVerDetalhes(event);
   };
 
   return (
     <div className="home-container">
-      {/* Hero Section */}
+      {/* Hero Section com Carrossel */}
       <section className="hero">
-        <div className="hero-content">
-          <h1>Universidade Eduardo Mondlane</h1>
-          <p>Bem-vindo ao portal de eventos da UEM</p>
-          <div className="hero-buttons">
-            <button className="btn-primary" onClick={handleLoginClick}>
-              Explorar Eventos
-            </button>
-            <button className="btn-secondary">Saber Mais</button>
-          </div>
-        </div>
-        <div className="hero-overlay"></div>
-      </section>
-
-      {/* Carrossel de Eventos em Destaque */}
-      <section className="featured-events">
-        <div className="container">
-          <h2 className="section-title">
-            Eventos em <span className="highlight">Destaque</span>
-          </h2>
-          <p className="section-subtitle">
-            Descubra os eventos mais esperados da Universidade
-          </p>
-
-          <div className="carousel">
-            <button className="carousel-btn prev" onClick={prevSlide}>
-              <i className="fas fa-chevron-left"></i>
-            </button>
-
+        <div className="hero-carousel">
+          {heroEvents.map((event, index) => (
             <div
-              className="carousel-content"
-              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              key={event.id}
+              className={`hero-slide ${index === currentSlide ? 'active' : ''}`}
+              style={{ backgroundImage: `url(${event.image})` }}
             >
-              {events.map((event, index) => (
-                <div key={event.id} className="carousel-slide">
-                  <div className="slide-image">
-                    <img src={event.image} alt={event.title} />
-                    <div className="slide-overlay"></div>
-                  </div>
-                  <div className="slide-content">
-                    <span className="event-category">{event.category}</span>
-                    <h3>{event.title}</h3>
-                    <div className="event-details">
-                      <span>
-                        <i className="fas fa-calendar-alt"></i> {event.date}
-                      </span>
-                      <span>
-                        <i className="fas fa-map-marker-alt"></i>{' '}
-                        {event.location}
-                      </span>
-                    </div>
-                    <div className="event-buttons">
-                      <button className="event-btn" onClick={() => handleVerDetalhes(event)}>
-                        Ver Detalhes
-                      </button>
-                    </div>
-                  </div>
+              <div className="hero-overlay"></div>
+              <div className="hero-content">
+                <h1>{event.title}</h1>
+                <p>{event.subtitle}</p>
+                <div className="hero-buttons">
+                
+                  <button className="btn-secondary" onClick={handleLoginClick}>
+                    Explorar Todos
+                  </button>
                 </div>
-              ))}
+              </div>
             </div>
+          ))}
+        </div>
 
-            <button className="carousel-btn next" onClick={nextSlide}>
-              <i className="fas fa-chevron-right"></i>
-            </button>
+        {/* Controles do Carrossel */}
+        <button className="hero-carousel-btn prev" onClick={prevHeroSlide}>
+          <i className="fas fa-chevron-left"></i>
+        </button>
+        <button className="hero-carousel-btn next" onClick={nextHeroSlide}>
+          <i className="fas fa-chevron-right"></i>
+        </button>
 
-            <div className="carousel-indicators">
-              {events.map((_, index) => (
-                <button
-                  key={index}
-                  className={`indicator ${index === currentSlide ? 'active' : ''}`}
-                  onClick={() => setCurrentSlide(index)}
-                ></button>
-              ))}
-            </div>
-          </div>
+        {/* Indicadores */}
+        <div className="hero-indicators">
+          {heroEvents.map((_, index) => (
+            <button
+              key={index}
+              className={`hero-indicator ${index === currentSlide ? 'active' : ''}`}
+              onClick={() => setCurrentSlide(index)}
+            ></button>
+          ))}
         </div>
       </section>
+
 
       {/* Categorias de Eventos */}
       <section className="event-categories">
