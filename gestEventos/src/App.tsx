@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
@@ -20,25 +20,35 @@ import HomeEstudante from './pages/HomeEstudante';
 
 
 
+
+
+function AppContent() {
+  const location = useLocation();
+  const hideNavbar = location.pathname === '/login';
+  return (
+    <div className="App">
+      {!hideNavbar && <Navbar />}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/sobre" element={<Sobre />} />
+        <Route path="/contacto" element={<Contact />} />
+        <Route path="/eventos" element={<Eventos />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/registrar" element={<RegistrarEvento />} />
+        <Route path="/admin" element={<HomeAdmin />} />
+        <Route path="/promotor" element={<HomePromotor />} />
+        <Route path="/estudante" element={<HomeEstudante />} />
+      </Routes>
+    </div>
+  );
+}
+
 function App() {
   return (
     <EventosProvider>
       <AuthProvider>
         <Router>
-          <div className="App">
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/sobre" element={<Sobre />} />
-              <Route path="/contacto" element={<Contact />} />
-              <Route path="/eventos" element={<Eventos />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/registrar" element={<RegistrarEvento />} />
-              <Route path="/admin" element={<HomeAdmin />} />
-              <Route path="/promotor" element={<HomePromotor />} />
-              <Route path="/estudante" element={<HomeEstudante />} />
-            </Routes>
-          </div>
+          <AppContent />
         </Router>
       </AuthProvider>
     </EventosProvider>
