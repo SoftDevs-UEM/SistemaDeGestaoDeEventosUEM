@@ -1,7 +1,7 @@
 :root {
   --primary-color: #03492a;
   --secondary-color: #0f9257;
-  --accent-color: #ffd700;
+  --accent-color: #02663e;
   --light-color: #f8f9fa;
   --dark-color: #212529;
   --gray-color: #6c757d;
@@ -69,7 +69,7 @@
 
 .event-category-badge {
   background: var(--accent-color);
-  color: var(--primary-color);
+  color: white;
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -196,7 +196,7 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+  background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
   border-radius: 10px;
   transition: width 0.5s ease;
 }
@@ -255,7 +255,7 @@
   margin-bottom: 25px;
   font-size: 1.5rem;
   font-weight: 600;
-  border-bottom: 2px solid var(--accent-color);
+  border-bottom: 2px solid var(--secondary-color);
   padding-bottom: 10px;
   display: inline-block;
 }
@@ -323,15 +323,15 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-color), #ffed4e);
-  color: var(--primary-color);
-  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+  background: var(--secondary-color);
+  color: white;
+  box-shadow: 0 6px 20px rgba(15, 146, 87, 0.4);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ffed4e, var(--accent-color));
+  background: var(--accent-color);
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(255, 215, 0, 0.6);
+  box-shadow: 0 10px 25px rgba(2, 102, 62, 0.6);
 }
 
 .btn-primary:disabled {
@@ -361,15 +361,15 @@
   align-items: center;
   gap: 10px;
   padding: 15px;
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
   border-radius: 10px;
-  color: #856404;
+  color: #721c24;
   margin-top: 20px;
 }
 
 .warning-message i {
-  color: #f39c12;
+  color: #dc3545;
 }
 
 .error-state {
