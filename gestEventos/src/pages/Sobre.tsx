@@ -1,8 +1,33 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import './Sobre.css';
 import Footer from '../layouts/footer';
 
 const Sobre = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Verifica se há uma seção para scroll
+    if (location.state?.scrollToSection) {
+      const sectionId = location.state.scrollToSection;
+      
+      // Pequeno delay para garantir que a página carregou
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          // Scroll suave para a seção
+          element.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+        
+        // Limpa o state após o scroll
+        window.history.replaceState({}, document.title);
+      }, 100);
+    }
+  }, [location.state]);
+
   return (
     <div className="sobre-container">
       {/* Hero Section */}
@@ -16,7 +41,7 @@ const Sobre = () => {
       </section>
 
       {/* História da UEM */}
-      <section className="historia-section">
+      <section className="historia-section" id="historia">
         <div className="container">
           <div className="historia-content">
             <div className="historia-text">
@@ -46,7 +71,7 @@ const Sobre = () => {
       </section>
 
       {/* Missão, Visão e Valores */}
-      <section className="mvv-section">
+      <section className="mvv-section" id="missao">
         <div className="container">
           <h2 className="section-title">
             Nossa <span className="highlight">Identidade</span>
@@ -97,7 +122,7 @@ const Sobre = () => {
       </section>
 
       {/* Números e Estatísticas */}
-      <section className="estatisticas-section">
+      <section className="estatisticas-section" id="equipa">
         <div className="container">
           <h2 className="section-title">
             UEM em <span className="highlight">Números</span>
@@ -125,7 +150,7 @@ const Sobre = () => {
       </section>
 
       {/* Equipe de Desenvolvimento */}
-      <section className="desenvolvedores-section">
+      <section className="desenvolvedores-section" id="desenvolvedores">
         <div className="container">
           <h2 className="section-title">
             Equipe de <span className="highlight">Desenvolvimento</span>
@@ -159,27 +184,27 @@ const Sobre = () => {
             </div>
 
             <div className="desenvolvedor-card">
-  <div className="dev-avatar">
-    <img src="src/assets/joao.jpeg" alt="João Langa" />
-  </div>
-  <h3>João Langa</h3>
-  <p className="dev-role">FullStack Developer</p>
-  <p className="dev-desc">
-    Especialista em React.js, TypeScript e desenvolvimento fullstack. 
-    Responsável pela arquitetura frontend moderna e experiência do usuário.
-  </p>
-  <div className="dev-social">
-    <a href="mailto:joao.langa@uem.ac.mz" className="social-link" aria-label="Email">
-      <i className="fas fa-envelope"></i>
-    </a>
-    <a href="https://linkedin.com/in/joao-langa" className="social-link" aria-label="LinkedIn">
-      <i className="fab fa-linkedin-in"></i>
-    </a>
-    <a href="https://github.com/joao-langa" className="social-link" aria-label="GitHub">
-      <i className="fab fa-github"></i>
-    </a>
-  </div>
-</div>
+              <div className="dev-avatar">
+                <img src="src/assets/joao.jpeg" alt="João Langa" />
+              </div>
+              <h3>João Langa</h3>
+              <p className="dev-role">FullStack Developer</p>
+              <p className="dev-desc">
+                Especialista em React.js, TypeScript e desenvolvimento fullstack. 
+                Responsável pela arquitetura frontend moderna e experiência do usuário.
+              </p>
+              <div className="dev-social">
+                <a href="mailto:joao.langa@uem.ac.mz" className="social-link" aria-label="Email">
+                  <i className="fas fa-envelope"></i>
+                </a>
+                <a href="https://linkedin.com/in/joao-langa" className="social-link" aria-label="LinkedIn">
+                  <i className="fab fa-linkedin-in"></i>
+                </a>
+                <a href="https://github.com/joao-langa" className="social-link" aria-label="GitHub">
+                  <i className="fab fa-github"></i>
+                </a>
+              </div>
+            </div>
 
             <div className="desenvolvedor-card">
               <div className="dev-avatar">

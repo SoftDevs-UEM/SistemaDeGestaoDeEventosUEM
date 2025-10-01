@@ -9,8 +9,8 @@ export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   const handleLoginClick = () => {
-    setIsVisible(false); // Atualiza o estado para ocultar o Navbar
-    navigate("/login"); // Navega para a página de login
+    setIsVisible(false);
+    navigate("/login");
   };
 
   const handleDropdownEnter = (dropdownName) => {
@@ -21,7 +21,11 @@ export default function Navbar() {
     setActiveDropdown(null);
   };
 
-  // Retorna null se o Navbar não estiver visível
+  // Função para navegar para seções específicas da página Sobre
+  const handleSobreSectionClick = (sectionId) => {
+    navigate('/sobre', { state: { scrollToSection: sectionId } });
+  };
+
   if (!isVisible) return null;
 
   return (
@@ -83,10 +87,30 @@ export default function Navbar() {
               Sobre Nós 
             </Link>
             <div className={`dropdown-menu ${activeDropdown === 'sobre' ? 'active' : ''}`}>
-              <Link to="/sobre/historia">História</Link>
-              <Link to="/sobre/missao">Missão e Visão</Link>
-              <Link to="/sobre/equipa">Nossa Equipa</Link>
-              <Link to="/sobre/parceiros">Parceiros</Link>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('historia')}
+              >
+                História
+              </button>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('missao')}
+              >
+                Missão e Visão
+              </button>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('equipa')}
+              >
+                Nossa Equipa
+              </button>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('desenvolvedores')}
+              >
+                Desenvolvedores
+              </button>
             </div>
           </div>
 
@@ -102,7 +126,6 @@ export default function Navbar() {
               <Link to="/organizadores/criar-evento">Criar Evento</Link>
               <Link to="/organizadores/meus-eventos">Meus Eventos</Link>
               <Link to="/organizadores/estatisticas">Estatísticas</Link>
-              
             </div>
           </div>
 
