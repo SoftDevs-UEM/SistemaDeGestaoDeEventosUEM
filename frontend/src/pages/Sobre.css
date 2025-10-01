@@ -1,8 +1,10 @@
 /* Sobre.css */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+
 :root {
   --primary-color: #03492a;
   --secondary-color: #0f9257;
-  --accent-color: #ffd700;
+  --accent-color: #02663e;
   --light-color: #f8f9fa;
   --dark-color: #212529;
   --gray-color: #6c757d;
@@ -92,10 +94,9 @@
   bottom: -5px;
   left: 0;
   width: 100%;
-  height: 8px;
+  height: 3px;
   background-color: var(--accent-color);
-  opacity: 0.6;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 .section-subtitle {
@@ -183,6 +184,7 @@ section {
 .mvv-icon {
   font-size: 3rem;
   margin-bottom: 20px;
+  color: var(--secondary-color);
 }
 
 .mvv-card h3 {
@@ -199,11 +201,23 @@ section {
 .mvv-card ul {
   text-align: left;
   color: var(--gray-color);
+  list-style: none;
+  padding: 0;
 }
 
 .mvv-card li {
   margin-bottom: 10px;
   line-height: 1.6;
+  position: relative;
+  padding-left: 25px;
+}
+
+.mvv-card li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--secondary-color);
+  font-weight: bold;
 }
 
 /* Estatísticas */
@@ -306,30 +320,23 @@ section {
 }
 
 .social-link {
-  display: inline-block;
-  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   background-color: var(--light-color);
   border-radius: 50%;
   transition: var(--transition);
-  font-size: 1.2rem;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 1.1rem;
 }
 
 .social-link:hover {
-  background-color: var(--accent-color);
-  transform: translateY(-3px);
-}
-
-/* Footer */
-.sobre-footer {
-  background-color: var(--primary-color);
+  background-color: var(--secondary-color);
   color: white;
-  text-align: center;
-  padding: 30px 0;
-}
-
-.sobre-footer p {
-  margin-bottom: 10px;
-  opacity: 0.9;
+  transform: translateY(-3px);
 }
 
 /* Responsividade */

@@ -198,7 +198,7 @@ const RegistrarEvento = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="matricula">Número de Matrícula *</label>
+                  <label htmlFor="matricula">Número de Estudante *</label>
                   <input
                     type="text"
                     id="matricula"

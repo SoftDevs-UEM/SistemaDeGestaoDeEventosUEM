@@ -1,123 +1,233 @@
+/* Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  min-height: 200vh;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Navbar - SEMPRE com fundo verde */
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+/* -------- Barra superior -------- */
+.topbar {
+  background: #03492a;
+  color: white;
+  font-size: 14px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 14px 60px;
-  z-index: 1000;
-  background: #03492a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 6px 40px;
+  border-bottom: 1px solid #02663e;
 }
-
-/* Logo - Estilo para a imagem */
-.navbar .logo img {
-  height: 85px;
-  width: auto;
-}
-
-/* Links */
-.navbar .nav-links {
-  display: flex;
-  gap: 28px;
-}
-
-.navbar .nav-links a {
+.topbar a {
   color: white;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 15px;
+  margin-left: 15px;
   transition: color 0.3s ease;
 }
-
-.navbar .nav-links a:hover {
+.topbar a:hover {
   color: #ffd700;
 }
 
-/* Botão */
-.navbar .btn-login {
+/* -------- Barra intermédia (logo + pesquisa) -------- */
+.midbar {
+  background: #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  border-bottom: 1px solid #ddd;
+}
+.midbar .logo img {
+  height: 80px;
+  width: auto;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.search-box input {
+  border: none;
+  padding: 8px 12px;
+  outline: none;
+  width: 220px;
+  font-size: 14px;
+}
+.search-box button {
+  background: #03492a;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.search-box button:hover {
+  background: #02663e;
+}
+
+/* -------- Navbar principal -------- */
+.navbar {
+  background: #03492a;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  min-height: 60px;
+}
+
+/* Remover o logo da navbar principal */
+.navbar .logo {
+  display: none;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0 auto;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 18px 20px;
+  display: block;
+  transition: all 0.3s ease;
+  border-right: 1px solid #02663e;
+}
+
+.nav-links a:last-child {
+  border-right: none;
+}
+
+.nav-links a:hover {
+  background: #02663e;
+}
+
+/* -------- Dropdown -------- */ 
+.dropdown-container {
+   position: relative; 
+   display: inline-block;
+   }
+ .dropdown-toggle { 
+  display: flex;
+   align-items: center; gap: 5px; 
+  }
+    .dropdown-menu { 
+      position: absolute;
+       top: 100%; left: 0;
+        background: #ffffff; /* Fundo branco como na imagem */ 
+        min-width: 250px; /* Largura maior para melhor legibilidade */ box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* Sombra mais suave */ border: 1px solid #ddd; /* Borda sutil */ border-top: 3px solid #03492a; /* Linha superior verde */ display: none; z-index: 1000; border-radius: 0 0 4px 4px; /* Cantos arredondados na parte inferior */ } .dropdown-menu a { padding: 12px 20px; font-size: 14px; font-weight: normal; color: #333; /* Texto escuro como na imagem */ text-decoration: none; border-bottom: 1px solid #f0f0f0; /* Divisor mais suave */ display: block; width: 100%; transition: all 0.3s ease; background: #ffffff; /* Garantir fundo branco */ } .dropdown-menu a:last-child { border-bottom: none; } .dropdown-menu a:hover { background: #ffffff !important; /* Fundo permanece branco */ color: #03492a; /* Apenas o texto muda para verde */ /* Remover qualquer cor de fundo azul */ } .dropdown-container:hover .dropdown-menu { display: block; } /* Garantir que não haja herança de cores indesejadas */ .dropdown-menu a:focus, .dropdown-menu a:active { background: #ffffff !important; color: #03492a; } /* Remover estilos padrão do navegador */ .dropdown-menu a { -webkit-tap-highlight-color: transparent; outline: none; }
+
+/* -------- Botão login CORRIGIDO -------- */
+.btn-login {
   background: #ffd700;
   color: #03492a;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: bold;
   border: none;
   cursor: pointer;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.navbar .btn-login:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Hero section */
-.hero {
-  height: 100vh;
-  background: linear-gradient(135deg, #109659, #0f9257);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-size: 32px;
-  font-weight: bold;
-  padding-top: 120px;
+  font-size: 15px;
+  min-width: 100px;
   text-align: center;
+  margin-left: 16px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
 }
 
-.hero h1 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
+.btn-login:hover {
+  background: #e6c200;
+  color: #03492a !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-.hero p {
-  font-size: 1.2rem;
-  font-weight: normal;
+/* Garantir que o texto sempre fique visível */
+.btn-login::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: -1;
 }
 
-/* Page container para outras páginas */
-.page-container {
-  min-height: 100vh;
-  padding-top: 120px;
-  background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+/* Forçar a cor do texto em todos os estados */
+.btn-login,
+.btn-login:link,
+.btn-login:visited,
+.btn-login:hover,
+.btn-login:active,
+.btn-login:focus {
+  color: #e1e7e4 !important;
+  text-decoration: none !important;
 }
 
-.page-container .content {
-  background: white;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin: 20px;
-  width: 80%;
-  max-width: 1000px;
+/* Responsividade básica */
+@media (max-width: 1200px) {
+  .nav-links a {
+    padding: 18px 15px;
+    font-size: 14px;
+  }
+  
+  .navbar, .midbar, .topbar {
+    padding: 0 20px;
+  }
+  
+  .btn-login {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-width: 90px;
+  }
 }
 
-.page-container h1 {
-  color: #03492a;
-  margin-bottom: 20px;
-}
-
-.page-container p {
-  color: #333;
-  line-height: 1.6;
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    padding: 10px;
+  }
+  
+  .nav-links {
+    margin: 0;
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .nav-links a {
+    border-right: none;
+    border-bottom: 1px solid #02663e;
+    text-align: center;
+    padding: 15px 20px;
+  }
+  
+  .dropdown-menu {
+    position: static;
+    width: 100%;
+    display: none;
+  }
+  
+  .dropdown-container:hover .dropdown-menu {
+    display: block;
+  }
+  
+  .btn-login {
+    margin: 10px 0 0 0;
+    width: 100%;
+    order: 1;
+  }
 }

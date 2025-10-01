@@ -54,7 +54,9 @@ const Sobre = () => {
 
           <div className="mvv-grid">
             <div className="mvv-card">
-              <div className="mvv-icon">🎯</div>
+              <div className="mvv-icon">
+                <i className="fas fa-bullseye"></i>
+              </div>
               <h3>Missão</h3>
               <p>
                 Produzir, disseminar e aplicar conhecimento científico e
@@ -65,7 +67,9 @@ const Sobre = () => {
             </div>
 
             <div className="mvv-card">
-              <div className="mvv-icon">👁️</div>
+              <div className="mvv-icon">
+                <i className="fas fa-eye"></i>
+              </div>
               <h3>Visão</h3>
               <p>
                 Ser uma universidade de excelência, reconhecida nacional e
@@ -76,7 +80,9 @@ const Sobre = () => {
             </div>
 
             <div className="mvv-card">
-              <div className="mvv-icon">💎</div>
+              <div className="mvv-icon">
+                <i className="fas fa-gem"></i>
+              </div>
               <h3>Valores</h3>
               <ul>
                 <li>Excelência Académica</li>
@@ -131,67 +137,69 @@ const Sobre = () => {
           <div className="desenvolvedores-grid">
             <div className="desenvolvedor-card">
               <div className="dev-avatar">
-                <img src="src/assets/frank.jpeg" alt="Frank Francisco " />
+                <img src="src/assets/frank.jpeg" alt="Frank Francisco" />
               </div>
-              <h3>Frenk Francisco</h3>
-              <p className="dev-role">Admistrador de Base de Dados</p>
+              <h3>Frank Francisco</h3>
+              <p className="dev-role">Administrador de Base de Dados</p>
               <p className="dev-desc">
-                Especialista em Admistracao de Base de dados
+                Especialista em administração de bases de dados e otimização de
+                performance.
               </p>
               <div className="dev-social">
-                <a href="#" className="social-link">
-                  📧
+                <a href="mailto:frank@uem.ac.mz" className="social-link" aria-label="Email">
+                  <i className="fas fa-envelope"></i>
                 </a>
-                <a href="#" className="social-link">
-                  💼
+                <a href="https://linkedin.com/in/frank-francisco" className="social-link" aria-label="LinkedIn">
+                  <i className="fab fa-linkedin-in"></i>
                 </a>
-                <a href="#" className="social-link">
-                  🐱
+                <a href="https://github.com/frank-francisco" className="social-link" aria-label="GitHub">
+                  <i className="fab fa-github"></i>
                 </a>
               </div>
             </div>
 
             <div className="desenvolvedor-card">
-              <div className="dev-avatar">
-                <img src="src/assets/joao.jpeg" alt="João Langa" />
-              </div>
-              <h3>João Langa</h3>
-              <p className="dev-role">FullStack Developer</p>
-              <p className="dev-desc">
-                Especialista em Node.js e bancos de dados, garantindo a
-                performance e segurança da plataforma.
-              </p>
-              <div className="dev-social">
-                <a href="#" className="social-link">
-                  📧
-                </a>
-                <a href="#" className="social-link">
-                  💼
-                </a>
-                <a href="#" className="social-link">
-                  🐱
-                </a>
-              </div>
-            </div>
+  <div className="dev-avatar">
+    <img src="src/assets/joao.jpeg" alt="João Langa" />
+  </div>
+  <h3>João Langa</h3>
+  <p className="dev-role">FullStack Developer</p>
+  <p className="dev-desc">
+    Especialista em React.js, TypeScript e desenvolvimento fullstack. 
+    Responsável pela arquitetura frontend moderna e experiência do usuário.
+  </p>
+  <div className="dev-social">
+    <a href="mailto:joao.langa@uem.ac.mz" className="social-link" aria-label="Email">
+      <i className="fas fa-envelope"></i>
+    </a>
+    <a href="https://linkedin.com/in/joao-langa" className="social-link" aria-label="LinkedIn">
+      <i className="fab fa-linkedin-in"></i>
+    </a>
+    <a href="https://github.com/joao-langa" className="social-link" aria-label="GitHub">
+      <i className="fab fa-github"></i>
+    </a>
+  </div>
+</div>
 
             <div className="desenvolvedor-card">
               <div className="dev-avatar">
-                <img src="src/assets/ussene.jpeg" alt="João Langa" />
+                <img src="src/assets/ussene.jpeg" alt="Ussene Matato" />
               </div>
               <h3>Ussene Matato</h3>
               <p className="dev-role">Gestor do Projecto</p>
               <p className="dev-desc">
-                Responsável por arquitetura e o desenho do sistema
+                Responsável por arquitetura e o desenho do sistema, coordenando
+                toda a equipe de desenvolvimento.
               </p>
               <div className="dev-social">
-                <a href="#" className="social-link">
-                  📧
+                <a href="mailto:ussene.matato@uem.ac.mz" className="social-link" aria-label="Email">
+                  <i className="fas fa-envelope"></i>
                 </a>
-                <a href="#" className="social-link">
-                  💼
+                <a href="https://linkedin.com/in/ussene-matato" className="social-link" aria-label="LinkedIn">
+                  <i className="fab fa-linkedin-in"></i>
                 </a>
-                <a href="#" className="social-link">
-                  🐱
+                <a href="https://github.com/ussene-matato" className="social-link" aria-label="GitHub">
+                  <i className="fab fa-github"></i>
                 </a>
               </div>
             </div>

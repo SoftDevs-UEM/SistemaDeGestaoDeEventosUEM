@@ -11,9 +11,9 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>
+        {/* <button className="modal-close" onClick={onClose}>
           <i className="fas fa-times"></i>
-        </button>
+        </button> */}
         
         <div className="modal-header">
           <img src={event.image} alt={event.title} />

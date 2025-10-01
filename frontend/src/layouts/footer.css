@@ -1,6 +1,9 @@
-/* Footer.css */
+/* Garantir que o Font Awesome esteja carregado */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+
+/* Footer.css - Atualizado (Sem Cores Amarelas, Background Preto) */
 .footer {
-  background-color: var(--primary-color);
+  background-color: #161212; /* Fundo preto */
   color: white;
   padding: 40px 0 20px;
   margin-top: 60px;
@@ -25,6 +28,7 @@
   margin-bottom: 20px;
   text-transform: lowercase;
   font-weight: 400;
+  color: #ffffff;
 }
 
 .newsletter-form {
@@ -41,24 +45,25 @@
   border: none;
   border-radius: 4px;
   font-size: 1rem;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #333;
 }
 
 .newsletter-submit {
-  background-color: var(--accent-color);
-  color: var(--primary-color);
+  background-color: #03492a; /* Verde UEM */
+  color: white;
   border: none;
   padding: 12px 25px;
   border-radius: 4px;
   font-weight: 700;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.3s ease;
   text-transform: uppercase;
   font-size: 0.9rem;
 }
 
 .newsletter-submit:hover {
-  background-color: #ffed4e;
+  background-color: #02663e; /* Verde UEM mais escuro */
   transform: translateY(-2px);
 }
 
@@ -89,7 +94,7 @@
 .uem-emblem h4 {
   font-size: 1.1rem;
   margin: 0;
-  color: var(--accent-color);
+  color: #ffffff;
   font-weight: 600;
 }
 
@@ -105,6 +110,7 @@
   margin-top: 15px;
 }
 
+/* CORREÇÃO DOS ÍCONES DAS REDES SOCIAIS */
 .social-links {
   display: flex;
   gap: 15px;
@@ -115,26 +121,57 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   color: white;
   text-decoration: none;
-  transition: var(--transition);
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  position: relative;
+}
+
+/* Garantir que os ícones sejam visíveis */
+.social-links a i {
+  color: white;
+  font-size: 1.1rem;
+  z-index: 2;
+  position: relative;
 }
 
 .social-links a:hover {
-  background-color: var(--accent-color);
-  color: var(--primary-color);
-  transform: translateY(-2px);
+  background-color: #03492a;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(3, 73, 42, 0.4);
+}
+
+/* Cores específicas para cada rede social no hover */
+.social-links a[aria-label="Facebook"]:hover i {
+  color: white;
+}
+
+.social-links a[aria-label="Twitter"]:hover i {
+  color: white;
+}
+
+.social-links a[aria-label="Instagram"]:hover i {
+  color: white;
+}
+
+.social-links a[aria-label="YouTube"]:hover i {
+  color: white;
+}
+
+.social-links a[aria-label="LinkedIn"]:hover i {
+  color: white;
 }
 
 /* Estilo para as colunas com listas (Ensino, Investigação, Cultura) */
 .footer-section h4 {
   font-size: 1.2rem;
   margin-bottom: 20px;
-  color: var(--accent-color);
+  color: #ffffff;
   font-weight: 600;
   position: relative;
   padding-bottom: 10px;
@@ -147,7 +184,7 @@
   left: 0;
   width: 40px;
   height: 3px;
-  background-color: var(--accent-color);
+  background-color: #03492a;
 }
 
 .footer-section ul {
@@ -162,12 +199,12 @@
 .footer-section ul li a {
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
-  transition: var(--transition);
+  transition: all 0.3s ease;
   font-size: 0.95rem;
 }
 
 .footer-section ul li a:hover {
-  color: var(--accent-color);
+  color: #02663e;
   padding-left: 5px;
 }
 
@@ -186,11 +223,10 @@
 /* Responsividade */
 @media (max-width: 992px) {
   .footer-main-sections {
-    grid-template-columns: repeat(2, 1fr); /* 2 colunas em tablets */
+    grid-template-columns: repeat(2, 1fr);
     gap: 30px;
   }
 
-  /* Garantir que a primeira coluna ocupe toda a largura */
   .footer-main-sections .footer-section:first-child {
     grid-column: 1 / -1;
   }
@@ -198,7 +234,7 @@
 
 @media (max-width: 768px) {
   .footer-main-sections {
-    grid-template-columns: 1fr; /* 1 coluna em mobile */
+    grid-template-columns: 1fr;
     gap: 30px;
   }
 
@@ -236,5 +272,13 @@
 
   .social-links {
     justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .social-links a {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
   }
 }
+
