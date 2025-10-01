@@ -77,36 +77,40 @@
   gap: 20px;
 }
 
-.btn-primary,
-.btn-secondary {
-  padding: 15px 30px;
-  border-radius: 50px;
+/* Botões principais */
+.btn-primaryy,
+.btn-secondaryy {
+  padding: 15px 30px; /* Mesmo padding para ambos os botões */
+  border-radius: 50px; /* Bordas arredondadas */
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1rem; /* Mesmo tamanho de fonte */
   cursor: pointer;
   transition: var(--transition);
-  border: none;
+  display: inline-block;
+  text-align: center;
+  width: auto; /* Ambos os botões terão o mesmo comportamento */
 }
 
-.btn-primary {
+.btn-primaryy {
   background-color: var(--accent-color);
   color: white;
   box-shadow: 0 4px 15px rgba(15, 146, 87, 0.3);
+  border: none;
 }
 
-.btn-primary:hover {
+.btn-primaryy:hover {
   background-color: #0d7a4c;
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(15, 146, 87, 0.4);
 }
 
-.btn-secondary {
+.btn-secondaryy {
   background-color: transparent;
   color: white;
-  border: 2px solid white;
+  border: 2px solid white; /* Borda branca */
 }
 
-.btn-secondary:hover {
+.btn-secondaryy:hover {
   background-color: white;
   color: var(--primary-color);
   transform: translateY(-3px);

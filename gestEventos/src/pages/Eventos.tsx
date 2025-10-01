@@ -186,8 +186,8 @@ const Eventos = () => {
             Descubra e participe nos eventos da Universidade Eduardo Mondlane
           </p>
           <div className="hero-buttons">
-            <button className="btn-primary">Explorar Eventos</button>
-            <button className="btn-secondary">Criar Evento</button>
+            <button className="btn-primaryy">Explorar Eventos</button>
+            <button className="btn-secondaryy">Criar Evento</button>
           </div>
         </div>
       </section>
