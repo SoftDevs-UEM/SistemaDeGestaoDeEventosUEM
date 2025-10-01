@@ -102,7 +102,7 @@ export default function Navbar() {
               <Link to="/organizadores/criar-evento">Criar Evento</Link>
               <Link to="/organizadores/meus-eventos">Meus Eventos</Link>
               <Link to="/organizadores/estatisticas">Estatísticas</Link>
-              <Link to="/organizadores/directrizes">Directrizes</Link>
+              
             </div>
           </div>
 

@@ -15,8 +15,13 @@ const Home = () => {
 
   const navigate = useNavigate();
 
+  // const handleLoginClick = () => {
+  //   navigate('/Eventos');
+  // };
+
   const handleLoginClick = () => {
-    navigate('/Eventos');
+    // Navega para a página de Eventos com âncora para a seção de eventos
+    navigate('/Eventos#eventos-section');
   };
 
   const handleParticiparClick = (event) => {

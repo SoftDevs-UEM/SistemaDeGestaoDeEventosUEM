@@ -4,6 +4,7 @@ import './Eventos.css';
 import Footer from '../layouts/footer';
 import EventModal from '../components/EventModal';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const Eventos = () => {
   const [activeCategory, setActiveCategory] = useState('todos');
@@ -12,6 +13,21 @@ const Eventos = () => {
   const [popularEvents, setPopularEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showEventModal, setShowEventModal] = useState(false);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    // Verifica se há uma âncora na URL
+    if (location.hash === '#eventos-section') {
+      const element = document.getElementById('eventos-section');
+      if (element) {
+        // Scroll suave para a seção
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location]);
+
+
 
   const navigate = useNavigate();
 
@@ -219,62 +235,62 @@ const Eventos = () => {
       </section>
 
       {/* Lista de Eventos */}
-      <section className="eventos-list-section">
-        <div className="container">
-          <h2 className="section-title">
-            {activeCategory === 'todos'
-              ? 'Todos os Eventos'
-              : categories.find((c) => c.id === activeCategory)?.name}
-          </h2>
-          <p className="section-subtitle">
-            Confira nossa agenda completa de eventos acadêmicos
-          </p>
+      <section className="eventos-list-section" id="eventos-section">
+  <div className="container">
+    <h2 className="section-title">
+      {activeCategory === 'todos'
+        ? 'Todos os Eventos'
+        : categories.find((c) => c.id === activeCategory)?.name}
+    </h2>
+    <p className="section-subtitle">
+      Confira nossa agenda completa de eventos acadêmicos
+    </p>
 
-          <div className="events-grid">
-            {filteredEvents.map((event) => (
-              <div key={event.id} className="event-card">
-                <div className="event-image">
-                  <img src={event.image} alt={event.title} />
-                  <div className="event-category-badge">
-                    {categories.find((c) => c.id === event.category)?.icon}
-                    {categories.find((c) => c.id === event.category)?.name}
-                  </div>
-                </div>
-                <div className="event-info">
-                  <h3>{event.title}</h3>
-                  <p className="event-description">{event.description}</p>
-                  <div className="event-meta">
-                    <div className="event-detail">
-                      <i className="fas fa-calendar-alt"></i>
-                      <span>{event.date}</span>
-                    </div>
-                    <div className="event-detail">
-                      <i className="fas fa-clock"></i>
-                      <span>{event.time}</span>
-                    </div>
-                    <div className="event-detail">
-                      <i className="fas fa-map-marker-alt"></i>
-                      <span>{event.location}</span>
-                    </div>
-                    <div className="event-detail">
-                      <i className="fas fa-users"></i>
-                      <span>{event.attendees} participantes</span>
-                    </div>
-                  </div>
-                  <div className="event-buttons">
-                    <button className="event-btn" onClick={() => handleParticiparClick(event)}>
-                      Participar
-                    </button>
-                    <button className="btn-secondary" onClick={() => handleVerDetalhes(event)}>
-                      Detalhes
-                    </button>
-                  </div>
-                </div>
+    <div className="events-grid">
+      {filteredEvents.map((event) => (
+        <div key={event.id} className="event-card">
+          <div className="event-image">
+            <img src={event.image} alt={event.title} />
+            <div className="event-category-badge">
+              {categories.find((c) => c.id === event.category)?.icon}
+              {categories.find((c) => c.id === event.category)?.name}
+            </div>
+          </div>
+          <div className="event-info">
+            <h3>{event.title}</h3>
+            <p className="event-description">{event.description}</p>
+            <div className="event-meta">
+              <div className="event-detail">
+                <i className="fas fa-calendar-alt"></i>
+                <span>{event.date}</span>
               </div>
-            ))}
+              <div className="event-detail">
+                <i className="fas fa-clock"></i>
+                <span>{event.time}</span>
+              </div>
+              <div className="event-detail">
+                <i className="fas fa-map-marker-alt"></i>
+                <span>{event.location}</span>
+              </div>
+              <div className="event-detail">
+                <i className="fas fa-users"></i>
+                <span>{event.attendees} participantes</span>
+              </div>
+            </div>
+            <div className="event-buttons">
+              <button className="event-btn" onClick={() => handleParticiparClick(event)}>
+                Participar
+              </button>
+              <button className="btn-secondary" onClick={() => handleVerDetalhes(event)}>
+                Detalhes
+              </button>
+            </div>
           </div>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* Eventos Populares */}
       <section className="popular-events">
