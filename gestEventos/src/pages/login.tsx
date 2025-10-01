@@ -8,6 +8,11 @@ export default function Login() {
     console.log('Login submitted');
   };
 
+  const onClose = () => {
+    console.log('Modal closed');
+    // Add logic to close the modal here
+  };
+
   return (
     <div className="login-container">
       <div className="login-wrapper">
@@ -64,9 +69,9 @@ export default function Login() {
             <a href="#" className="forgot-link">
               Esqueceu a palavra-passe?
             </a>
-               <button className="modal-close" onClick={onClose}>
-          <i className="fas fa-times"></i>
-        </button>
+<button className="modal-close" onClick={onClose}>
+  <i className="fas fa-times"></i>
+</button>
           </div>
           
         </div>

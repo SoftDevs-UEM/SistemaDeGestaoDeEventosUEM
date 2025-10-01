@@ -188,10 +188,9 @@ const eventCategories = [
                 <h1>{event.title}</h1>
                 <p>{event.subtitle}</p>
                 <div className="hero-buttons">
-                
-                  <button className="btn-secondary" onClick={handleLoginClick}>
-                    Explorar Todos
-                  </button>
+                <button className="btn-secondary hero-btn" onClick={handleLoginClick}>
+  Explorar Todos
+</button>
                 </div>
               </div>
             </div>

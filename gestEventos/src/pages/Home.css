@@ -356,9 +356,9 @@
 }
 
 .btn-secondary {
-  background-color: transparent;
-  color: #03492a;
-  border: 2px solid #03492a;
+  background-color: transparent; /* Fundo transparente */
+  color: white; /* Cor do texto branca */
+  border: 2px solid white; /* Borda branca */
   padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
@@ -369,8 +369,24 @@
 }
 
 .btn-secondary:hover {
-  background-color: #03492a;
-  color: white;
+  background-color: #03492a; /* Verde UEM no hover */
+  color: white; /* Texto continua branco */
+  transform: translateY(-2px);
+  border-color: #03492a; /* Borda também fica verde no hover */
+}
+
+/* Botão específico do hero */
+.hero-buttons .btn-secondary {
+  background-color: transparent !important;
+  color: white !important;
+  border: 2px solid white !important;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+}
+
+.hero-buttons .btn-secondary:hover {
+  background-color: white !important;
+  color: #03492a !important;
   transform: translateY(-2px);
 }
 

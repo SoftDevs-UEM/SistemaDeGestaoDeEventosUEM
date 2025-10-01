@@ -9,8 +9,8 @@ export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   const handleLoginClick = () => {
-    setIsVisible(false);
-    navigate("/login");
+    setIsVisible(false); // Atualiza o estado para ocultar o Navbar
+    navigate("/login"); // Navega para a página de login
   };
 
   const handleDropdownEnter = (dropdownName) => {
@@ -21,6 +21,7 @@ export default function Navbar() {
     setActiveDropdown(null);
   };
 
+  // Retorna null se o Navbar não estiver visível
   if (!isVisible) return null;
 
   return (
