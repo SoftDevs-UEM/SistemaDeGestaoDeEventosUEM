@@ -27,12 +27,27 @@
 }
 
 /* Modal Content */
-.modal-content {
+/* .modal-content {
   background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 20px;
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+} */
+
+.modal-content {
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  max-width: 1200px; /* Aumente a largura máxima */
+  width: 95%; /* Ajuste a largura relativa */
+  max-height: 98vh; /* Aumente ainda mais a altura máxima */
+  height: 90vh; /* Defina uma altura relativa */
   overflow-y: auto;
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.3),
