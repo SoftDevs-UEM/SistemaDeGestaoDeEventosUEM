@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import './Home.css';
 import Footer from '../layouts/footer';
 import EventModal from '../components/EventModal';
@@ -14,13 +15,21 @@ const Home = () => {
   const [heroEvents, setHeroEvents] = useState([]);
 
   const navigate = useNavigate();
+  const { isAuthenticated, userType } = useAuth();
 
-  const handleLoginClick = () => {
-    navigate('/Eventos');
-  };
-
+  // Participar: só estudante autenticado pode se inscrever direto
   const handleParticiparClick = (event) => {
-    navigate('/registrar', { state: { event } });
+    if (!isAuthenticated) {
+      // Salva evento para pós-login
+      localStorage.setItem('eventoParaInscricao', JSON.stringify(event));
+      navigate('/login');
+    } else if (userType === 'estudante') {
+      navigate('/registrar', { state: { event } });
+    } else if (userType === 'promotor') {
+      navigate('/promotor');
+    } else if (userType === 'admin') {
+      navigate('/admin');
+    }
   };
 
   const handleVerDetalhes = (event) => {
@@ -189,7 +198,7 @@ const eventCategories = [
                 <p>{event.subtitle}</p>
                 <div className="hero-buttons">
                 
-                  <button className="btn-secondary" onClick={handleLoginClick}>
+                  <button className="btn-secondary" onClick={() => navigate('/eventos')}>
                     Explorar Todos
                   </button>
                 </div>

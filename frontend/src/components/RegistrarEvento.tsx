@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './RegistrarEvento.css';
 import Footer from '../layouts/footer';
@@ -13,21 +13,41 @@ const RegistrarEvento = () => {
     email: '',
     telefone: '',
     matricula: '',
-    curso: ''
+    curso: '',
+    pagamento: '',
+    numeroInscricao: ''
   });
 
-  const handleChange = (e) => {
+  // Preencher dados do usuário logado
+  useEffect(() => {
+    const userStr = localStorage.getItem('usuarioLogado');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setFormData(prev => ({
+          ...prev,
+          nome: user.nome || '',
+          email: user.email || '',
+          telefone: user.telefone || '',
+          matricula: user.nrEstudante || '',
+        }));
+      } catch {}
+    }
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dados de inscrição:', formData);
-    console.log('Evento:', event);
-    alert('Inscrição realizada com sucesso!');
+    // Gerar número de inscrição único
+    const numeroInscricao = 'INSCR-' + Math.floor(100000 + Math.random() * 900000);
+    setFormData(prev => ({ ...prev, numeroInscricao }));
+    alert(`Inscrição realizada com sucesso!\nSeu número de inscrição: ${numeroInscricao}`);
     navigate('/');
   };
 
@@ -197,6 +217,7 @@ const RegistrarEvento = () => {
                   />
                 </div>
 
+
                 <div className="form-group">
                   <label htmlFor="matricula">Número de Estudante *</label>
                   <input
@@ -207,6 +228,19 @@ const RegistrarEvento = () => {
                     onChange={handleChange}
                     required
                     placeholder="Ex: 202301234"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="pagamento">Número para Pagamento *</label>
+                  <input
+                    type="text"
+                    id="pagamento"
+                    name="pagamento"
+                    value={formData.pagamento}
+                    onChange={handleChange}
+                    required
+                    placeholder="Insira o número para pagamento"
                   />
                 </div>
 

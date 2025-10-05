@@ -2,15 +2,19 @@ import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./navbar.css";
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(true);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const { isAuthenticated, logout } = useAuth();
 
   const handleLoginClick = () => {
-    setIsVisible(false);
     navigate("/login");
+  };
+  const handleLogoutClick = () => {
+    logout();
+    navigate("/");
   };
 
   const handleDropdownEnter = (dropdownName) => {
@@ -20,8 +24,6 @@ export default function Navbar() {
   const handleDropdownLeave = () => {
     setActiveDropdown(null);
   };
-
-  if (!isVisible) return null;
 
   return (
     <>
@@ -108,10 +110,16 @@ export default function Navbar() {
           <Link to="/contacto">Contacto</Link>
         </div>
 
-        {/* Botão Entrar posicionado absolutamente à direita */}
-        <button className="btn-login" onClick={handleLoginClick}>
-          Entrar
-        </button>
+        {/* Botão Entrar/Sair posicionado absolutamente à direita */}
+        {isAuthenticated ? (
+          <button className="btn-login" onClick={handleLogoutClick}>
+            Sair
+          </button>
+        ) : (
+          <button className="btn-login" onClick={handleLoginClick}>
+            Entrar
+          </button>
+        )}
       </nav>
     </>
   );

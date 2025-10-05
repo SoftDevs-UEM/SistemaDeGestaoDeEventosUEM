@@ -6,6 +6,7 @@ import './Eventos.css';
 import Footer from '../layouts/footer';
 import EventModal from '../components/EventModal';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 type CategoryType = {
   id: string;
@@ -18,6 +19,7 @@ const Eventos = () => {
   const [activeCategory, setActiveCategory] = useState<string>('todos');
   const [events, setEvents] = useState<EventoType[]>([]);
   const { eventos } = useEventos();
+  const { isAuthenticated, userType } = useAuth();
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [popularEvents, setPopularEvents] = useState<EventoType[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventoType | null>(null);
@@ -26,7 +28,16 @@ const Eventos = () => {
   const navigate = useNavigate();
 
   const handleParticiparClick = (event: EventoType) => {
-    navigate('/registrar', { state: { event } });
+    if (!isAuthenticated) {
+      localStorage.setItem('eventoParaInscricao', JSON.stringify(event));
+      navigate('/login');
+    } else if (userType === 'estudante') {
+      navigate('/registrar', { state: { event } });
+    } else if (userType === 'promotor') {
+      navigate('/promotor');
+    } else if (userType === 'admin') {
+      navigate('/admin');
+    }
   };
 
   const handleVerDetalhes = (event: EventoType) => {
