@@ -1,41 +1,46 @@
 // Eventos.tsx
 import React, { useState, useEffect } from 'react';
+import { useEventos } from '../context/EventosContext';
+import type { EventoType } from '../context/EventosContext';
 import './Eventos.css';
 import Footer from '../layouts/footer';
 import EventModal from '../components/EventModal';
 import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+type CategoryType = {
+  id: string;
+  name: string;
+  icon: string;
+  count: number;
+};
 
 const Eventos = () => {
-  const [activeCategory, setActiveCategory] = useState('todos');
-  const [events, setEvents] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [popularEvents, setPopularEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [activeCategory, setActiveCategory] = useState<string>('todos');
+  const [events, setEvents] = useState<EventoType[]>([]);
+  const { eventos } = useEventos();
+  const { isAuthenticated, userType } = useAuth();
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [popularEvents, setPopularEvents] = useState<EventoType[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<EventoType | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
-
-  const location = useLocation();
-
-  useEffect(() => {
-    // Verifica se há uma âncora na URL
-    if (location.hash === '#eventos-section') {
-      const element = document.getElementById('eventos-section');
-      if (element) {
-        // Scroll suave para a seção
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  }, [location]);
-
-
 
   const navigate = useNavigate();
 
-  const handleParticiparClick = (event) => {
-    navigate('/registrar', { state: { event } });
+  const handleParticiparClick = (event: EventoType) => {
+    if (!isAuthenticated) {
+      localStorage.setItem('eventoParaInscricao', JSON.stringify(event));
+      navigate('/login');
+    } else if (userType === 'estudante') {
+      navigate('/registrar', { state: { event } });
+    } else if (userType === 'promotor') {
+      navigate('/promotor');
+    } else if (userType === 'admin') {
+      navigate('/admin');
+    }
   };
 
-  const handleVerDetalhes = (event) => {
+  const handleVerDetalhes = (event: EventoType) => {
     setSelectedEvent(event);
     setShowEventModal(true);
   };
@@ -174,7 +179,11 @@ const Eventos = () => {
 
     // Ordenar eventos por data (mais recentes primeiro)
     const sortedEvents = [...allEvents].sort(
-      (a, b) => new Date(b.date) - new Date(a.date)
+      (a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateB - dateA;
+      }
     );
 
     // Top 5 eventos mais participados
@@ -183,9 +192,9 @@ const Eventos = () => {
       .slice(0, 5);
 
     setCategories(eventCategories);
-    setEvents(sortedEvents);
+  setEvents([...sortedEvents, ...eventos]);
     setPopularEvents(topEvents);
-  }, []);
+  }, [eventos]);
 
   const filteredEvents =
     activeCategory === 'todos'
@@ -202,8 +211,8 @@ const Eventos = () => {
             Descubra e participe nos eventos da Universidade Eduardo Mondlane
           </p>
           <div className="hero-buttons">
-            <button className="btn-primaryy">Explorar Eventos</button>
-            <button className="btn-secondaryy">Criar Evento</button>
+            <button className="btn-primary">Explorar Eventos</button>
+            <button className="btn-secondary">Criar Evento</button>
           </div>
         </div>
       </section>
@@ -235,62 +244,62 @@ const Eventos = () => {
       </section>
 
       {/* Lista de Eventos */}
-      <section className="eventos-list-section" id="eventos-section">
-  <div className="container">
-    <h2 className="section-title">
-      {activeCategory === 'todos'
-        ? 'Todos os Eventos'
-        : categories.find((c) => c.id === activeCategory)?.name}
-    </h2>
-    <p className="section-subtitle">
-      Confira nossa agenda completa de eventos acadêmicos
-    </p>
+      <section className="eventos-list-section">
+        <div className="container">
+          <h2 className="section-title">
+            {activeCategory === 'todos'
+              ? 'Todos os Eventos'
+              : categories.find((c) => c.id === activeCategory)?.name}
+          </h2>
+          <p className="section-subtitle">
+            Confira nossa agenda completa de eventos acadêmicos
+          </p>
 
-    <div className="events-grid">
-      {filteredEvents.map((event) => (
-        <div key={event.id} className="event-card">
-          <div className="event-image">
-            <img src={event.image} alt={event.title} />
-            <div className="event-category-badge">
-              {categories.find((c) => c.id === event.category)?.icon}
-              {categories.find((c) => c.id === event.category)?.name}
-            </div>
-          </div>
-          <div className="event-info">
-            <h3>{event.title}</h3>
-            <p className="event-description">{event.description}</p>
-            <div className="event-meta">
-              <div className="event-detail">
-                <i className="fas fa-calendar-alt"></i>
-                <span>{event.date}</span>
+          <div className="events-grid">
+            {filteredEvents.map((event) => (
+              <div key={event.id} className="event-card">
+                <div className="event-image">
+                  <img src={event.image} alt={event.title} />
+                  <div className="event-category-badge">
+                    {categories.find((c) => c.id === event.category)?.icon}
+                    {categories.find((c) => c.id === event.category)?.name}
+                  </div>
+                </div>
+                <div className="event-info">
+                  <h3>{event.title}</h3>
+                  <p className="event-description">{event.description}</p>
+                  <div className="event-meta">
+                    <div className="event-detail">
+                      <i className="fas fa-calendar-alt"></i>
+                      <span>{event.date}</span>
+                    </div>
+                    <div className="event-detail">
+                      <i className="fas fa-clock"></i>
+                      <span>{event.time}</span>
+                    </div>
+                    <div className="event-detail">
+                      <i className="fas fa-map-marker-alt"></i>
+                      <span>{event.location}</span>
+                    </div>
+                    <div className="event-detail">
+                      <i className="fas fa-users"></i>
+                      <span>{event.attendees} participantes</span>
+                    </div>
+                  </div>
+                  <div className="event-buttons">
+                    <button className="event-btn" onClick={() => handleParticiparClick(event)}>
+                      Participar
+                    </button>
+                    <button className="btn-secondary" onClick={() => handleVerDetalhes(event)}>
+                      Detalhes
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="event-detail">
-                <i className="fas fa-clock"></i>
-                <span>{event.time}</span>
-              </div>
-              <div className="event-detail">
-                <i className="fas fa-map-marker-alt"></i>
-                <span>{event.location}</span>
-              </div>
-              <div className="event-detail">
-                <i className="fas fa-users"></i>
-                <span>{event.attendees} participantes</span>
-              </div>
-            </div>
-            <div className="event-buttons">
-              <button className="event-btn" onClick={() => handleParticiparClick(event)}>
-                Participar
-              </button>
-              <button className="btn-secondary" onClick={() => handleVerDetalhes(event)}>
-                Detalhes
-              </button>
-            </div>
+            ))}
           </div>
         </div>
-      ))}
-    </div>
-  </div>
-</section>
+      </section>
 
       {/* Eventos Populares */}
       <section className="popular-events">
@@ -348,7 +357,7 @@ const Eventos = () => {
         event={selectedEvent}
         isOpen={showEventModal}
         onClose={closeModal}
-        onRegister={() => handleParticiparClick(selectedEvent)}
+  onRegister={() => selectedEvent && handleParticiparClick(selectedEvent)}
       />
 
       <Footer />

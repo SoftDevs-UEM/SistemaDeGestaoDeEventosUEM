@@ -2,15 +2,19 @@ import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./navbar.css";
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(true);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const { isAuthenticated, logout } = useAuth();
 
   const handleLoginClick = () => {
-    setIsVisible(false);
     navigate("/login");
+  };
+  const handleLogoutClick = () => {
+    logout();
+    navigate("/");
   };
 
   const handleDropdownEnter = (dropdownName) => {
@@ -20,13 +24,6 @@ export default function Navbar() {
   const handleDropdownLeave = () => {
     setActiveDropdown(null);
   };
-
-  // Função para navegar para seções específicas da página Sobre
-  const handleSobreSectionClick = (sectionId) => {
-    navigate('/sobre', { state: { scrollToSection: sectionId } });
-  };
-
-  if (!isVisible) return null;
 
   return (
     <>
@@ -87,30 +84,10 @@ export default function Navbar() {
               Sobre Nós 
             </Link>
             <div className={`dropdown-menu ${activeDropdown === 'sobre' ? 'active' : ''}`}>
-              <button 
-                className="dropdown-link-btn"
-                onClick={() => handleSobreSectionClick('historia')}
-              >
-                História
-              </button>
-              <button 
-                className="dropdown-link-btn"
-                onClick={() => handleSobreSectionClick('missao')}
-              >
-                Missão e Visão
-              </button>
-              <button 
-                className="dropdown-link-btn"
-                onClick={() => handleSobreSectionClick('equipa')}
-              >
-                Nossa Equipa
-              </button>
-              <button 
-                className="dropdown-link-btn"
-                onClick={() => handleSobreSectionClick('desenvolvedores')}
-              >
-                Desenvolvedores
-              </button>
+              <Link to="/sobre/historia">História</Link>
+              <Link to="/sobre/missao">Missão e Visão</Link>
+              <Link to="/sobre/equipa">Nossa Equipa</Link>
+              <Link to="/sobre/parceiros">Parceiros</Link>
             </div>
           </div>
 
@@ -126,16 +103,23 @@ export default function Navbar() {
               <Link to="/organizadores/criar-evento">Criar Evento</Link>
               <Link to="/organizadores/meus-eventos">Meus Eventos</Link>
               <Link to="/organizadores/estatisticas">Estatísticas</Link>
+              <Link to="/organizadores/directrizes">Directrizes</Link>
             </div>
           </div>
 
           <Link to="/contacto">Contacto</Link>
         </div>
 
-        {/* Botão Entrar posicionado absolutamente à direita */}
-        <button className="btn-login" onClick={handleLoginClick}>
-          Entrar
-        </button>
+        {/* Botão Entrar/Sair posicionado absolutamente à direita */}
+        {isAuthenticated ? (
+          <button className="btn-login" onClick={handleLogoutClick}>
+            Sair
+          </button>
+        ) : (
+          <button className="btn-login" onClick={handleLoginClick}>
+            Entrar
+          </button>
+        )}
       </nav>
     </>
   );

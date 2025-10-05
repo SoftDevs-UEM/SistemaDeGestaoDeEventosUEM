@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './RegistrarEvento.css';
 import Footer from '../layouts/footer';
@@ -13,21 +13,42 @@ const RegistrarEvento = () => {
     email: '',
     telefone: '',
     matricula: '',
-    curso: ''
+    curso: '',
+    pagamento: '',
+    metodoPagamento: '',
+    numeroInscricao: ''
   });
 
-  const handleChange = (e) => {
+  // Preencher dados do usuário logado
+  useEffect(() => {
+    const userStr = localStorage.getItem('usuarioLogado');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setFormData(prev => ({
+          ...prev,
+          nome: user.nome || '',
+          email: user.email || '',
+          telefone: user.telefone || '',
+          matricula: user.nrEstudante || '',
+        }));
+      } catch {}
+    }
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dados de inscrição:', formData);
-    console.log('Evento:', event);
-    alert('Inscrição realizada com sucesso!');
+    // Gerar número de inscrição único
+    const numeroInscricao = 'INSCR-' + Math.floor(100000 + Math.random() * 900000);
+    setFormData(prev => ({ ...prev, numeroInscricao }));
+    alert(`Inscrição realizada com sucesso!\nSeu número de inscrição: ${numeroInscricao}`);
     navigate('/');
   };
 
@@ -197,17 +218,64 @@ const RegistrarEvento = () => {
                   />
                 </div>
 
+
+                {/* Campo de matrícula e curso só para estudante */}
+                {formData.email.endsWith('@uem.ac.mz') && formData.matricula !== undefined && (
+                  <>
+                    <div className="form-group">
+                      <label htmlFor="matricula">Número de Estudante *</label>
+                      <input
+                        type="text"
+                        id="matricula"
+                        name="matricula"
+                        value={formData.matricula}
+                        onChange={handleChange}
+                        required
+                        placeholder="Ex: 202301234"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="curso">Curso *</label>
+                      <input
+                        type="text"
+                        id="curso"
+                        name="curso"
+                        value={formData.curso}
+                        onChange={handleChange}
+                        required
+                        placeholder="Digite seu curso"
+                      />
+                    </div>
+                  </>
+                )}
+
                 <div className="form-group">
-                  <label htmlFor="matricula">Número de Estudante *</label>
+                  <label htmlFor="pagamento">Número para Pagamento *</label>
                   <input
                     type="text"
-                    id="matricula"
-                    name="matricula"
-                    value={formData.matricula}
+                    id="pagamento"
+                    name="pagamento"
+                    value={formData.pagamento}
                     onChange={handleChange}
                     required
-                    placeholder="Ex: 202301234"
+                    placeholder="Insira o número para pagamento"
                   />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="metodoPagamento">Método de Pagamento *</label>
+                  <select
+                    id="metodoPagamento"
+                    name="metodoPagamento"
+                    value={formData.metodoPagamento}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Selecione</option>
+                    <option value="M-Pesa">M-Pesa</option>
+                    <option value="E-Mola">E-Mola</option>
+                    <option value="M-Kesh">M-Kesh</option>
+                    <option value="NetShop">NetShop</option>
+                  </select>
                 </div>
 
                 <div className="form-group">
