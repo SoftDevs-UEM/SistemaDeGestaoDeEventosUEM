@@ -15,6 +15,7 @@ const RegistrarEvento = () => {
     matricula: '',
     curso: '',
     pagamento: '',
+    metodoPagamento: '',
     numeroInscricao: ''
   });
 
@@ -35,7 +36,7 @@ const RegistrarEvento = () => {
     }
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -218,18 +219,35 @@ const RegistrarEvento = () => {
                 </div>
 
 
-                <div className="form-group">
-                  <label htmlFor="matricula">Número de Estudante *</label>
-                  <input
-                    type="text"
-                    id="matricula"
-                    name="matricula"
-                    value={formData.matricula}
-                    onChange={handleChange}
-                    required
-                    placeholder="Ex: 202301234"
-                  />
-                </div>
+                {/* Campo de matrícula e curso só para estudante */}
+                {formData.email.endsWith('@uem.ac.mz') && formData.matricula !== undefined && (
+                  <>
+                    <div className="form-group">
+                      <label htmlFor="matricula">Número de Estudante *</label>
+                      <input
+                        type="text"
+                        id="matricula"
+                        name="matricula"
+                        value={formData.matricula}
+                        onChange={handleChange}
+                        required
+                        placeholder="Ex: 202301234"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="curso">Curso *</label>
+                      <input
+                        type="text"
+                        id="curso"
+                        name="curso"
+                        value={formData.curso}
+                        onChange={handleChange}
+                        required
+                        placeholder="Digite seu curso"
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div className="form-group">
                   <label htmlFor="pagamento">Número para Pagamento *</label>
@@ -242,6 +260,22 @@ const RegistrarEvento = () => {
                     required
                     placeholder="Insira o número para pagamento"
                   />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="metodoPagamento">Método de Pagamento *</label>
+                  <select
+                    id="metodoPagamento"
+                    name="metodoPagamento"
+                    value={formData.metodoPagamento}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Selecione</option>
+                    <option value="M-Pesa">M-Pesa</option>
+                    <option value="E-Mola">E-Mola</option>
+                    <option value="M-Kesh">M-Kesh</option>
+                    <option value="NetShop">NetShop</option>
+                  </select>
                 </div>
 
                 <div className="form-group">
