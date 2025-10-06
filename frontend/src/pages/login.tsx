@@ -46,6 +46,8 @@ export default function Login() {
     e.preventDefault();
     const email = emailRef.current?.value || '';
     const password = passwordRef.current?.value || '';
+    
+    // Login com contas padrão
     if (
       (email === 'estudante@uem.ac.mz' && password === '123') ||
       (email === 'promotor@uem.ac.mz' && password === '123') ||
@@ -53,6 +55,7 @@ export default function Login() {
     ) {
       login(email);
       const eventoParaInscricao = localStorage.getItem('eventoParaInscricao');
+      
       if (email === 'estudante@uem.ac.mz') {
         if (eventoParaInscricao) {
           try {
@@ -70,6 +73,8 @@ export default function Login() {
       }
       return;
     }
+
+    // Login com usuários cadastrados
     const users = getRegisteredUsers();
     const found = users.find((u: RegisteredUser) => u.email === email && u.password === password);
     if (found) {
@@ -80,29 +85,37 @@ export default function Login() {
       else if (found.tipo === 'cta') navigate('/admin');
       return;
     }
+    
     alert('Email ou senha inválidos!');
   };
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setRegisterError('');
+    
+    // Validações
     if (!registerData.nome || !registerData.telefone || !registerData.email || !registerData.password || !registerData.confirmPassword) {
       setRegisterError('Preencha todos os campos obrigatórios.');
       return;
     }
+    
     if (registerData.password !== registerData.confirmPassword) {
       setRegisterError('As senhas não coincidem.');
       return;
     }
+    
     if (registerData.tipo === 'estudante' && !registerData.nrEstudante) {
       setRegisterError('Informe o número de estudante.');
       return;
     }
+    
     const users = getRegisteredUsers();
     if (users.some((u: RegisteredUser) => u.email === registerData.email)) {
       setRegisterError('Email já cadastrado.');
       return;
     }
+    
+    // Salvar usuário
     const userToSave: RegisteredUser = {
       nome: registerData.nome,
       telefone: registerData.telefone,
@@ -111,9 +124,26 @@ export default function Login() {
       tipo: registerData.tipo as 'estudante' | 'docente' | 'cta',
       nrEstudante: registerData.tipo === 'estudante' ? registerData.nrEstudante : undefined
     };
+    
     saveRegisteredUser(userToSave);
     setShowRegister(false);
+    setRegisterData({
+      nome: '',
+      telefone: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      tipo: 'estudante',
+      nrEstudante: ''
+    });
     alert('Cadastro realizado! Faça login.');
+  };
+
+  const handleInputChange = (field: keyof typeof registerData, value: string) => {
+    setRegisterData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -122,10 +152,13 @@ export default function Login() {
         <div className="login-logo-circle">
           <span className="login-logo-text">UEM</span>
         </div>
+        
         <h2 className="login-title">Sistema de Gestão de Eventos</h2>
         <p className="login-subtitle">Universidade Eduardo Mondlane</p>
+
         {!showRegister ? (
           <>
+            {/* FORMULÁRIO DE LOGIN */}
             <form className="login-form-styled" onSubmit={handleSubmit}>
               <div className="login-form-group">
                 <label htmlFor="email" className="login-form-label">
@@ -141,6 +174,7 @@ export default function Login() {
                   required
                 />
               </div>
+              
               <div className="login-form-group">
                 <label htmlFor="password" className="login-form-label">
                   <span className="login-icon">🔒</span> Palavra-passe
@@ -155,69 +189,143 @@ export default function Login() {
                   required
                 />
               </div>
+              
               <div className="login-form-actions">
                 <button type="submit" className="login-btn-main">
                   Entrar no Sistema
                 </button>
               </div>
+              
               <div className="login-form-footer">
-                <a href="#" className="login-forgot-link">Esqueceu a palavra-passe?</a>
+                <a href="#" className="login-forgot-link">
+                  Esqueceu a palavra-passe?
+                </a>
               </div>
             </form>
-            <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <button className="login-btn-main" style={{ background: '#109659', marginTop: 8 }} onClick={() => setShowRegister(true)}>
+            
+            {/* SEÇÃO DE CADASTRO */}
+            <div className="login-register-section">
+              <p className="login-register-text">Não tem uma conta?</p>
+              <button 
+                className="login-register-btn" 
+                onClick={() => setShowRegister(true)}
+              >
                 Cadastrar
               </button>
             </div>
           </>
         ) : (
+       
           <form className="login-form-styled" onSubmit={handleRegister}>
             <div className="login-form-group">
-              <label className="login-form-label">Nome completo</label>
-              <input type="text" className="login-form-input" value={registerData.nome} onChange={e => setRegisterData({ ...registerData, nome: e.target.value })} required />
+              <label className="login-form-label">Nome completo *</label>
+              <input 
+                type="text" 
+                className="login-form-input" 
+                value={registerData.nome} 
+                onChange={e => handleInputChange('nome', e.target.value)} 
+                placeholder="Seu nome completo"
+                required 
+              />
             </div>
+            
             <div className="login-form-group">
-              <label className="login-form-label">Telefone</label>
-              <input type="tel" className="login-form-input" value={registerData.telefone} onChange={e => setRegisterData({ ...registerData, telefone: e.target.value })} required />
+              <label className="login-form-label">Telefone *</label>
+              <input 
+                type="tel" 
+                className="login-form-input" 
+                value={registerData.telefone} 
+                onChange={e => handleInputChange('telefone', e.target.value)} 
+                placeholder="(+258) 8X XXX XXXX"
+                required 
+              />
             </div>
+            
             <div className="login-form-group">
-              <label className="login-form-label">Email institucional</label>
-              <input type="email" className="login-form-input" value={registerData.email} onChange={e => setRegisterData({ ...registerData, email: e.target.value })} required />
+              <label className="login-form-label">Email institucional *</label>
+              <input 
+                type="email" 
+                className="login-form-input" 
+                value={registerData.email} 
+                onChange={e => handleInputChange('email', e.target.value)} 
+                placeholder="seu.email@uem.ac.mz"
+                required 
+              />
             </div>
+            
             <div className="login-form-group">
-              <label className="login-form-label">Tipo de usuário</label>
-              <select className="login-form-input" value={registerData.tipo} onChange={e => setRegisterData({ ...registerData, tipo: e.target.value as 'estudante' | 'docente' | 'cta' })} required>
+              <label className="login-form-label">Tipo de usuário *</label>
+              <select 
+                className="login-form-input" 
+                value={registerData.tipo} 
+                onChange={e => handleInputChange('tipo', e.target.value)}
+                required
+              >
                 <option value="estudante">Estudante</option>
                 <option value="docente">Docente</option>
                 <option value="cta">CTA</option>
               </select>
             </div>
+            
             {registerData.tipo === 'estudante' && (
               <div className="login-form-group">
-                <label className="login-form-label">Nº de estudante</label>
-                <input type="text" className="login-form-input" value={registerData.nrEstudante} onChange={e => setRegisterData({ ...registerData, nrEstudante: e.target.value })} required />
+                <label className="login-form-label">Nº de estudante *</label>
+                <input 
+                  type="text" 
+                  className="login-form-input" 
+                  value={registerData.nrEstudante} 
+                  onChange={e => handleInputChange('nrEstudante', e.target.value)} 
+                  placeholder="Ex: 202301234"
+                  required 
+                />
               </div>
             )}
+            
             <div className="login-form-group">
-              <label className="login-form-label">Senha</label>
-              <input type="password" className="login-form-input" value={registerData.password} onChange={e => setRegisterData({ ...registerData, password: e.target.value })} required />
+              <label className="login-form-label">Senha *</label>
+              <input 
+                type="password" 
+                className="login-form-input" 
+                value={registerData.password} 
+                onChange={e => handleInputChange('password', e.target.value)} 
+                placeholder="Mínimo 6 caracteres"
+                minLength={6}
+                required 
+              />
             </div>
+            
             <div className="login-form-group">
-              <label className="login-form-label">Confirmação de senha</label>
-              <input type="password" className="login-form-input" value={registerData.confirmPassword} onChange={e => setRegisterData({ ...registerData, confirmPassword: e.target.value })} required />
+              <label className="login-form-label">Confirmação de senha *</label>
+              <input 
+                type="password" 
+                className="login-form-input" 
+                value={registerData.confirmPassword} 
+                onChange={e => handleInputChange('confirmPassword', e.target.value)} 
+                placeholder="Digite a senha novamente"
+                required 
+              />
             </div>
-            {registerError && <div style={{ color: 'red', marginBottom: 8 }}>{registerError}</div>}
+            
+            {registerError && (
+              <div className="login-error-message">
+                {registerError}
+              </div>
+            )}
+            
             <div className="login-form-actions">
-              <button type="submit" className="login-btn-main">Cadastrar</button>
-              <button type="button" className="login-btn-main" style={{ background: '#03492a', marginTop: 8 }} onClick={() => setShowRegister(false)}>Voltar para Login</button>
+              <button type="submit" className="login-btn-main">
+                Cadastrar
+              </button>
+              <button 
+                type="button" 
+                className="login-back-btn"
+                onClick={() => setShowRegister(false)}
+              >
+                Voltar para Login
+              </button>
             </div>
           </form>
         )}
-      </div>
-      <div className="login-bg-elements">
-        <div className="login-bg-1"></div>
-        <div className="login-bg-2"></div>
-        <div className="login-bg-3"></div>
       </div>
     </div>
   );

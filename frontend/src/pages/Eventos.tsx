@@ -50,6 +50,24 @@ const Eventos = () => {
     setSelectedEvent(null);
   };
 
+  // Função para navegar para explorar eventos
+  const handleExplorarEventos = () => {
+    document.getElementById('eventos-categories')?.scrollIntoView({ 
+      behavior: 'smooth' 
+    });
+  };
+
+  // Função para navegar para criar evento
+  const handleCriarEvento = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else if (userType === 'promotor' || userType === 'admin') {
+      navigate('/organizadores/criar-evento');
+    } else {
+      navigate('/organizadores');
+    }
+  };
+
   // Dados de exemplo
   useEffect(() => {
     const eventCategories = [
@@ -192,7 +210,7 @@ const Eventos = () => {
       .slice(0, 5);
 
     setCategories(eventCategories);
-  setEvents([...sortedEvents, ...eventos]);
+    setEvents([...sortedEvents, ...eventos]);
     setPopularEvents(topEvents);
   }, [eventos]);
 
@@ -211,14 +229,18 @@ const Eventos = () => {
             Descubra e participe nos eventos da Universidade Eduardo Mondlane
           </p>
           <div className="hero-buttons">
-            <button className="btn-primary">Explorar Eventos</button>
-            <button className="btn-secondary">Criar Evento</button>
+            <button className="btn-hero-primary" onClick={handleExplorarEventos}>
+              Explorar Eventos
+            </button>
+            <button className="btn-hero-secondary" onClick={handleCriarEvento}>
+              Criar Evento
+            </button>
           </div>
         </div>
       </section>
 
       {/* Categorias de Eventos */}
-      <section className="eventos-categories">
+      <section id="eventos-categories" className="eventos-categories">
         <div className="container">
           <h2 className="section-title">
             Explore por <span className="highlight">Categorias</span>
@@ -243,7 +265,7 @@ const Eventos = () => {
         </div>
       </section>
 
-      {/* Lista de Eventos */}
+      {/* Resto do código permanece igual... */}
       <section className="eventos-list-section">
         <div className="container">
           <h2 className="section-title">
@@ -357,7 +379,7 @@ const Eventos = () => {
         event={selectedEvent}
         isOpen={showEventModal}
         onClose={closeModal}
-  onRegister={() => selectedEvent && handleParticiparClick(selectedEvent)}
+        onRegister={() => selectedEvent && handleParticiparClick(selectedEvent)}
       />
 
       <Footer />

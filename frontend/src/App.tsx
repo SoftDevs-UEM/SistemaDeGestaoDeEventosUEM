@@ -6,7 +6,7 @@ import './App.css';
 import Navbar from './layouts/navbar';
 import { AuthProvider } from './context/AuthContext';
 import { EventosProvider } from './context/EventosContext';
-
+import CriarEvento from './pages/CriarEvento';
 import Contact from './pages/Contact';
 import Home from './pages/Home';
 import Sobre from './pages/Sobre';
@@ -17,10 +17,6 @@ import RegistrarEvento from './components/RegistrarEvento';
 import HomeAdmin from './pages/HomeAdmin';
 import HomePromotor from './pages/HomePromotor';
 import HomeEstudante from './pages/HomeEstudante';
-
-
-
-
 
 function AppContent() {
   const location = useLocation();
@@ -38,6 +34,9 @@ function AppContent() {
         <Route path="/admin" element={<HomeAdmin />} />
         <Route path="/promotor" element={<HomePromotor />} />
         <Route path="/estudante" element={<HomeEstudante />} />
+        <Route path="/criar-evento" element={<CriarEvento />} />
+        {/* ADICIONE ESTA LINHA: */}
+        <Route path="/organizadores/criar-evento" element={<CriarEvento />} />
       </Routes>
     </div>
   );

@@ -12,6 +12,7 @@ export default function Navbar() {
   const handleLoginClick = () => {
     navigate("/login");
   };
+  
   const handleLogoutClick = () => {
     logout();
     navigate("/");
@@ -23,6 +24,11 @@ export default function Navbar() {
 
   const handleDropdownLeave = () => {
     setActiveDropdown(null);
+  };
+
+  // Função para navegar para seções específicas da página Sobre
+  const handleSobreSectionClick = (sectionId: string) => {
+    navigate('/sobre', { state: { scrollToSection: sectionId } });
   };
 
   return (
@@ -64,7 +70,7 @@ export default function Navbar() {
             onMouseLeave={handleDropdownLeave}
           >
             <Link to="/eventos" className="dropdown-toggle">
-              Eventos 
+              Eventos <span className="dropdown-arrow">▼</span>
             </Link>
             <div className={`dropdown-menu ${activeDropdown === 'eventos' ? 'active' : ''}`}>
               <Link to="/eventos/proximos">Próximos Eventos</Link>
@@ -81,13 +87,33 @@ export default function Navbar() {
             onMouseLeave={handleDropdownLeave}
           >
             <Link to="/sobre" className="dropdown-toggle">
-              Sobre Nós 
+              Sobre Nós <span className="dropdown-arrow">▼</span>
             </Link>
             <div className={`dropdown-menu ${activeDropdown === 'sobre' ? 'active' : ''}`}>
-              <Link to="/sobre/historia">História</Link>
-              <Link to="/sobre/missao">Missão e Visão</Link>
-              <Link to="/sobre/equipa">Nossa Equipa</Link>
-              <Link to="/sobre/parceiros">Parceiros</Link>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('historia')}
+              >
+                História
+              </button>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('missao')}
+              >
+                Missão e Visão
+              </button>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('equipa')}
+              >
+                Nossa Equipa
+              </button>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('desenvolvedores')}
+              >
+                Desenvolvedores
+              </button>
             </div>
           </div>
 
@@ -97,27 +123,27 @@ export default function Navbar() {
             onMouseLeave={handleDropdownLeave}
           >
             <Link to="/organizadores" className="dropdown-toggle">
-              Para Organizadores 
+              Para Organizadores <span className="dropdown-arrow">▼</span>
             </Link>
             <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
               <Link to="/organizadores/criar-evento">Criar Evento</Link>
               <Link to="/organizadores/meus-eventos">Meus Eventos</Link>
               <Link to="/organizadores/estatisticas">Estatísticas</Link>
-              <Link to="/organizadores/directrizes">Directrizes</Link>
+            
             </div>
           </div>
 
           <Link to="/contacto">Contacto</Link>
         </div>
 
-        {/* Botão Entrar/Sair posicionado absolutamente à direita */}
+        {/* Botão Entrar/Sair estilizado como o do footer */}
         {isAuthenticated ? (
-          <button className="btn-login" onClick={handleLogoutClick}>
-            Sair
+          <button className="btn-login-footer-style" onClick={handleLogoutClick}>
+            SAIR
           </button>
         ) : (
-          <button className="btn-login" onClick={handleLoginClick}>
-            Entrar
+          <button className="btn-login-footer-style" onClick={handleLoginClick}>
+            ENTRAR
           </button>
         )}
       </nav>
