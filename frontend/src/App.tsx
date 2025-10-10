@@ -42,6 +42,30 @@ function AppContent() {
   );
 }
 
+// Adicione este componente para proteger rotas
+const ProtectedRoute: React.FC<{ 
+  children: React.ReactNode; 
+  allowedUserTypes: UserType[] 
+}> = ({ children, allowedUserTypes }) => {
+  const { isAuthenticated, userType } = useAuth();
+  
+  if (!isAuthenticated || !userType || !allowedUserTypes.includes(userType)) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// No seu Routes, proteja as rotas de organizadores:
+<Route 
+  path="/organizadores/criar-evento" 
+  element={
+    <ProtectedRoute allowedUserTypes={['promotor', 'admin']}>
+      <CriarEvento />
+    </ProtectedRoute>
+  } 
+/>
+
 function App() {
   return (
     <EventosProvider>

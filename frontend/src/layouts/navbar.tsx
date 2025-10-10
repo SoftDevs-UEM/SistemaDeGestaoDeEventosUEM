@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 export default function Navbar() {
   const navigate = useNavigate();
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, userType } = useAuth();
 
   const handleLoginClick = () => {
     navigate("/login");
@@ -30,6 +30,9 @@ export default function Navbar() {
   const handleSobreSectionClick = (sectionId: string) => {
     navigate('/sobre', { state: { scrollToSection: sectionId } });
   };
+
+  // Verificar se o usuário é promotor ou admin para mostrar menu de organizadores
+  const showOrganizadoresMenu = isAuthenticated && (userType === 'promotor' || userType === 'admin');
 
   return (
     <>
@@ -117,21 +120,23 @@ export default function Navbar() {
             </div>
           </div>
 
-          <div 
-            className="dropdown-container"
-            onMouseEnter={() => handleDropdownEnter('organizadores')}
-            onMouseLeave={handleDropdownLeave}
-          >
-            <Link to="/organizadores" className="dropdown-toggle">
-              Para Organizadores <span className="dropdown-arrow">▼</span>
-            </Link>
-            <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
-              <Link to="/organizadores/criar-evento">Criar Evento</Link>
-              <Link to="/organizadores/meus-eventos">Meus Eventos</Link>
-              <Link to="/organizadores/estatisticas">Estatísticas</Link>
-            
+          {/* Menu Para Organizadores - apenas para promotores e admin */}
+          {showOrganizadoresMenu && (
+            <div 
+              className="dropdown-container"
+              onMouseEnter={() => handleDropdownEnter('organizadores')}
+              onMouseLeave={handleDropdownLeave}
+            >
+              <Link to="/organizadores" className="dropdown-toggle">
+                Para Organizadores <span className="dropdown-arrow">▼</span>
+              </Link>
+              <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
+                <Link to="/organizadores/criar-evento">Criar Evento</Link>
+                <Link to="/organizadores/meus-eventos">Meus Eventos</Link>
+                <Link to="/organizadores/estatisticas">Estatísticas</Link>
+              </div>
             </div>
-          </div>
+          )}
 
           <Link to="/contacto">Contacto</Link>
         </div>
