@@ -15,6 +15,7 @@ import HomeAdmin from './pages/HomeAdmin';
 import HomePromotor from './pages/HomePromotor';
 import HomeEstudante from './pages/HomeEstudante';
 import Organizadores from './pages/Organizadores';
+import Estatisticas from './pages/Estatisticas';
 
 // Define o tipo de usuário permitido
 type UserType = 'estudante' | 'docente' | 'cta' | 'admin' | 'promotor';
@@ -36,6 +37,7 @@ function AppContent() {
         <Route path="/admin" element={<HomeAdmin />} />
         <Route path="/promotor" element={<HomePromotor />} />
         <Route path="/estudante" element={<HomeEstudante />} />
+        {/* <Route path="/organizadores/estatisticas" element={<Estatisticas />} /> */}
         
         <Route path="/organizadores/criar-evento" element={<CriarEvento />} />
         <Route 
