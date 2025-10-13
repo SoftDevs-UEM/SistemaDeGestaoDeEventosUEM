@@ -9,7 +9,7 @@ import Contact from './pages/Contact';
 import Home from './pages/Home';
 import Sobre from './pages/Sobre';
 import Eventos from './pages/Eventos';
-import Login from './pages/login';
+import Login from './pages/Login';
 import RegistrarEvento from './components/RegistrarEvento';
 import HomeAdmin from './pages/HomeAdmin';
 import HomePromotor from './pages/HomePromotor';
