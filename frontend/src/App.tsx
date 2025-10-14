@@ -43,7 +43,7 @@ function AppContent() {
         <Route 
   path="/organizadores" 
   element={
-    <ProtectedRoute allowedUserTypes={['promotor', 'admin']}>
+    <ProtectedRoute allowedUserTypes={['promotor', 'organizadores']}>
       <Organizadores />
     </ProtectedRoute>
   } 

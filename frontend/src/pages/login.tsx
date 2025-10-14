@@ -67,9 +67,9 @@ export default function Login() {
         }
         navigate('/estudante');
       } else if (email === 'promotor@uem.ac.mz') {
-        navigate('/promotor');
+        navigate('/Organizadores');
       } else if (email === 'admin@uem.ac.mz') {
-        navigate('/admin');
+        navigate('/');
       }
       return;
     }

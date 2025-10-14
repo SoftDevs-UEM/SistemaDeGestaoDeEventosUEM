@@ -36,7 +36,7 @@ const Eventos = () => {
     } else if (userType === 'promotor') {
       navigate('/promotor');
     } else if (userType === 'admin') {
-      navigate('/admin');
+      navigate('/Organizadores');
     }
   };
 
