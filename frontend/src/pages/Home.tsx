@@ -26,9 +26,9 @@ const Home = () => {
     } else if (userType === 'estudante') {
       navigate('/registrar', { state: { event } });
     } else if (userType === 'promotor') {
-      navigate('/promotor');
+      navigate('/organizadores');
     } else if (userType === 'admin') {
-      navigate('/admin');
+      navigate('/organizadores');
     }
   };
 
