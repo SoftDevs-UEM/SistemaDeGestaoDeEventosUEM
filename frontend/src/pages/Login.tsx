@@ -146,6 +146,10 @@ export default function Login() {
     }));
   };
 
+  const handleCancel = () => {
+    navigate('/');
+  };
+
   return (
     <div className="login-base-container">
       <div className="login-card">
@@ -193,6 +197,13 @@ export default function Login() {
               <div className="login-form-actions">
                 <button type="submit" className="login-btn-main">
                   Entrar no Sistema
+                </button>
+                <button 
+                  type="button" 
+                  className="login-cancel-btn"
+                  onClick={handleCancel}
+                >
+                  Cancelar
                 </button>
               </div>
               
@@ -316,13 +327,22 @@ export default function Login() {
               <button type="submit" className="login-btn-main">
                 Cadastrar
               </button>
-              <button 
-                type="button" 
-                className="login-back-btn"
-                onClick={() => setShowRegister(false)}
-              >
-                Voltar para Login
-              </button>
+              <div className="login-secondary-actions">
+                <button 
+                  type="button" 
+                  className="login-back-btn"
+                  onClick={() => setShowRegister(false)}
+                >
+                  Voltar para Login
+                </button>
+                <button 
+                  type="button" 
+                  className="login-cancel-btn"
+                  onClick={handleCancel}
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
           </form>
         )}
