@@ -10,6 +10,8 @@ type RegisteredUser = {
   password: string;
   tipo: 'estudante' | 'docente' | 'cta';
   nrEstudante?: string;
+  curso?: string;
+  departamento?: string;
 };
 
 export default function Login() {
@@ -26,7 +28,9 @@ export default function Login() {
       password: '',
       confirmPassword: '',
       tipo: 'estudante',
-      nrEstudante: ''
+      nrEstudante: '',
+      curso: '',
+      departamento: ''
     }
   );
   const [registerError, setRegisterError] = useState('');
@@ -104,8 +108,19 @@ export default function Login() {
       return;
     }
     
-    if (registerData.tipo === 'estudante' && !registerData.nrEstudante) {
-      setRegisterError('Informe o número de estudante.');
+    if (registerData.tipo === 'estudante') {
+      if (!registerData.nrEstudante) {
+        setRegisterError('Informe o número de estudante.');
+        return;
+      }
+      if (!registerData.curso) {
+        setRegisterError('Informe o curso.');
+        return;
+      }
+    }
+    
+    if (registerData.tipo === 'docente' && !registerData.departamento) {
+      setRegisterError('Informe o departamento.');
       return;
     }
     
@@ -122,7 +137,9 @@ export default function Login() {
       email: registerData.email,
       password: registerData.password,
       tipo: registerData.tipo as 'estudante' | 'docente' | 'cta',
-      nrEstudante: registerData.tipo === 'estudante' ? registerData.nrEstudante : undefined
+      nrEstudante: registerData.tipo === 'estudante' ? registerData.nrEstudante : undefined,
+      curso: registerData.tipo === 'estudante' ? registerData.curso : undefined,
+      departamento: registerData.tipo === 'docente' ? registerData.departamento : undefined
     };
     
     saveRegisteredUser(userToSave);
@@ -134,7 +151,9 @@ export default function Login() {
       password: '',
       confirmPassword: '',
       tipo: 'estudante',
-      nrEstudante: ''
+      nrEstudante: '',
+      curso: '',
+      departamento: ''
     });
     alert('Cadastro realizado! Faça login.');
   };
@@ -279,16 +298,94 @@ export default function Login() {
             </div>
             
             {registerData.tipo === 'estudante' && (
+              <>
+                <div className="login-form-group">
+                  <label className="login-form-label">Nº de estudante *</label>
+                  <input 
+                    type="text" 
+                    className="login-form-input" 
+                    value={registerData.nrEstudante} 
+                    onChange={e => handleInputChange('nrEstudante', e.target.value)} 
+                    placeholder="Ex: 202301234"
+                    required 
+                  />
+                </div>
+                
+                <div className="login-form-group">
+                  <label className="login-form-label">Curso *</label>
+                  <select 
+                    className="login-form-input" 
+                    value={registerData.curso} 
+                    onChange={e => handleInputChange('curso', e.target.value)}
+                    required
+                  >
+                    <option value="">Selecione o curso</option>
+                    <option value="Informática">Informática</option>
+                    <option value="Estatistica">Estatistica</option>
+                    <option value="Matematica">Matematica</option>
+                    <option value="Medicina">Medicina</option>
+                    <option value="Direito">Direito</option>
+                    <option value="Engenharia Civil">Engenharia Civil</option>
+                    <option value="Engenharia Informática">Engenharia Informática</option>
+                    <option value="Economia">Economia</option>
+                    <option value="Gestão">Gestão</option>
+                    <option value="Arquitetura">Arquitetura</option>
+                    <option value="Biologia">Biologia</option>
+                    <option value="Química">Química</option>
+                    <option value="Matemática">Matemática</option>
+                    <option value="Física">Física</option>
+                    <option value="Letras">Letras</option>
+                    <option value="História">História</option>
+                    <option value="Psicologia">Psicologia</option>
+                    <option value="Sociologia">Sociologia</option>
+                    <option value="Agronomia">Agronomia</option>
+                    <option value="Veterinária">Veterinária</option>
+                
+                  </select>
+                </div>
+              </>
+            )}
+            
+            {registerData.tipo === 'docente' && (
               <div className="login-form-group">
-                <label className="login-form-label">Nº de estudante *</label>
-                <input 
-                  type="text" 
+                <label className="login-form-label">Departamento *</label>
+                <select 
                   className="login-form-input" 
-                  value={registerData.nrEstudante} 
-                  onChange={e => handleInputChange('nrEstudante', e.target.value)} 
-                  placeholder="Ex: 202301234"
-                  required 
-                />
+                  value={registerData.departamento} 
+                  onChange={e => handleInputChange('departamento', e.target.value)}
+                  required
+                >
+                  <option value="">Selecione o departamento</option>
+                  <option value="Departamento de Matemática e Informática">Departamento de Matemática e Informática</option>
+                  <option value="Departamento de Física">Departamento de Física</option>
+                  <option value="Departamento de Química">Departamento de Química</option>
+                  <option value="Departamento de Biologia">Departamento de Biologia</option>
+                  <option value="Departamento de Geologia">Departamento de Geologia</option>
+                  <option value="Departamento de Engenharia Civil">Departamento de Engenharia Civil</option>
+                  <option value="Departamento de Engenharia Mecânica">Departamento de Engenharia Mecânica</option>
+                  <option value="Departamento de Engenharia Química">Departamento de Engenharia Química</option>
+                  <option value="Departamento de Engenharia Eletrotécnica">Departamento de Engenharia Eletrotécnica</option>
+                  <option value="Departamento de Arquitetura e Planeamento Físico">Departamento de Arquitetura e Planeamento Físico</option>
+                  <option value="Departamento de Economia">Departamento de Economia</option>
+                  <option value="Departamento de Gestão">Departamento de Gestão</option>
+                  <option value="Departamento de Contabilidade e Auditoria">Departamento de Contabilidade e Auditoria</option>
+                  <option value="Departamento de Direito">Departamento de Direito</option>
+                  <option value="Departamento de Ciências da Educação">Departamento de Ciências da Educação</option>
+                  <option value="Departamento de Línguas e Literaturas">Departamento de Línguas e Literaturas</option>
+                  <option value="Departamento de História">Departamento de História</option>
+                  <option value="Departamento de Geografia">Departamento de Geografia</option>
+                  <option value="Departamento de Sociologia">Departamento de Sociologia</option>
+                  <option value="Departamento de Psicologia">Departamento de Psicologia</option>
+                  <option value="Departamento de Medicina">Departamento de Medicina</option>
+                  <option value="Departamento de Cirurgia">Departamento de Cirurgia</option>
+                  <option value="Departamento de Pediatria">Departamento de Pediatria</option>
+                  <option value="Departamento de Ginecologia e Obstetrícia">Departamento de Ginecologia e Obstetrícia</option>
+                  <option value="Departamento de Saúde Pública">Departamento de Saúde Pública</option>
+                  <option value="Departamento de Agronomia">Departamento de Agronomia</option>
+                  <option value="Departamento de Engenharia Rural">Departamento de Engenharia Rural</option>
+                  <option value="Departamento de Ciências Animais">Departamento de Ciências Animais</option>
+                  <option value="Departamento de Veterinária">Departamento de Veterinária</option>
+                </select>
               </div>
             )}
             
