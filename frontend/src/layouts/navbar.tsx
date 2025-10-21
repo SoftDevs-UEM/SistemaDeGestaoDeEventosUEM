@@ -45,7 +45,7 @@ export default function Navbar() {
       {/* Barra superior com idioma e atalhos */}
       <div className="topbar">
         <div className="left-links">
-          <span>EN</span> | <span>PT</span>
+          <span>EN</span> | <span>PT</span> 
         </div>
         <div className="right-links">
           <a href="#">Facebook</a>
@@ -137,7 +137,7 @@ export default function Navbar() {
                 Para Organizadores <span className="dropdown-arrow">▼</span>
               </Link>
               <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
-                <Link to="/organizadores/criar-evento">Criar Evento</Link>
+              
                 <Link to="/organizadores/meus-eventos">Meus Eventos</Link>
                 <Link to="/organizadores/estatisticas">Estatísticas</Link>
               </div>
