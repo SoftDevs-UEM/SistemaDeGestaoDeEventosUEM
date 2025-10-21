@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './AdminDashboard.css';
 
@@ -25,10 +25,25 @@ type SystemStats = {
   eventosEsteMes: number;
 };
 
-type ActiveView = 'dashboard' | 'cadastrar-promotor' | 'lista-usuarios' | 'gestao-eventos' | 'relatorios';
+type ActiveView = 'dashboard' | 'cadastrar-promotor' | 'lista-usuarios' | 'estudantes' | 'promotores' | 'gestao-eventos' | 'relatorios';
+
+type Usuario = {
+  id: string;
+  nome: string;
+  outrosNomes: string;
+  email: string;
+  telefone: string;
+  tipo: 'estudante' | 'docente' | 'cta';
+  departamento?: string;
+  faculdade?: string;
+  curso?: string;
+  anoAcademico?: string;
+  dataCadastro: string;
+};
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, userType, logout } = useAuth();
   const [userStats, setUserStats] = useState<UserStats>({
     totalUsuarios: 0,
@@ -51,7 +66,12 @@ export default function AdminDashboard() {
   });
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<ActiveView>('dashboard');
+  
+  // Obter a view ativa do estado de navegação ou usar 'dashboard' como padrão
+  const [activeView, setActiveView] = useState<ActiveView>(
+    location.state?.activeView || 'dashboard'
+  );
+  
   const [promotorData, setPromotorData] = useState({
     nome: '',
     outrosNomes: '',
@@ -64,6 +84,23 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Estados para gestão de usuários
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [estudantes, setEstudantes] = useState<Usuario[]>([]);
+  const [promotores, setPromotores] = useState<Usuario[]>([]);
+  const [usuarioEditando, setUsuarioEditando] = useState<Usuario | null>(null);
+  const [editandoUsuario, setEditandoUsuario] = useState(false);
+  const [dadosEdicao, setDadosEdicao] = useState({
+    nome: '',
+    outrosNomes: '',
+    telefone: '',
+    email: '',
+    departamento: '',
+    faculdade: '',
+    curso: '',
+    anoAcademico: ''
+  });
+
   // Redirecionar se não for admin
   React.useEffect(() => {
     if (!isAuthenticated || userType !== 'admin') {
@@ -75,6 +112,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     loadStatistics();
   }, []);
+
+  // Atualizar a view ativa quando o estado de navegação mudar
+  useEffect(() => {
+    if (location.state?.activeView) {
+      setActiveView(location.state.activeView);
+    }
+  }, [location.state]);
 
   const loadStatistics = () => {
     setLoading(true);
@@ -118,7 +162,7 @@ export default function AdminDashboard() {
         totalEstudantes: estudantes.length,
         totalPromotores: promotores.length,
         totalAdmin: admins.length,
-        usuariosAtivos: usuarios.length // Simulação
+        usuariosAtivos: usuarios.length
       });
 
       setEventStats({
@@ -137,6 +181,12 @@ export default function AdminDashboard() {
 
       // Usuários recentes (últimos 5)
       setRecentUsers(usuarios.slice(-5).reverse());
+
+      // Carregar todos os usuários para gestão
+      setUsuarios(usuarios);
+      setEstudantes(estudantes);
+      setPromotores(promotores);
+
       setLoading(false);
     }, 1000);
   };
@@ -148,7 +198,6 @@ export default function AdminDashboard() {
 
   // Função para lidar com mudanças nos campos do promotor
   const handleInputChange = (field: string, value: string) => {
-    // Se selecionar faculdade, limpar departamento
     if (field === 'faculdade' && value) {
       setPromotorData(prev => ({
         ...prev,
@@ -156,7 +205,6 @@ export default function AdminDashboard() {
         departamento: ''
       }));
     }
-    // Se selecionar departamento, limpar faculdade
     else if (field === 'departamento' && value) {
       setPromotorData(prev => ({
         ...prev,
@@ -164,7 +212,6 @@ export default function AdminDashboard() {
         faculdade: ''
       }));
     }
-    // Para outros campos, apenas atualizar o valor
     else {
       setPromotorData(prev => ({
         ...prev,
@@ -186,7 +233,6 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Validar que pelo menos um (departamento OU faculdade) foi selecionado
     if (!promotorData.departamento && !promotorData.faculdade) {
       setError('Selecione pelo menos um departamento ou uma faculdade.');
       return;
@@ -206,6 +252,7 @@ export default function AdminDashboard() {
 
     // Criar objeto do promotor
     const novoPromotor = {
+      id: Date.now().toString(),
       nome: promotorData.nome,
       outrosNomes: promotorData.outrosNomes,
       telefone: promotorData.telefone,
@@ -254,227 +301,244 @@ export default function AdminDashboard() {
     });
     setError('');
     setSuccess('');
+    setEditandoUsuario(false);
+    setUsuarioEditando(null);
   };
 
-  const getRecentActivities = () => {
-    const activities = [];
-    
-    if (systemStats.usuariosNovos > 0) {
-      activities.push({
-        id: 1,
-        action: 'Novos usuários registrados',
-        user: `${systemStats.usuariosNovos} novos usuários`,
-        time: 'este mês'
-      });
-    }
-    
-    if (eventStats.eventosPendentes > 0) {
-      activities.push({
-        id: 2,
-        action: 'Eventos pendentes de aprovação',
-        user: `${eventStats.eventosPendentes} eventos`,
-        time: 'aguardando'
-      });
-    }
-    
-    activities.push({
-      id: 3,
-      action: 'Sistema operacional',
-      user: 'Todos os serviços',
-      time: '🟢 Online'
+  // Funções para gestão de usuários
+  const handleEditarUsuario = (usuario: Usuario) => {
+    setUsuarioEditando(usuario);
+    setEditandoUsuario(true);
+    setDadosEdicao({
+      nome: usuario.nome,
+      outrosNomes: usuario.outrosNomes,
+      telefone: usuario.telefone,
+      email: usuario.email,
+      departamento: usuario.departamento || '',
+      faculdade: usuario.faculdade || '',
+      curso: usuario.curso || '',
+      anoAcademico: usuario.anoAcademico || ''
     });
+  };
 
-    return activities;
+  const handleSalvarEdicao = () => {
+    if (!usuarioEditando) return;
+
+    const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]');
+    const usuarioIndex = usuariosCadastrados.findIndex((u: any) => u.id === usuarioEditando.id);
+    
+    if (usuarioIndex !== -1) {
+      usuariosCadastrados[usuarioIndex] = {
+        ...usuariosCadastrados[usuarioIndex],
+        nome: dadosEdicao.nome,
+        outrosNomes: dadosEdicao.outrosNomes,
+        telefone: dadosEdicao.telefone,
+        email: dadosEdicao.email,
+        departamento: dadosEdicao.departamento,
+        faculdade: dadosEdicao.faculdade,
+        curso: dadosEdicao.curso,
+        anoAcademico: dadosEdicao.anoAcademico
+      };
+
+      localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosCadastrados));
+      setSuccess('Usuário atualizado com sucesso!');
+      setEditandoUsuario(false);
+      setUsuarioEditando(null);
+      
+      setTimeout(() => {
+        loadStatistics();
+        setSuccess('');
+      }, 2000);
+    }
+  };
+
+  const handleCancelarEdicao = () => {
+    setEditandoUsuario(false);
+    setUsuarioEditando(null);
+    setDadosEdicao({
+      nome: '',
+      outrosNomes: '',
+      telefone: '',
+      email: '',
+      departamento: '',
+      faculdade: '',
+      curso: '',
+      anoAcademico: ''
+    });
+  };
+
+  const handleExcluirUsuario = (usuarioId: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
+      const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]');
+      const usuariosAtualizados = usuariosCadastrados.filter((u: any) => u.id !== usuarioId);
+      
+      localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosAtualizados));
+      setSuccess('Usuário excluído com sucesso!');
+      
+      setTimeout(() => {
+        loadStatistics();
+        setSuccess('');
+      }, 2000);
+    }
+  };
+
+  const handleInputChangeEdicao = (field: string, value: string) => {
+    setDadosEdicao(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const renderDashboardView = () => (
     <>
-      {/* Estatísticas de Usuários */}
-      <section className="stats-section">
-        <h2>👥 Estatísticas de Usuários</h2>
-        <div className="stats-grid">
-          <div className="stat-card user-stat">
-            <div className="stat-icon">👥</div>
-            <div className="stat-info">
-              <h3>Total de Usuários</h3>
-              <span className="stat-number">{userStats.totalUsuarios}</span>
-              <span className="stat-change">
-                {systemStats.taxaCrescimento > 0 ? '↗' : '↘'} 
-                {systemStats.taxaCrescimento}% este mês
-              </span>
+      {/* Estatísticas Gerais - Layout Compacto */}
+      <div className="dashboard-overview">
+        {/* Estatísticas de Usuários */}
+        <section className="stats-section compact">
+          <h2>👥 Estatísticas de Usuários</h2>
+          <div className="stats-grid compact">
+            <div className="stat-card user-stat compact">
+              <div className="stat-icon">👥</div>
+              <div className="stat-info">
+                <h3>Total de Usuários</h3>
+                <span className="stat-number">{userStats.totalUsuarios}</span>
+                <span className="stat-change">
+                  {systemStats.taxaCrescimento > 0 ? '↗' : '↘'} 
+                  {systemStats.taxaCrescimento}% este mês
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div className="stat-card student-stat">
-            <div className="stat-icon">🎓</div>
-            <div className="stat-info">
-              <h3>Estudantes</h3>
-              <span className="stat-number">{userStats.totalEstudantes}</span>
-              <span className="stat-percentage">
-                {userStats.totalUsuarios > 0 ? 
-                  Math.round((userStats.totalEstudantes / userStats.totalUsuarios) * 100) : 0
-                }% do total
-              </span>
+            <div className="stat-card student-stat compact">
+              <div className="stat-icon">🎓</div>
+              <div className="stat-info">
+                <h3>Estudantes</h3>
+                <span className="stat-number">{userStats.totalEstudantes}</span>
+                <span className="stat-percentage">
+                  {userStats.totalUsuarios > 0 ? 
+                    Math.round((userStats.totalEstudantes / userStats.totalUsuarios) * 100) : 0
+                  }% do total
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div className="stat-card promoter-stat">
-            <div className="stat-icon">👨‍🏫</div>
-            <div className="stat-info">
-              <h3>Promotores</h3>
-              <span className="stat-number">{userStats.totalPromotores}</span>
-              <span className="stat-percentage">
-                {userStats.totalUsuarios > 0 ? 
-                  Math.round((userStats.totalPromotores / userStats.totalUsuarios) * 100) : 0
-                }% do total
-              </span>
+            <div className="stat-card promoter-stat compact">
+              <div className="stat-icon">👨‍🏫</div>
+              <div className="stat-info">
+                <h3>Promotores</h3>
+                <span className="stat-number">{userStats.totalPromotores}</span>
+                <span className="stat-percentage">
+                  {userStats.totalUsuarios > 0 ? 
+                    Math.round((userStats.totalPromotores / userStats.totalUsuarios) * 100) : 0
+                  }% do total
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div className="stat-card admin-stat">
-            <div className="stat-icon">⚙️</div>
-            <div className="stat-info">
-              <h3>Administradores</h3>
-              <span className="stat-number">{userStats.totalAdmin}</span>
-              <span className="stat-percentage">
-                {userStats.totalUsuarios > 0 ? 
-                  Math.round((userStats.totalAdmin / userStats.totalUsuarios) * 100) : 0
-                }% do total
-              </span>
+            <div className="stat-card admin-stat compact">
+              <div className="stat-icon">⚙️</div>
+              <div className="stat-info">
+                <h3>Administradores</h3>
+                <span className="stat-number">{userStats.totalAdmin}</span>
+                <span className="stat-percentage">
+                  {userStats.totalUsuarios > 0 ? 
+                    Math.round((userStats.totalAdmin / userStats.totalUsuarios) * 100) : 0
+                  }% do total
+                </span>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Estatísticas de Eventos */}
-      <section className="stats-section">
-        <h2>📅 Estatísticas de Eventos</h2>
-        <div className="stats-grid">
-          <div className="stat-card event-stat">
-            <div className="stat-icon">📅</div>
-            <div className="stat-info">
-              <h3>Total de Eventos</h3>
-              <span className="stat-number">{eventStats.totalEventos}</span>
-              <span className="stat-change">
-                {systemStats.eventosEsteMes} este mês
-              </span>
-            </div>
-          </div>
-
-          <div className="stat-card active-event-stat">
-            <div className="stat-icon">🟢</div>
-            <div className="stat-info">
-              <h3>Eventos Ativos</h3>
-              <span className="stat-number">{eventStats.eventosAtivos}</span>
-              <span className="stat-percentage">
-                {eventStats.totalEventos > 0 ? 
-                  Math.round((eventStats.eventosAtivos / eventStats.totalEventos) * 100) : 0
-                }% do total
-              </span>
-            </div>
-          </div>
-
-          <div className="stat-card finished-event-stat">
-            <div className="stat-icon">✅</div>
-            <div className="stat-info">
-              <h3>Eventos Finalizados</h3>
-              <span className="stat-number">{eventStats.eventosFinalizados}</span>
-              <span className="stat-percentage">
-                {eventStats.totalEventos > 0 ? 
-                  Math.round((eventStats.eventosFinalizados / eventStats.totalEventos) * 100) : 0
-                }% do total
-              </span>
-            </div>
-          </div>
-
-          <div className="stat-card inscription-stat">
-            <div className="stat-icon">📝</div>
-            <div className="stat-info">
-              <h3>Total de Inscrições</h3>
-              <span className="stat-number">{eventStats.totalInscricoes}</span>
-              <span className="stat-change">
-                Média: {eventStats.totalEventos > 0 ? 
-                  Math.round(eventStats.totalInscricoes / eventStats.totalEventos) : 0
-                } por evento
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="content-grid">
-        {/* Ações Rápidas */}
-        <section className="quick-actions">
-          <h2>🚀 Ações Rápidas</h2>
-          <div className="actions-grid">
-            <button 
-              className="action-card"
-              onClick={() => setActiveView('cadastrar-promotor')}
-            >
-              <div className="action-icon">👨‍🏫</div>
-              <span>Cadastrar Promotor</span>
-            </button>
-
-            <button className="action-card">
-              <div className="action-icon">✅</div>
-              <span>Aprovar Eventos ({eventStats.eventosPendentes})</span>
-            </button>
-
-            <button className="action-card">
-              <div className="action-icon">📊</div>
-              <span>Ver Relatórios</span>
-            </button>
-
-            <button className="action-card">
-              <div className="action-icon">👥</div>
-              <span>Gerir Usuários</span>
-            </button>
           </div>
         </section>
 
-        {/* Usuários Recentes */}
-        <section className="recent-users">
-          <h2>🆕 Usuários Recentes</h2>
-          <div className="users-list">
-            {recentUsers.length > 0 ? (
-              recentUsers.map((user, index) => (
-                <div key={index} className="user-item">
-                  <div className="user-avatar">
-                    {user.nome ? user.nome.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                  <div className="user-info">
-                    <strong>{user.nome || 'Usuário'}</strong>
-                    <span className="user-type">
-                      {user.tipo === 'estudante' ? '🎓 Estudante' : 
-                       user.tipo === 'docente' ? '👨‍🏫 Promotor' : 
-                       '⚙️ Admin'}
-                    </span>
-                  </div>
-                  <span className="user-email">{user.email}</span>
-                </div>
-              ))
-            ) : (
-              <div className="no-data">
-                <p>Nenhum usuário cadastrado ainda</p>
+        {/* Estatísticas de Eventos */}
+        <section className="stats-section compact">
+          <h2>📅 Estatísticas de Eventos</h2>
+          <div className="stats-grid compact">
+            <div className="stat-card event-stat compact">
+              <div className="stat-icon">📅</div>
+              <div className="stat-info">
+                <h3>Total de Eventos</h3>
+                <span className="stat-number">{eventStats.totalEventos}</span>
+                <span className="stat-change">
+                  {systemStats.eventosEsteMes} este mês
+                </span>
               </div>
-            )}
+            </div>
+
+            <div className="stat-card active-event-stat compact">
+              <div className="stat-icon">🟢</div>
+              <div className="stat-info">
+                <h3>Eventos Ativos</h3>
+                <span className="stat-number">{eventStats.eventosAtivos}</span>
+                <span className="stat-percentage">
+                  {eventStats.totalEventos > 0 ? 
+                    Math.round((eventStats.eventosAtivos / eventStats.totalEventos) * 100) : 0
+                  }% do total
+                </span>
+              </div>
+            </div>
+
+            <div className="stat-card finished-event-stat compact">
+              <div className="stat-icon">✅</div>
+              <div className="stat-info">
+                <h3>Eventos Finalizados</h3>
+                <span className="stat-number">{eventStats.eventosFinalizados}</span>
+                <span className="stat-percentage">
+                  {eventStats.totalEventos > 0 ? 
+                    Math.round((eventStats.eventosFinalizados / eventStats.totalEventos) * 100) : 0
+                  }% do total
+                </span>
+              </div>
+            </div>
+
+            <div className="stat-card inscription-stat compact">
+              <div className="stat-icon">📝</div>
+              <div className="stat-info">
+                <h3>Total de Inscrições</h3>
+                <span className="stat-number">{eventStats.totalInscricoes}</span>
+                <span className="stat-change">
+                  Média: {eventStats.totalEventos > 0 ? 
+                    Math.round(eventStats.totalInscricoes / eventStats.totalEventos) : 0
+                  } por evento
+                </span>
+              </div>
+            </div>
           </div>
         </section>
       </div>
 
-      {/* Atividades Recentes */}
-      <section className="recent-activities">
-        <h2>📋 Atividades do Sistema</h2>
-        <div className="activities-list">
-          {getRecentActivities().map(activity => (
-            <div key={activity.id} className="activity-item">
-              <div className="activity-content">
-                <strong>{activity.action}</strong>
-                <span>{activity.user}</span>
+      {/* Usuários Recentes */}
+      <section className="recent-section">
+        <div className="section-header">
+          <h2>🆕 Usuários Recentes</h2>
+          <span className="section-badge">{recentUsers.length} usuários</span>
+        </div>
+        <div className="users-list compact">
+          {recentUsers.length > 0 ? (
+            recentUsers.map((user, index) => (
+              <div key={index} className="user-item compact">
+                <div className="user-avatar">
+                  {user.nome ? user.nome.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div className="user-info">
+                  <strong>{user.nome || 'Usuário'}</strong>
+                  <span className="user-type">
+                    {user.tipo === 'estudante' ? '🎓 Estudante' : 
+                     user.tipo === 'docente' ? '👨‍🏫 Promotor' : 
+                     '⚙️ Admin'}
+                  </span>
+                </div>
+                <span className="user-email">{user.email}</span>
+                <span className="user-date">
+                  {user.dataCadastro ? new Date(user.dataCadastro).toLocaleDateString('pt-BR') : 'Data não disponível'}
+                </span>
               </div>
-              <span className="activity-time">{activity.time}</span>
+            ))
+          ) : (
+            <div className="no-data">
+              <p>Nenhum usuário cadastrado ainda</p>
             </div>
-          ))}
+          )}
         </div>
       </section>
     </>
@@ -482,14 +546,6 @@ export default function AdminDashboard() {
 
   const renderCadastrarPromotorView = () => (
     <div className="form-view-container">
-      {/* <div className="form-view-header">
-        <button className="back-button" onClick={handleBackToDashboard}>
-          ← Voltar para Dashboard
-        </button>
-        <h1>👨‍🏫 Cadastrar Novo Promotor</h1>
-        <p>Preencha os dados do promotor para cadastrar no sistema</p>
-      </div> */}
-
       <div className="form-view-content">
         <form onSubmit={handleCadastrarPromotor} className="promotor-form">
           <div className="form-row">
@@ -640,6 +696,270 @@ export default function AdminDashboard() {
     </div>
   );
 
+  const renderEstudantesView = () => (
+    <div className="management-view">
+      <div className="management-header">
+        <h2>🎓 Gestão de Estudantes</h2>
+        <span className="total-badge">{estudantes.length} estudantes</span>
+      </div>
+
+      {success && (
+        <div className="success-message">
+          {success}
+        </div>
+      )}
+
+      <div className="users-table-container">
+        {estudantes.length > 0 ? (
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Telefone</th>
+                <th>Curso</th>
+                <th>Ano Académico</th>
+                <th>Data de Cadastro</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {estudantes.map((estudante) => (
+                <tr key={estudante.id}>
+                  <td>
+                    <div className="user-info-cell">
+                      <div className="user-avatar small">
+                        {estudante.nome ? estudante.nome.charAt(0).toUpperCase() : 'E'}
+                      </div>
+                      <div>
+                        <strong>{estudante.nome} {estudante.outrosNomes}</strong>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{estudante.email}</td>
+                  <td>{estudante.telefone}</td>
+                  <td>{estudante.curso || 'Não informado'}</td>
+                  <td>{estudante.anoAcademico || 'Não informado'}</td>
+                  <td>{new Date(estudante.dataCadastro).toLocaleDateString('pt-BR')}</td>
+                  <td>
+                    <div className="action-buttons">
+                      <button 
+                        className="btn-edit"
+                        onClick={() => handleEditarUsuario(estudante)}
+                      >
+                        ✏️ Editar
+                      </button>
+                      <button 
+                        className="btn-delete"
+                        onClick={() => handleExcluirUsuario(estudante.id)}
+                      >
+                        🗑️ Excluir
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="no-data">
+            <p>Nenhum estudante cadastrado</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderPromotoresView = () => (
+    <div className="management-view">
+      <div className="management-header">
+        <h2>👨‍🏫 Gestão de Promotores</h2>
+        <span className="total-badge">{promotores.length} promotores</span>
+      </div>
+
+      {success && (
+        <div className="success-message">
+          {success}
+        </div>
+      )}
+
+      <div className="users-table-container">
+        {promotores.length > 0 ? (
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Telefone</th>
+                <th>Departamento/Faculdade</th>
+                <th>Data de Cadastro</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {promotores.map((promotor) => (
+                <tr key={promotor.id}>
+                  <td>
+                    <div className="user-info-cell">
+                      <div className="user-avatar small">
+                        {promotor.nome ? promotor.nome.charAt(0).toUpperCase() : 'P'}
+                      </div>
+                      <div>
+                        <strong>{promotor.nome} {promotor.outrosNomes}</strong>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{promotor.email}</td>
+                  <td>{promotor.telefone}</td>
+                  <td>{promotor.departamento || promotor.faculdade || 'Não informado'}</td>
+                  <td>{new Date(promotor.dataCadastro).toLocaleDateString('pt-BR')}</td>
+                  <td>
+                    <div className="action-buttons">
+                      <button 
+                        className="btn-edit"
+                        onClick={() => handleEditarUsuario(promotor)}
+                      >
+                        ✏️ Editar
+                      </button>
+                      <button 
+                        className="btn-delete"
+                        onClick={() => handleExcluirUsuario(promotor.id)}
+                      >
+                        🗑️ Excluir
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="no-data">
+            <p>Nenhum promotor cadastrado</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderEdicaoUsuarioView = () => (
+    <div className="form-view-container">
+      <div className="form-view-content">
+        <div className="edicao-header">
+          <h2>✏️ Editar Usuário</h2>
+          <p>Editando: {usuarioEditando?.nome} {usuarioEditando?.outrosNomes}</p>
+        </div>
+
+        <form className="promotor-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label>Nome *</label>
+              <input
+                type="text"
+                value={dadosEdicao.nome}
+                onChange={(e) => handleInputChangeEdicao('nome', e.target.value)}
+                placeholder="Primeiro nome"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Outros Nomes *</label>
+              <input
+                type="text"
+                value={dadosEdicao.outrosNomes}
+                onChange={(e) => handleInputChangeEdicao('outrosNomes', e.target.value)}
+                placeholder="Sobrenomes"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Telefone *</label>
+              <input
+                type="tel"
+                value={dadosEdicao.telefone}
+                onChange={(e) => handleInputChangeEdicao('telefone', e.target.value)}
+                placeholder="(+258) 8X XXX XXXX"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Email *</label>
+              <input
+                type="email"
+                value={dadosEdicao.email}
+                onChange={(e) => handleInputChangeEdicao('email', e.target.value)}
+                placeholder="Email"
+                required
+              />
+            </div>
+          </div>
+
+          {usuarioEditando?.tipo === 'docente' && (
+            <div className="form-row">
+              <div className="form-group">
+                <label>Departamento</label>
+                <input
+                  type="text"
+                  value={dadosEdicao.departamento}
+                  onChange={(e) => handleInputChangeEdicao('departamento', e.target.value)}
+                  placeholder="Departamento"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Faculdade</label>
+                <input
+                  type="text"
+                  value={dadosEdicao.faculdade}
+                  onChange={(e) => handleInputChangeEdicao('faculdade', e.target.value)}
+                  placeholder="Faculdade"
+                />
+              </div>
+            </div>
+          )}
+
+          {usuarioEditando?.tipo === 'estudante' && (
+            <div className="form-row">
+              <div className="form-group">
+                <label>Curso</label>
+                <input
+                  type="text"
+                  value={dadosEdicao.curso}
+                  onChange={(e) => handleInputChangeEdicao('curso', e.target.value)}
+                  placeholder="Curso"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Ano Académico</label>
+                <input
+                  type="text"
+                  value={dadosEdicao.anoAcademico}
+                  onChange={(e) => handleInputChangeEdicao('anoAcademico', e.target.value)}
+                  placeholder="Ano Académico"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="form-actions">
+            <button type="button" className="btn-primary" onClick={handleSalvarEdicao}>
+              Salvar Alterações
+            </button>
+            <button type="button" className="btn-secondary" onClick={handleCancelarEdicao}>
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -657,12 +977,22 @@ export default function AdminDashboard() {
       <header className="admin-header">
         <div className="header-content">
           <h1>
-            {activeView === 'dashboard' ? '🏠 Painel de Administração' : '👨‍🏫 Cadastrar Promotor'}
+            {activeView === 'dashboard' ? '🏠 Painel de Administração' : 
+             activeView === 'cadastrar-promotor' ? '👨‍🏫 Cadastrar Promotor' :
+             activeView === 'estudantes' ? '🎓 Gestão de Estudantes' :
+             activeView === 'promotores' ? '👨‍🏫 Gestão de Promotores' :
+             'Editar Usuário'}
           </h1>
           <p>
             {activeView === 'dashboard' 
               ? 'Visão geral do sistema de gestão de eventos' 
-              : 'Preencha os dados do promotor para cadastrar no sistema'
+              : activeView === 'cadastrar-promotor'
+              ? 'Preencha os dados do promotor para cadastrar no sistema'
+              : activeView === 'estudantes'
+              ? 'Gerencie os estudantes cadastrados no sistema'
+              : activeView === 'promotores'
+              ? 'Gerencie os promotores cadastrados no sistema'
+              : 'Edite os dados do usuário selecionado'
             }
           </p>
         </div>
@@ -698,13 +1028,17 @@ export default function AdminDashboard() {
               >
                 ➕ Cadastrar Promotor
               </button>
-              <button className="nav-btn">
-                📋 Lista de Usuários
-              </button>
-              <button className="nav-btn">
+              
+              <button 
+                className={`nav-btn ${activeView === 'estudantes' ? 'active' : ''}`}
+                onClick={() => setActiveView('estudantes')}
+              >
                 🎓 Estudantes
               </button>
-              <button className="nav-btn">
+              <button 
+                className={`nav-btn ${activeView === 'promotores' ? 'active' : ''}`}
+                onClick={() => setActiveView('promotores')}
+              >
                 👨‍🏫 Promotores
               </button>
             </div>
@@ -715,16 +1049,6 @@ export default function AdminDashboard() {
                 📊 Todos os Eventos
               </button>
             </div>
-
-            <div className="nav-section">
-              <h3>📑 Relatórios</h3>
-              <button className="nav-btn">
-                📋 Relatórios Gerais
-              </button>
-              <button className="nav-btn">
-                📊 Analytics
-              </button>
-            </div>
           </nav>
         </aside>
 
@@ -732,6 +1056,9 @@ export default function AdminDashboard() {
         <main className="admin-main">
           {activeView === 'dashboard' && renderDashboardView()}
           {activeView === 'cadastrar-promotor' && renderCadastrarPromotorView()}
+          {activeView === 'estudantes' && renderEstudantesView()}
+          {activeView === 'promotores' && renderPromotoresView()}
+          {editandoUsuario && renderEdicaoUsuarioView()}
         </main>
       </div>
     </div>

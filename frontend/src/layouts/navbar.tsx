@@ -31,6 +31,11 @@ export default function Navbar() {
     navigate('/sobre', { state: { scrollToSection: sectionId } });
   };
 
+  // Função para navegar para o AdminDashboard com view específica
+  const handleAdminNavigation = (view: string) => {
+    navigate('/admin/dashboard', { state: { activeView: view } });
+  };
+
   // Verificar se o usuário é admin para mostrar menu administrativo
   const isAdmin = isAuthenticated && userType === 'admin';
   const showOrganizadoresMenu = isAuthenticated && (userType === 'promotor' || userType === 'admin');
@@ -81,7 +86,7 @@ export default function Navbar() {
               <Link to="/eventos/passados">Eventos Passados</Link>
               <Link to="/eventos/inscricoes">Minhas Inscrições</Link>
               <Link to="/eventos/categorias">Categorias</Link>
-              <Link to="/eventos/calendario">Calendário</Link>
+             
             </div>
           </div>
 
@@ -151,10 +156,18 @@ export default function Navbar() {
               </Link>
               <div className={`dropdown-menu ${activeDropdown === 'admin' ? 'active' : ''}`}>
               
-                <Link to="/admin/cadastrar-promotor">Cadastrar Promotor</Link>
-                <Link to="/admin/gestao-usuarios">Gestão de Usuários</Link>
-          
-                <Link to="/admin/configuracoes">Configurações</Link>
+                <button 
+                  className="dropdown-link-btn"
+                  onClick={() => handleAdminNavigation('gestao-usuarios')}
+                >
+                  Gestão de Usuários
+                </button>
+                <button 
+                  className="dropdown-link-btn"
+                  onClick={() => handleAdminNavigation('configuracoes')}
+                >
+                  Configurações
+                </button>
               </div>
             </div>
           )}
