@@ -146,13 +146,14 @@ export default function Navbar() {
               onMouseEnter={() => handleDropdownEnter('admin')}
               onMouseLeave={handleDropdownLeave}
             >
-              <Link to="/admin" className="dropdown-toggle">
+              <Link to="/admin/dashboard" className="dropdown-toggle">
                 Administração <span className="dropdown-arrow">▼</span>
               </Link>
               <div className={`dropdown-menu ${activeDropdown === 'admin' ? 'active' : ''}`}>
+              
                 <Link to="/admin/cadastrar-promotor">Cadastrar Promotor</Link>
                 <Link to="/admin/gestao-usuarios">Gestão de Usuários</Link>
-                <Link to="/admin/relatorios">Relatórios</Link>
+          
                 <Link to="/admin/configuracoes">Configurações</Link>
               </div>
             </div>
