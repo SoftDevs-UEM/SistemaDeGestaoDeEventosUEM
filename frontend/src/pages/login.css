@@ -142,6 +142,35 @@
   box-shadow: 0 4px 12px rgba(3, 73, 42, 0.2);
 }
 
+/* Botão Cancelar */
+.login-cancel-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 12px 0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+  font-family: inherit;
+  width: 100%;
+}
+
+.login-cancel-btn:hover {
+  background: #c82333;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Ações secundárias para formulário de registro */
+.login-secondary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* Seção de Cadastro */
 .login-register-section {
   text-align: center;
@@ -238,7 +267,8 @@
 .login-form-input:focus-visible,
 .login-btn-main:focus-visible,
 .login-register-btn:focus-visible,
-.login-back-btn:focus-visible {
+.login-back-btn:focus-visible,
+.login-cancel-btn:focus-visible {
   outline: 2px solid #109659;
   outline-offset: 2px;
 }
@@ -283,6 +313,11 @@
     font-size: 14px;
   }
   
+  .login-cancel-btn {
+    padding: 11px 0;
+    font-size: 13px;
+  }
+  
   .login-logo-circle {
     width: 70px;
     height: 70px;
@@ -319,6 +354,10 @@
   
   .login-btn-main {
     padding: 12px 0;
+  }
+  
+  .login-cancel-btn {
+    padding: 11px 0;
   }
   
   .login-register-section {

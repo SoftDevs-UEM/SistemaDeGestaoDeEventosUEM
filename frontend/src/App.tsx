@@ -18,6 +18,8 @@ import HomePromotor from './pages/HomePromotor';
 import HomeEstudante from './pages/HomeEstudante';
 import Organizadores from './pages/Organizadores';
 import Estatisticas from './pages/Estatisticas';
+import CadastrarPromotor from './pages/CadastrarPromotor';
+import AdminDashboard from './pages/AdminDashboard';
 
 // Define o tipo de usuário permitido
 type UserType = 'estudante' | 'docente' | 'cta' | 'admin' | 'promotor';
@@ -39,6 +41,16 @@ function AppContent() {
         <Route path="/admin" element={<HomeAdmin />} />
         <Route path="/promotor" element={<HomePromotor />} />
         <Route path="/estudante" element={<HomeEstudante />} />
+        <Route path="/admin/dashboard" element={
+          <ProtectedRoute allowedUserTypes={['admin']}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />      
+<Route path="/admin/cadastrar-promotor" element={<CadastrarPromotor />} />
+      
+<Route path="/admin/cadastrar-promotor" element={<CadastrarPromotor />} />
+   
+    
         {/* <Route path="/organizadores/estatisticas" element={<Estatisticas />} /> */}
         
         <Route path="/organizadores/criar-evento" element={<CriarEvento />} />

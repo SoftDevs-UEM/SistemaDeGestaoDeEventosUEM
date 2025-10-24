@@ -236,8 +236,16 @@ body {
 
 /* Remover estilos padrão do navegador */
 .dropdown-link-btn {
-  -webkit-tap-highlight-color: transparent;
-  outline: none;
+  background: none;
+  border: none;
+  padding: 10px 15px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
 }
 
 /* -------- Botão login NOVO ESTILO (igual ao footer) -------- */

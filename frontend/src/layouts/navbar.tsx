@@ -31,7 +31,13 @@ export default function Navbar() {
     navigate('/sobre', { state: { scrollToSection: sectionId } });
   };
 
-  // Verificar se o usuário é promotor ou admin para mostrar menu de organizadores
+  // Função para navegar para o AdminDashboard com view específica
+  const handleAdminNavigation = (view: string) => {
+    navigate('/admin/dashboard', { state: { activeView: view } });
+  };
+
+  // Verificar se o usuário é admin para mostrar menu administrativo
+  const isAdmin = isAuthenticated && userType === 'admin';
   const showOrganizadoresMenu = isAuthenticated && (userType === 'promotor' || userType === 'admin');
 
   return (
@@ -39,7 +45,7 @@ export default function Navbar() {
       {/* Barra superior com idioma e atalhos */}
       <div className="topbar">
         <div className="left-links">
-          <span>EN</span> | <span>PT</span>
+          <span>EN</span> | <span>PT</span> 
         </div>
         <div className="right-links">
           <a href="#">Facebook</a>
@@ -80,7 +86,7 @@ export default function Navbar() {
               <Link to="/eventos/passados">Eventos Passados</Link>
               <Link to="/eventos/inscricoes">Minhas Inscrições</Link>
               <Link to="/eventos/categorias">Categorias</Link>
-              <Link to="/eventos/calendario">Calendário</Link>
+             
             </div>
           </div>
 
@@ -131,9 +137,37 @@ export default function Navbar() {
                 Para Organizadores <span className="dropdown-arrow">▼</span>
               </Link>
               <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
-                <Link to="/organizadores/criar-evento">Criar Evento</Link>
+              
                 <Link to="/organizadores/meus-eventos">Meus Eventos</Link>
                 <Link to="/organizadores/estatisticas">Estatísticas</Link>
+              </div>
+            </div>
+          )}
+
+          {/* Menu Administrativo - apenas para admin */}
+          {isAdmin && (
+            <div 
+              className="dropdown-container"
+              onMouseEnter={() => handleDropdownEnter('admin')}
+              onMouseLeave={handleDropdownLeave}
+            >
+              <Link to="/admin/dashboard" className="dropdown-toggle">
+                Administração <span className="dropdown-arrow">▼</span>
+              </Link>
+              <div className={`dropdown-menu ${activeDropdown === 'admin' ? 'active' : ''}`}>
+              
+                <button 
+                  className="dropdown-link-btn"
+                  onClick={() => handleAdminNavigation('gestao-usuarios')}
+                >
+                  Gestão de Usuários
+                </button>
+                <button 
+                  className="dropdown-link-btn"
+                  onClick={() => handleAdminNavigation('configuracoes')}
+                >
+                  Configurações
+                </button>
               </div>
             </div>
           )}
