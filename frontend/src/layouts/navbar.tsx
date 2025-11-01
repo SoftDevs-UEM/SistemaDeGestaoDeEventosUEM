@@ -36,6 +36,8 @@ export default function Navbar() {
     navigate('/admin/dashboard', { state: { activeView: view } });
   };
 
+  
+
   // Verificar se o usuário é admin para mostrar menu administrativo
   const isAdmin = isAuthenticated && userType === 'admin';
   const showOrganizadoresMenu = isAuthenticated && (userType === 'promotor' || userType === 'admin');
@@ -138,8 +140,12 @@ export default function Navbar() {
               </Link>
               <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
               
-                <Link to="/organizadores/meus-eventos">Meus Eventos</Link>
-                <Link to="/organizadores/estatisticas">Estatísticas</Link>
+              <button 
+                  className="dropdown-link-btn"
+                  onClick={() => handleAdminNavigation('configuracoes')}
+                >
+                  Configurações
+                </button>
               </div>
             </div>
           )}
@@ -156,12 +162,12 @@ export default function Navbar() {
               </Link>
               <div className={`dropdown-menu ${activeDropdown === 'admin' ? 'active' : ''}`}>
               
-                <button 
+                {/* <button 
                   className="dropdown-link-btn"
                   onClick={() => handleAdminNavigation('gestao-usuarios')}
                 >
                   Gestão de Usuários
-                </button>
+                </button> */}
                 <button 
                   className="dropdown-link-btn"
                   onClick={() => handleAdminNavigation('configuracoes')}
