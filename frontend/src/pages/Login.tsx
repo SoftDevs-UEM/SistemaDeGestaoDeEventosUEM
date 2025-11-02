@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './login.css';
 
+const API_URL = 'http://localhost:8000/api';
+
 type RegisteredUser = {
   nome: string;
   telefone: string;
@@ -35,65 +37,86 @@ export default function Login() {
   );
   const [registerError, setRegisterError] = useState('');
 
-  const getRegisteredUsers = (): RegisteredUser[] => {
-    const users = localStorage.getItem('usuariosCadastrados');
-    return users ? JSON.parse(users) : [];
+  // Função para fazer login com fetch
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw errorData;
+      }
+      
+      return await response.json();
+    } catch (error: any) {
+      throw error;
+    }
   };
 
-  const saveRegisteredUser = (user: RegisteredUser) => {
-    const users = getRegisteredUsers();
-    users.push(user);
-    localStorage.setItem('usuariosCadastrados', JSON.stringify(users));
+  // Função para fazer registro com fetch
+  const handleRegisterAPI = async (userData: any) => {
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(userData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw errorData;
+      }
+      
+      return await response.json();
+    } catch (error: any) {
+      throw error;
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const email = emailRef.current?.value || '';
     const password = passwordRef.current?.value || '';
     
-    // Login com contas padrão
-    if (
-      (email === 'estudante@uem.ac.mz' && password === '123') ||
-      (email === 'promotor@uem.ac.mz' && password === '123') ||
-      (email === 'admin@uem.ac.mz' && password === '123')
-    ) {
-      login(email);
-      const eventoParaInscricao = localStorage.getItem('eventoParaInscricao');
+    try {
+      // Fazer login via API Laravel
+      const data = await handleLogin(email, password);
+      const { access_token, usuario } = data;
       
-      if (email === 'estudante@uem.ac.mz') {
-        if (eventoParaInscricao) {
-          try {
-            const event = JSON.parse(eventoParaInscricao);
-            localStorage.removeItem('eventoParaInscricao');
-            navigate('/registrar', { state: { event } });
-            return;
-          } catch {}
-        }
-        navigate('/estudante');
-      } else if (email === 'promotor@uem.ac.mz') {
-        navigate('/Organizadores');
-      } else if (email === 'admin@uem.ac.mz') {
-        navigate('/');
+      // Salvar token e usuário
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+      
+      // Chamar a função login do contexto
+      if (login) {
+        login(usuario.email);
       }
-      return;
+      
+      // Redirecionar baseado no tipo de usuário
+      if (usuario.tipo === 'estudante') {
+        navigate('/estudante');
+      } else if (usuario.tipo === 'docente') {
+        navigate('/promotor');
+      } else if (usuario.tipo === 'cta') {
+        navigate('/admin');
+      }
+      
+    } catch (error: any) {
+      alert(error.message || 'Erro ao fazer login');
     }
-
-    // Login com usuários cadastrados
-    const users = getRegisteredUsers();
-    const found = users.find((u: RegisteredUser) => u.email === email && u.password === password);
-    if (found) {
-      login(email);
-      localStorage.setItem('usuarioLogado', JSON.stringify(found));
-      if (found.tipo === 'estudante') navigate('/estudante');
-      else if (found.tipo === 'docente') navigate('/promotor');
-      else if (found.tipo === 'cta') navigate('/admin');
-      return;
-    }
-    
-    alert('Email ou senha inválidos!');
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegisterError('');
     
@@ -124,38 +147,54 @@ export default function Login() {
       return;
     }
     
-    const users = getRegisteredUsers();
-    if (users.some((u: RegisteredUser) => u.email === registerData.email)) {
-      setRegisterError('Email já cadastrado.');
-      return;
+    try {
+      // Fazer registro via API Laravel
+      const data = await handleRegisterAPI({
+        nome: registerData.nome,
+        telefone: registerData.telefone,
+        email: registerData.email,
+        password: registerData.password,
+        password_confirmation: registerData.confirmPassword,
+        tipo: registerData.tipo,
+        nr_estudante: registerData.nrEstudante,
+        curso: registerData.curso,
+        departamento: registerData.departamento
+      });
+      
+      const { access_token, usuario } = data;
+      
+      // Salvar token e usuário
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+      
+      // Fechar modal de registro e redirecionar
+      setShowRegister(false);
+      setRegisterData({
+        nome: '',
+        telefone: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        tipo: 'estudante',
+        nrEstudante: '',
+        curso: '',
+        departamento: ''
+      });
+      
+      // Redirecionar baseado no tipo
+      if (usuario.tipo === 'estudante') navigate('/home/estudante');
+      else if (usuario.tipo === 'docente') navigate('/promotor');
+      else if (usuario.tipo === 'cta') navigate('/admin');
+      
+    } catch (error: any) {
+      if (error.errors) {
+        // Erros de validação do Laravel
+        const firstError = Object.values(error.errors)[0] as string[];
+        setRegisterError(firstError[0]);
+      } else {
+        setRegisterError(error.message || 'Erro ao cadastrar');
+      }
     }
-    
-    // Salvar usuário
-    const userToSave: RegisteredUser = {
-      nome: registerData.nome,
-      telefone: registerData.telefone,
-      email: registerData.email,
-      password: registerData.password,
-      tipo: registerData.tipo as 'estudante' | 'docente' | 'cta',
-      nrEstudante: registerData.tipo === 'estudante' ? registerData.nrEstudante : undefined,
-      curso: registerData.tipo === 'estudante' ? registerData.curso : undefined,
-      departamento: registerData.tipo === 'docente' ? registerData.departamento : undefined
-    };
-    
-    saveRegisteredUser(userToSave);
-    setShowRegister(false);
-    setRegisterData({
-      nome: '',
-      telefone: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      tipo: 'estudante',
-      nrEstudante: '',
-      curso: '',
-      departamento: ''
-    });
-    alert('Cadastro realizado! Faça login.');
   };
 
   const handleInputChange = (field: keyof typeof registerData, value: string) => {
@@ -191,6 +230,7 @@ export default function Login() {
                   type="email"
                   className="login-form-input"
                   id="email"
+                  name="email"
                   placeholder="exemplo@uem.ac.mz"
                   ref={emailRef}
                   autoComplete="username"
@@ -206,6 +246,7 @@ export default function Login() {
                   type="password"
                   className="login-form-input"
                   id="password"
+                  name="password"
                   placeholder="Digite sua palavra-passe"
                   ref={passwordRef}
                   autoComplete="current-password"
@@ -340,7 +381,6 @@ export default function Login() {
                     <option value="Sociologia">Sociologia</option>
                     <option value="Agronomia">Agronomia</option>
                     <option value="Veterinária">Veterinária</option>
-                
                   </select>
                 </div>
               </>

@@ -2,6 +2,37 @@
 
 return [
 
+
+    'guards' => [
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
+    'api' => [
+        'driver' => 'sanctum',
+        'provider' => 'usuarios',
+    ],
+],
+
+'providers' => [
+    'users' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\User::class,
+    ],
+    'usuarios' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Usuario::class,
+    ],
+],
+
+
+'providers' => [
+    'users' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Usuario::class,
+    ],
+],
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults
