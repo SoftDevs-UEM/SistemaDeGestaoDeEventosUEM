@@ -17,6 +17,7 @@ export default function CadastrarPromotor() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [formLoading, setFormLoading] = useState(false);
 
   // Redirecionar se não for admin
   React.useEffect(() => {
@@ -53,7 +54,7 @@ export default function CadastrarPromotor() {
   };
 
   // Função para cadastrar promotor
-  const handleCadastrarPromotor = (e: React.FormEvent) => {
+  const handleCadastrarPromotor = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -76,42 +77,36 @@ export default function CadastrarPromotor() {
       return;
     }
 
-    // Verificar se email já existe
-    const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]');
-    if (usuariosCadastrados.some((u: any) => u.email === promotorData.email)) {
-      setError('Email já cadastrado.');
-      return;
+    try {
+      setFormLoading(true);
+      const payload = {
+        name: `${promotorData.nome} ${promotorData.outrosNomes}`,
+        email: promotorData.email,
+        password: promotorData.password,
+        telefone: promotorData.telefone,
+        departamento: promotorData.departamento || null,
+        faculdade: promotorData.faculdade || null,
+      };
+
+      const { promoterService } = await import('../services/promoterService');
+      await promoterService.create(payload);
+
+      setPromotorData({
+        nome: '',
+        outrosNomes: '',
+        telefone: '',
+        email: '',
+        departamento: '',
+        faculdade: '',
+        password: ''
+      });
+      setSuccess('Promotor cadastrado com sucesso!');
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.response?.data?.errors || err.message || 'Erro ao cadastrar promotor';
+      setError(typeof message === 'string' ? message : JSON.stringify(message));
+    } finally {
+      setFormLoading(false);
     }
-
-    // Criar objeto do promotor
-    const novoPromotor = {
-      nome: promotorData.nome,
-      outrosNomes: promotorData.outrosNomes,
-      telefone: promotorData.telefone,
-      email: promotorData.email,
-      password: promotorData.password,
-      tipo: 'docente' as const,
-      departamento: promotorData.departamento,
-      faculdade: promotorData.faculdade,
-      cadastradoPorAdmin: true,
-      dataCadastro: new Date().toISOString()
-    };
-
-    // Salvar no localStorage
-    usuariosCadastrados.push(novoPromotor);
-    localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosCadastrados));
-
-    // Limpar formulário e mostrar mensagem de sucesso
-    setPromotorData({
-      nome: '',
-      outrosNomes: '',
-      telefone: '',
-      email: '',
-      departamento: '',
-      faculdade: '',
-      password: ''
-    });
-    setSuccess('Promotor cadastrado com sucesso!');
   };
 
   const handleCancel = () => {

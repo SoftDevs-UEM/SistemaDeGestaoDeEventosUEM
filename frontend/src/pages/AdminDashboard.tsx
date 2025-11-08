@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './AdminDashboard.css';
+import { promoterService } from '../services/promoterService';
 
 type UserStats = {
   totalUsuarios: number;
@@ -120,27 +121,40 @@ export default function AdminDashboard() {
     }
   }, [location.state]);
 
-  const loadStatistics = () => {
+  const loadStatistics = async () => {
     setLoading(true);
-    
-    // Simular carregamento de dados
-    setTimeout(() => {
+
+    try {
+      // Read local data (events/users) for stats where backend endpoints don't exist
       const usuarios = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]');
       const eventos = JSON.parse(localStorage.getItem('eventos') || '[]');
       const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]');
-      
+
+      // Fetch promoters from backend to keep data consistent
+      let backendPromoters: any[] = [];
+      try {
+        const res = await promoterService.list();
+        backendPromoters = Array.isArray(res) ? res : [];
+      } catch (e) {
+        // ignore backend errors and fallback to local data
+        backendPromoters = [];
+      }
+
       // Estatísticas de usuários
       const estudantes = usuarios.filter((u: any) => u.tipo === 'estudante');
-      const promotores = usuarios.filter((u: any) => u.tipo === 'docente');
+      const promotoresLocal = usuarios.filter((u: any) => u.tipo === 'docente');
       const admins = usuarios.filter((u: any) => u.tipo === 'cta' || u.email === 'admin@uem.ac.mz');
-      
+
+      // Combine promoters (local + backend) for display
+      const combinedPromotores = [...promotoresLocal, ...backendPromoters];
+
       // Estatísticas de eventos
       const eventosAtivos = eventos.filter((e: any) => 
         new Date(e.dataFim) >= new Date() && new Date(e.dataInicio) <= new Date()
       );
       const eventosFinalizados = eventos.filter((e: any) => new Date(e.dataFim) < new Date());
       const eventosPendentes = eventos.filter((e: any) => !e.aprovado);
-      
+
       // Calcular crescimento (simulado)
       const taxaCrescimento = usuarios.length > 0 ? Math.round((usuarios.length / 100) * 15) : 0;
       const usuariosNovos = usuarios.filter((u: any) => {
@@ -149,7 +163,7 @@ export default function AdminDashboard() {
         umMesAtras.setMonth(umMesAtras.getMonth() - 1);
         return dataCadastro >= umMesAtras;
       }).length;
-      
+
       const eventosEsteMes = eventos.filter((e: any) => {
         const dataEvento = new Date(e.dataInicio);
         const esteMes = new Date();
@@ -158,9 +172,9 @@ export default function AdminDashboard() {
       }).length;
 
       setUserStats({
-        totalUsuarios: usuarios.length,
+        totalUsuarios: usuarios.length + backendPromoters.length,
         totalEstudantes: estudantes.length,
-        totalPromotores: promotores.length,
+        totalPromotores: combinedPromotores.length,
         totalAdmin: admins.length,
         usuariosAtivos: usuarios.length
       });
@@ -185,10 +199,11 @@ export default function AdminDashboard() {
       // Carregar todos os usuários para gestão
       setUsuarios(usuarios);
       setEstudantes(estudantes);
-      setPromotores(promotores);
+      setPromotores(combinedPromotores);
 
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleLogout = () => {
@@ -221,7 +236,7 @@ export default function AdminDashboard() {
   };
 
   // Função para cadastrar promotor
-  const handleCadastrarPromotor = (e: React.FormEvent) => {
+  const handleCadastrarPromotor = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -243,49 +258,55 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Verificar se email já existe
-    const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]');
-    if (usuariosCadastrados.some((u: any) => u.email === promotorData.email)) {
-      setError('Email já cadastrado.');
-      return;
+    setLoading(true);
+    try {
+      const payload = {
+        name: `${promotorData.nome} ${promotorData.outrosNomes}`,
+        email: promotorData.email,
+        password: promotorData.password,
+        telefone: promotorData.telefone,
+        departamento: promotorData.departamento || null,
+        faculdade: promotorData.faculdade || null,
+      };
+
+      await promoterService.create(payload);
+
+      // Also keep local storage fallback for other parts of UI
+      const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]');
+      usuariosCadastrados.push({
+        id: Date.now().toString(),
+        nome: promotorData.nome,
+        outrosNomes: promotorData.outrosNomes,
+        telefone: promotorData.telefone,
+        email: promotorData.email,
+        password: promotorData.password,
+        tipo: 'docente',
+        departamento: promotorData.departamento,
+        faculdade: promotorData.faculdade,
+        cadastradoPorAdmin: true,
+        dataCadastro: new Date().toISOString()
+      });
+      localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosCadastrados));
+
+      setPromotorData({
+        nome: '',
+        outrosNomes: '',
+        telefone: '',
+        email: '',
+        departamento: '',
+        faculdade: '',
+        password: ''
+      });
+      setSuccess('Promotor cadastrado com sucesso!');
+
+      // Refresh stats
+      await loadStatistics();
+      setTimeout(() => setSuccess(''), 2000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || JSON.stringify(err.response?.data?.errors || err.message) || 'Erro ao cadastrar promotor');
+    } finally {
+      setLoading(false);
     }
-
-    // Criar objeto do promotor
-    const novoPromotor = {
-      id: Date.now().toString(),
-      nome: promotorData.nome,
-      outrosNomes: promotorData.outrosNomes,
-      telefone: promotorData.telefone,
-      email: promotorData.email,
-      password: promotorData.password,
-      tipo: 'docente' as const,
-      departamento: promotorData.departamento,
-      faculdade: promotorData.faculdade,
-      cadastradoPorAdmin: true,
-      dataCadastro: new Date().toISOString()
-    };
-
-    // Salvar no localStorage
-    usuariosCadastrados.push(novoPromotor);
-    localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosCadastrados));
-
-    // Limpar formulário e mostrar mensagem de sucesso
-    setPromotorData({
-      nome: '',
-      outrosNomes: '',
-      telefone: '',
-      email: '',
-      departamento: '',
-      faculdade: '',
-      password: ''
-    });
-    setSuccess('Promotor cadastrado com sucesso!');
-    
-    // Recarregar estatísticas após 2 segundos
-    setTimeout(() => {
-      loadStatistics();
-      setSuccess('');
-    }, 2000);
   };
 
   const handleBackToDashboard = () => {
@@ -367,18 +388,30 @@ export default function AdminDashboard() {
     });
   };
 
-  const handleExcluirUsuario = (usuarioId: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
+  const handleExcluirUsuario = async (usuarioId: any) => {
+    if (!window.confirm('Tem certeza que deseja excluir este usuário?')) return;
+
+    setLoading(true);
+    try {
+      // If id looks numeric, try to delete via backend
+      if (!isNaN(Number(usuarioId))) {
+        try {
+          await promoterService.delete(Number(usuarioId));
+        } catch (e) {
+          // ignore backend delete errors
+        }
+      }
+
+      // Always remove from localStorage fallback
       const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]');
-      const usuariosAtualizados = usuariosCadastrados.filter((u: any) => u.id !== usuarioId);
-      
+      const usuariosAtualizados = usuariosCadastrados.filter((u: any) => u.id !== usuarioId && String(u.id) !== String(usuarioId));
       localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosAtualizados));
+
       setSuccess('Usuário excluído com sucesso!');
-      
-      setTimeout(() => {
-        loadStatistics();
-        setSuccess('');
-      }, 2000);
+      await loadStatistics();
+      setTimeout(() => setSuccess(''), 2000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -797,22 +830,31 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {promotores.map((promotor) => (
-                <tr key={promotor.id}>
+              {promotores.map((promotor) => {
+                const name = (promotor as any).nome || (promotor as any).name || '';
+                const outros = (promotor as any).outrosNomes || '';
+                const email = (promotor as any).email || '';
+                const telefone = (promotor as any).telefone || '';
+                const dept = (promotor as any).departamento || (promotor as any).faculdade || (promotor as any).department || '';
+                const dataCadastroRaw = (promotor as any).dataCadastro || (promotor as any).created_at || null;
+                const dataCadastro = dataCadastroRaw ? new Date(dataCadastroRaw).toLocaleDateString('pt-BR') : 'Não informado';
+
+                return (
+                <tr key={(promotor as any).id || name}>
                   <td>
                     <div className="user-info-cell">
                       <div className="user-avatar small">
-                        {promotor.nome ? promotor.nome.charAt(0).toUpperCase() : 'P'}
+                        {name ? name.charAt(0).toUpperCase() : 'P'}
                       </div>
                       <div>
-                        <strong>{promotor.nome} {promotor.outrosNomes}</strong>
+                        <strong>{name} {outros}</strong>
                       </div>
                     </div>
                   </td>
-                  <td>{promotor.email}</td>
-                  <td>{promotor.telefone}</td>
-                  <td>{promotor.departamento || promotor.faculdade || 'Não informado'}</td>
-                  <td>{new Date(promotor.dataCadastro).toLocaleDateString('pt-BR')}</td>
+                  <td>{email}</td>
+                  <td>{telefone}</td>
+                  <td>{dept || 'Não informado'}</td>
+                  <td>{dataCadastro}</td>
                   <td>
                     <div className="action-buttons">
                       <button 
@@ -823,14 +865,15 @@ export default function AdminDashboard() {
                       </button>
                       <button 
                         className="btn-delete"
-                        onClick={() => handleExcluirUsuario(promotor.id)}
+                        onClick={() => handleExcluirUsuario((promotor as any).id)}
                       >
                         🗑️ Excluir
                       </button>
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         ) : (
