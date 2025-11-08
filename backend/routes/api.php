@@ -13,3 +13,8 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 });
+
+// Admin-only test route
+Route::get('/admin-only', function () {
+    return response()->json(['ok' => 'admin']);
+})->middleware(['auth:sanctum', 'role:admin']);

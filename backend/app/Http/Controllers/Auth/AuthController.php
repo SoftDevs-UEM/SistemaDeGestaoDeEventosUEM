@@ -17,10 +17,11 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'telefone' => 'required|string',
-            'tipo' => 'required|in:estudante,docente,cta',
+            // allowed roles: estudante, docente, organizador, admin, cta, promotor
+            'tipo' => 'required|in:estudante,docente,organizador,admin,cta,promotor',
             'nrEstudante' => 'required_if:tipo,estudante',
             'curso' => 'required_if:tipo,estudante',
-            'departamento' => 'required_if:tipo,docente,cta',
+            'departamento' => 'required_if:tipo,docente,organizador,cta,promotor',
         ]);
 
         $user = User::create([
