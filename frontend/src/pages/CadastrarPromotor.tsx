@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import './cadastrarPromotor.css';
+import './CadastrarPromotor.css';
 
 export default function CadastrarPromotor() {
   const navigate = useNavigate();
