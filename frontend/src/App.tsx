@@ -21,6 +21,7 @@ import Estatisticas from './pages/Estatisticas';
 import CadastrarPromotor from './pages/CadastrarPromotor';
 import AdminDashboard from './pages/AdminDashboard';
 
+
 // Define o tipo de usuário permitido
 type UserType = 'estudante' | 'docente' | 'cta' | 'admin' | 'promotor';
 
