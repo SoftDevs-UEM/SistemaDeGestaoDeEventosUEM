@@ -37,8 +37,6 @@ export default function Organizadores() {
     category: '',
     description: '',
     maxParticipants: '',
-    dataInicio: '',
-    dataFim: '',
     endereco: '',
     cidade: '',
     coordenadas: {
@@ -63,48 +61,62 @@ export default function Organizadores() {
   ];
 
   // Redirecionar se não for promotor ou admin
-  React.useEffect(() => {
-    if (!isAuthenticated || (userType !== 'promotor' && userType !== 'admin')) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, userType, navigate]);
-
-  // Carregar estatísticas
   useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    
+    if (userType !== 'promotor' && userType !== 'admin') {
+      navigate('/');
+      return;
+    }
+    
     loadStatistics();
-  }, []);
+  }, [isAuthenticated, userType, navigate]);
 
   const loadStatistics = () => {
     setLoading(true);
     
     // Simular carregamento de dados
     setTimeout(() => {
-      const eventos = JSON.parse(localStorage.getItem('eventos') || '[]');
-      const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]');
-      
-      // Filtrar eventos do organizador atual (simulação)
-      const meusEventos = eventos;
-      
-      // Estatísticas de eventos
-      const eventosAtivos = meusEventos.filter((e: any) => 
-        new Date(e.dataFim) >= new Date() && new Date(e.dataInicio) <= new Date()
-      );
-      const eventosFinalizados = meusEventos.filter((e: any) => new Date(e.dataFim) < new Date());
-      const eventosPendentes = meusEventos.filter((e: any) => !e.aprovado);
+      try {
+        const eventos = JSON.parse(localStorage.getItem('eventos') || '[]');
+        const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]');
+        
+        // Estatísticas de eventos
+        const eventosAtivos = eventos.filter((e: any) => 
+          e.dataFim && new Date(e.dataFim) >= new Date() && 
+          e.dataInicio && new Date(e.dataInicio) <= new Date()
+        );
+        const eventosFinalizados = eventos.filter((e: any) => 
+          e.dataFim && new Date(e.dataFim) < new Date()
+        );
+        const eventosPendentes = eventos.filter((e: any) => !e.aprovado);
 
-      setEventStats({
-        totalEventos: meusEventos.length,
-        eventosAtivos: eventosAtivos.length,
-        eventosFinalizados: eventosFinalizados.length,
-        eventosPendentes: eventosPendentes.length,
-        totalInscricoes: inscricoes.filter((i: any) => 
-          meusEventos.some((e: any) => e.id === i.eventoId)
-        ).length
-      });
+        setEventStats({
+          totalEventos: eventos.length,
+          eventosAtivos: eventosAtivos.length,
+          eventosFinalizados: eventosFinalizados.length,
+          eventosPendentes: eventosPendentes.length,
+          totalInscricoes: inscricoes.length
+        });
 
-      // Eventos recentes (últimos 5)
-      setRecentEvents(meusEventos.slice(-5).reverse());
-      setLoading(false);
+        // Eventos recentes (últimos 5)
+        setRecentEvents(eventos.slice(-5).reverse());
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+        setEventStats({
+          totalEventos: 0,
+          eventosAtivos: 0,
+          eventosFinalizados: 0,
+          eventosPendentes: 0,
+          totalInscricoes: 0
+        });
+        setRecentEvents([]);
+      } finally {
+        setLoading(false);
+      }
     }, 1000);
   };
 
@@ -124,8 +136,6 @@ export default function Organizadores() {
       category: '',
       description: '',
       maxParticipants: '',
-      dataInicio: '',
-      dataFim: '',
       endereco: '',
       cidade: '',
       coordenadas: {
@@ -144,7 +154,7 @@ export default function Organizadores() {
       setEventoData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev[parent as keyof typeof prev] as any),
           [child]: value
         }
       }));
@@ -170,68 +180,70 @@ export default function Organizadores() {
       return;
     }
 
-    // Combinar data e hora
-    const dataInicio = new Date(`${eventoData.date}T${eventoData.time}`);
-    const dataFim = new Date(dataInicio.getTime() + 2 * 60 * 60 * 1000); // +2 horas
+    try {
+      // Combinar data e hora
+      const dataInicio = new Date(`${eventoData.date}T${eventoData.time}`);
+      const dataFim = new Date(dataInicio.getTime() + 2 * 60 * 60 * 1000); // +2 horas
 
-    // Simular processamento
-    await new Promise(resolve => setTimeout(resolve, 1500));
+      // Criar objeto do evento
+      const novoEvento = {
+        id: Date.now().toString(),
+        titulo: eventoData.title,
+        categoria: eventoData.category,
+        dataInicio: dataInicio.toISOString(),
+        dataFim: dataFim.toISOString(),
+        descricao: eventoData.description,
+        localizacao: eventoData.location,
+        endereco: eventoData.endereco,
+        cidade: eventoData.cidade,
+        image: eventoData.image || '/default-event-image.jpg',
+        vagas: parseInt(eventoData.maxParticipants),
+        coordenadas: eventoData.coordenadas,
+        organizadorId: 'current-user-id',
+        aprovado: userType === 'admin',
+        inscricoes: 0,
+        participantes: 0,
+        dataCriacao: new Date().toISOString()
+      };
 
-    // Criar objeto do evento
-    const novoEvento = {
-      id: Date.now().toString(),
-      titulo: eventoData.title,
-      categoria: eventoData.category,
-      dataInicio: dataInicio.toISOString(),
-      dataFim: dataFim.toISOString(),
-      descricao: eventoData.description,
-      localizacao: eventoData.location,
-      endereco: eventoData.endereco,
-      cidade: eventoData.cidade,
-      image: eventoData.image,
-      vagas: parseInt(eventoData.maxParticipants),
-      coordenadas: eventoData.coordenadas,
-      organizadorId: 'current-user-id',
-      aprovado: userType === 'admin',
-      inscricoes: 0,
-      participantes: 0,
-      dataCriacao: new Date().toISOString()
-    };
+      // Salvar no localStorage
+      const eventos = JSON.parse(localStorage.getItem('eventos') || '[]');
+      eventos.push(novoEvento);
+      localStorage.setItem('eventos', JSON.stringify(eventos));
 
-    // Salvar no localStorage
-    const eventos = JSON.parse(localStorage.getItem('eventos') || '[]');
-    eventos.push(novoEvento);
-    localStorage.setItem('eventos', JSON.stringify(eventos));
-
-    // Limpar formulário e mostrar sucesso
-    setEventoData({
-      title: '',
-      date: '',
-      time: '',
-      location: '',
-      image: '',
-      category: '',
-      description: '',
-      maxParticipants: '',
-      dataInicio: '',
-      dataFim: '',
-      endereco: '',
-      cidade: '',
-      coordenadas: {
-        lat: '',
-        lng: ''
-      }
-    });
-    
-    setSuccess(true);
-    setFormLoading(false);
-    
-    // Resetar mensagem de sucesso após 3 segundos
-    setTimeout(() => {
-      setSuccess(false);
-    }, 3000);
-    
-    loadStatistics(); // Recarregar estatísticas
+      // Limpar formulário e mostrar sucesso
+      setEventoData({
+        title: '',
+        date: '',
+        time: '',
+        location: '',
+        image: '',
+        category: '',
+        description: '',
+        maxParticipants: '',
+        endereco: '',
+        cidade: '',
+        coordenadas: {
+          lat: '',
+          lng: ''
+        }
+      });
+      
+      setSuccess(true);
+      
+      // Resetar mensagem de sucesso após 3 segundos
+      setTimeout(() => {
+        setSuccess(false);
+        setActiveView('dashboard');
+      }, 3000);
+      
+      loadStatistics(); // Recarregar estatísticas
+    } catch (error) {
+      console.error('Erro ao criar evento:', error);
+      alert('Erro ao criar evento. Tente novamente.');
+    } finally {
+      setFormLoading(false);
+    }
   };
 
   // Função para selecionar coordenadas no mapa
@@ -354,11 +366,11 @@ export default function Organizadores() {
                   <div className="event-header">
                     <h3>{evento.titulo || 'Evento'}</h3>
                     <span className={`event-status ${
-                      new Date(evento.dataFim) < new Date() ? 'finished' : 
-                      new Date(evento.dataInicio) <= new Date() ? 'active' : 'pending'
+                      evento.dataFim && new Date(evento.dataFim) < new Date() ? 'finished' : 
+                      evento.dataInicio && new Date(evento.dataInicio) <= new Date() ? 'active' : 'pending'
                     }`}>
-                      {new Date(evento.dataFim) < new Date() ? '✅ Finalizado' : 
-                       new Date(evento.dataInicio) <= new Date() ? '🟢 Ativo' : '⏳ Pendente'}
+                      {evento.dataFim && new Date(evento.dataFim) < new Date() ? '✅ Finalizado' : 
+                       evento.dataInicio && new Date(evento.dataInicio) <= new Date() ? '🟢 Ativo' : '⏳ Pendente'}
                     </span>
                   </div>
                   <p className="event-description">
@@ -403,7 +415,12 @@ export default function Organizadores() {
   const renderCriarEventoView = () => (
     <div className="criar-evento-container">
       {/* Header */}
-    
+      <div className="criar-evento-header">
+        <button onClick={handleBackToDashboard} className="back-button">
+          ← Voltar para Dashboard
+        </button>
+        <h1>➕ Criar Novo Evento</h1>
+      </div>
 
       {/* Form Section */}
       <div className="criar-evento-content">
@@ -533,8 +550,6 @@ export default function Organizadores() {
               </div>
             </div>
 
-           
-
             {/* Seção de Mapa */}
             <div className="form-section">
               <h2>📍 Localização no Mapa</h2>
@@ -618,7 +633,9 @@ export default function Organizadores() {
               <div className="form-section">
                 <h2>Pré-visualização</h2>
                 <div className="image-preview">
-                  <img src={eventoData.image} alt="Preview do evento" />
+                  <img src={eventoData.image} alt="Preview do evento" onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/default-event-image.jpg';
+                  }} />
                   <p>Pré-visualização da imagem do evento</p>
                 </div>
               </div>
@@ -660,28 +677,6 @@ export default function Organizadores() {
               </div>
             )}
           </form>
-
-          {/* Sidebar de Ajuda */}
-          <div className="form-sidebar">
-            <div className="help-card">
-              <h3>💡 Dicas para um bom evento</h3>
-              <ul>
-                <li>Use um título claro e descritivo</li>
-                <li>Selecione a categoria mais apropriada</li>
-                <li>Forneça uma descrição detalhada</li>
-                <li>Use uma imagem de alta qualidade</li>
-                <li>Verifique a capacidade do local</li>
-              </ul>
-            </div>
-
-            <div className="info-card">
-              <h3>📋 Informações Importantes</h3>
-              <p>
-                Todos os eventos são revisados pela administração antes de serem 
-                publicados. Certifique-se de que todas as informações estão correctas.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -726,11 +721,11 @@ export default function Organizadores() {
                   </td>
                   <td>
                     <span className={`status-badge ${
-                      new Date(evento.dataFim) < new Date() ? 'finished' : 
-                      new Date(evento.dataInicio) <= new Date() ? 'active' : 'pending'
+                      evento.dataFim && new Date(evento.dataFim) < new Date() ? 'finished' : 
+                      evento.dataInicio && new Date(evento.dataInicio) <= new Date() ? 'active' : 'pending'
                     }`}>
-                      {new Date(evento.dataFim) < new Date() ? '✅ Finalizado' : 
-                       new Date(evento.dataInicio) <= new Date() ? '🟢 Ativo' : '⏳ Pendente'}
+                      {evento.dataFim && new Date(evento.dataFim) < new Date() ? '✅ Finalizado' : 
+                       evento.dataInicio && new Date(evento.dataInicio) <= new Date() ? '🟢 Ativo' : '⏳ Pendente'}
                     </span>
                   </td>
                   <td>
@@ -807,7 +802,9 @@ export default function Organizadores() {
               🔄 Atualizar
             </button>
           )}
-
+          <button className="logout-btn" onClick={handleLogout}>
+            🚪 Sair
+          </button>
         </div>
       </header>
 

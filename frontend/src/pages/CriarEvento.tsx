@@ -1,24 +1,31 @@
 import React, { useState } from 'react';
 import { useEventos } from '../context/EventosContext';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './CriarEvento.css';
 
 const initialEvent = {
   title: '',
+  description: '',
   date: '',
   time: '',
   location: '',
-  image: '',
+  type: 'academico' as 'academico' | 'cultural' | 'desportivo',
   category: '',
-  description: '',
-  maxParticipants: '',
+  max_participants: '',
+  target_audience: '',
+  requirements: '',
+  image: '',
+  status: 'pendente' as const
 };
 
 const CriarEvento = () => {
   const [event, setEvent] = useState(initialEvent);
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { addEvento } = useEventos();
+  const { createEvent } = useEventos();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -28,26 +35,32 @@ const CriarEvento = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     
-    // Simular processamento
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    addEvento({
-      ...event,
-      id: Date.now(), // ID temporário
-      maxParticipants: Number(event.maxParticipants),
-      attendees: 0,
-      participants: 0,
-    });
-    
-    setSuccess(true);
-    setLoading(false);
-    setEvent(initialEvent);
-    
-    // Resetar mensagem de sucesso após 3 segundos
-    setTimeout(() => {
+    try {
+      if (!user?.id) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      await createEvent({
+        ...event,
+        max_participants: Number(event.max_participants),
+        promoter_id: user.id
+      });
+      
+      setSuccess(true);
+      setEvent(initialEvent);
+      
+      // Redirecionar após 2 segundos
+      setTimeout(() => {
+        navigate('/eventos');
+      }, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao criar evento');
       setSuccess(false);
-    }, 3000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -154,12 +167,12 @@ const CriarEvento = () => {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="maxParticipants">Máx. Participantes *</label>
+                    <label htmlFor="max_participants">Máx. Participantes *</label>
                     <input
-                      id="maxParticipants"
-                      name="maxParticipants"
+                      id="max_participants"
+                      name="max_participants"
                       type="number"
-                      value={event.maxParticipants}
+                      value={event.max_participants}
                       onChange={handleChange}
                       min="1"
                       max="1000"
