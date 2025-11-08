@@ -129,9 +129,13 @@ export function EventosProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
+  if (userType) {
     loadEvents();
-  }, [loadEvents]); // Agora loadEvents é estável devido ao useCallback
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [userType]);
+
 
   return (
     <EventosContext.Provider value={{

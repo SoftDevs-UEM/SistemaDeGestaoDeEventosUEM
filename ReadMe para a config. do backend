@@ -1,0 +1,20 @@
+1. Abra o terminal dentro da pasta do backend do projecto:
+cd /home/ussene/Documents/GitHub/SistemaDeGestaoDeEventosUEM/backend
+
+2. Instale as dependências PHP com o Composer:
+composer install
+
+3. Depois de terminar, gere a chave da aplicação:
+php artisan key:generate
+
+4. Se o seu .env ainda não existir (porque também não vai pro GitHub), crie-o:
+cp .env.example .env
+// 
+
+5. Agora sim, rode o servidor:
+php artisan serve
+
+⚠️ Dica adicional:
+
+Se o Composer não estiver instalado, instale com:
+sudo apt install composer
