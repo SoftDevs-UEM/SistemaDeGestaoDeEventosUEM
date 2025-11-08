@@ -25,3 +25,9 @@ Backend
 6-Aplicar logica de negocio para o fluxo
 7-Aplicarlogica para o dashboard do promotor
 8-Aplicar logica para 
+
+
+Comonados para criar o backend:
+composer create-project laravel/laravel backend
+
+composer require laravel/sanctum

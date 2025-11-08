@@ -1,7 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import './login.css';
+
+type LoginFormData = {
+  email: string;
+  password: string;
+};
 
 type RegisteredUser = {
   nome: string;
@@ -15,153 +21,112 @@ type RegisteredUser = {
 };
 
 export default function Login() {
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [registerData, setRegisterData] = useState<RegisteredUser & { confirmPassword: string }>(
-    {
-      nome: '',
-      telefone: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      tipo: 'estudante',
-      nrEstudante: '',
-      curso: '',
-      departamento: ''
-    }
-  );
-  const [registerError, setRegisterError] = useState('');
+  const [registerData, setRegisterData] = useState<RegisteredUser & { confirmPassword: string }>({
+    nome: '',
+    telefone: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    tipo: 'estudante',
+    nrEstudante: '',
+    curso: '',
+    departamento: ''
+  });
 
-  const getRegisteredUsers = (): RegisteredUser[] => {
-    const users = localStorage.getItem('usuariosCadastrados');
-    return users ? JSON.parse(users) : [];
-  };
-
-  const saveRegisteredUser = (user: RegisteredUser) => {
-    const users = getRegisteredUsers();
-    users.push(user);
-    localStorage.setItem('usuariosCadastrados', JSON.stringify(users));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const email = emailRef.current?.value || '';
-    const password = passwordRef.current?.value || '';
-    
-    // Login com contas padrão
-    if (
-      (email === 'estudante@uem.ac.mz' && password === '123') ||
-      (email === 'promotor@uem.ac.mz' && password === '123') ||
-      (email === 'admin@uem.ac.mz' && password === '123')
-    ) {
-      login(email);
-      const eventoParaInscricao = localStorage.getItem('eventoParaInscricao');
+    try {
+      setError('');
+      setLoading(true);
       
-      if (email === 'estudante@uem.ac.mz') {
-        if (eventoParaInscricao) {
-          try {
-            const event = JSON.parse(eventoParaInscricao);
-            localStorage.removeItem('eventoParaInscricao');
-            navigate('/registrar', { state: { event } });
-            return;
-          } catch {}
-        }
-        navigate('/estudante');
-      } else if (email === 'promotor@uem.ac.mz') {
-        navigate('/Organizadores');
-      } else if (email === 'admin@uem.ac.mz') {
-        navigate('/');
+      const response = await api.post('/login', formData);
+      const { token, user } = response.data;
+      
+      // Salvar token
+      localStorage.setItem('token', token);
+      
+      // Atualizar contexto de autenticação
+      await login(user);
+      
+      // Redirecionar baseado no tipo de usuário
+      switch (user.tipo) {
+        case 'estudante':
+          navigate('/estudante');
+          break;
+        case 'docente':
+        case 'cta':
+          navigate('/Organizadores');
+          break;
+        default:
+          navigate('/');
       }
-      return;
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Falha ao fazer login');
+    } finally {
+      setLoading(false);
     }
-
-    // Login com usuários cadastrados
-    const users = getRegisteredUsers();
-    const found = users.find((u: RegisteredUser) => u.email === email && u.password === password);
-    if (found) {
-      login(email);
-      localStorage.setItem('usuarioLogado', JSON.stringify(found));
-      if (found.tipo === 'estudante') navigate('/estudante');
-      else if (found.tipo === 'docente') navigate('/promotor');
-      else if (found.tipo === 'cta') navigate('/admin');
-      return;
-    }
-    
-    alert('Email ou senha inválidos!');
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setRegisterError('');
-    
-    // Validações
-    if (!registerData.nome || !registerData.telefone || !registerData.email || !registerData.password || !registerData.confirmPassword) {
-      setRegisterError('Preencha todos os campos obrigatórios.');
-      return;
-    }
-    
-    if (registerData.password !== registerData.confirmPassword) {
-      setRegisterError('As senhas não coincidem.');
-      return;
-    }
-    
-    if (registerData.tipo === 'estudante') {
-      if (!registerData.nrEstudante) {
-        setRegisterError('Informe o número de estudante.');
-        return;
+    try {
+      setError('');
+      setLoading(true);
+
+      if (registerData.password !== registerData.confirmPassword) {
+        throw new Error('As senhas não coincidem');
       }
-      if (!registerData.curso) {
-        setRegisterError('Informe o curso.');
-        return;
+
+      const response = await api.post('/register', registerData);
+      const { token, user } = response.data;
+      
+      // Salvar token
+      localStorage.setItem('token', token);
+      
+      // Atualizar contexto de autenticação
+      await login(user);
+      
+      // Redirecionar baseado no tipo de usuário
+      switch (user.tipo) {
+        case 'estudante':
+          navigate('/estudante');
+          break;
+        case 'docente':
+        case 'cta':
+          navigate('/Organizadores');
+          break;
+        default:
+          navigate('/');
       }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Falha ao registrar');
+    } finally {
+      setLoading(false);
     }
-    
-    if (registerData.tipo === 'docente' && !registerData.departamento) {
-      setRegisterError('Informe o departamento.');
-      return;
-    }
-    
-    const users = getRegisteredUsers();
-    if (users.some((u: RegisteredUser) => u.email === registerData.email)) {
-      setRegisterError('Email já cadastrado.');
-      return;
-    }
-    
-    // Salvar usuário
-    const userToSave: RegisteredUser = {
-      nome: registerData.nome,
-      telefone: registerData.telefone,
-      email: registerData.email,
-      password: registerData.password,
-      tipo: registerData.tipo as 'estudante' | 'docente' | 'cta',
-      nrEstudante: registerData.tipo === 'estudante' ? registerData.nrEstudante : undefined,
-      curso: registerData.tipo === 'estudante' ? registerData.curso : undefined,
-      departamento: registerData.tipo === 'docente' ? registerData.departamento : undefined
-    };
-    
-    saveRegisteredUser(userToSave);
-    setShowRegister(false);
-    setRegisterData({
-      nome: '',
-      telefone: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      tipo: 'estudante',
-      nrEstudante: '',
-      curso: '',
-      departamento: ''
-    });
-    alert('Cadastro realizado! Faça login.');
   };
 
-  const handleInputChange = (field: keyof typeof registerData, value: string) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleRegisterInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
     setRegisterData(prev => ({
       ...prev,
-      [field]: value
+      [name]: value
     }));
   };
 
@@ -179,6 +144,8 @@ export default function Login() {
         <h2 className="login-title">Sistema de Gestão de Eventos</h2>
         <p className="login-subtitle">Universidade Eduardo Mondlane</p>
 
+        {error && <div className="error-message">{error}</div>}
+
         {!showRegister ? (
           <>
             {/* FORMULÁRIO DE LOGIN */}
@@ -191,8 +158,10 @@ export default function Login() {
                   type="email"
                   className="login-form-input"
                   id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
                   placeholder="exemplo@uem.ac.mz"
-                  ref={emailRef}
                   autoComplete="username"
                   required
                 />
@@ -206,16 +175,18 @@ export default function Login() {
                   type="password"
                   className="login-form-input"
                   id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
                   placeholder="Digite sua palavra-passe"
-                  ref={passwordRef}
                   autoComplete="current-password"
                   required
                 />
               </div>
               
               <div className="login-form-actions">
-                <button type="submit" className="login-btn-main">
-                  Entrar no Sistema
+                <button type="submit" className="login-btn-main" disabled={loading}>
+                  {loading ? 'Entrando...' : 'Entrar no Sistema'}
                 </button>
                 <button 
                   type="button" 
@@ -245,15 +216,15 @@ export default function Login() {
             </div>
           </>
         ) : (
-       
           <form className="login-form-styled" onSubmit={handleRegister}>
             <div className="login-form-group">
               <label className="login-form-label">Nome completo *</label>
               <input 
-                type="text" 
+                type="text"
+                name="nome"
                 className="login-form-input" 
                 value={registerData.nome} 
-                onChange={e => handleInputChange('nome', e.target.value)} 
+                onChange={handleRegisterInputChange}
                 placeholder="Seu nome completo"
                 required 
               />
@@ -262,10 +233,11 @@ export default function Login() {
             <div className="login-form-group">
               <label className="login-form-label">Telefone *</label>
               <input 
-                type="tel" 
+                type="tel"
+                name="telefone"
                 className="login-form-input" 
                 value={registerData.telefone} 
-                onChange={e => handleInputChange('telefone', e.target.value)} 
+                onChange={handleRegisterInputChange}
                 placeholder="(+258) 8X XXX XXXX"
                 required 
               />
@@ -274,10 +246,11 @@ export default function Login() {
             <div className="login-form-group">
               <label className="login-form-label">Email institucional *</label>
               <input 
-                type="email" 
+                type="email"
+                name="email"
                 className="login-form-input" 
                 value={registerData.email} 
-                onChange={e => handleInputChange('email', e.target.value)} 
+                onChange={handleRegisterInputChange}
                 placeholder="seu.email@uem.ac.mz"
                 required 
               />
@@ -286,9 +259,10 @@ export default function Login() {
             <div className="login-form-group">
               <label className="login-form-label">Tipo de usuário *</label>
               <select 
+                name="tipo"
                 className="login-form-input" 
                 value={registerData.tipo} 
-                onChange={e => handleInputChange('tipo', e.target.value)}
+                onChange={handleRegisterInputChange}
                 required
               >
                 <option value="estudante">Estudante</option>
@@ -302,10 +276,11 @@ export default function Login() {
                 <div className="login-form-group">
                   <label className="login-form-label">Nº de estudante *</label>
                   <input 
-                    type="text" 
+                    type="text"
+                    name="nrEstudante"
                     className="login-form-input" 
                     value={registerData.nrEstudante} 
-                    onChange={e => handleInputChange('nrEstudante', e.target.value)} 
+                    onChange={handleRegisterInputChange}
                     placeholder="Ex: 202301234"
                     required 
                   />
@@ -314,9 +289,10 @@ export default function Login() {
                 <div className="login-form-group">
                   <label className="login-form-label">Curso *</label>
                   <select 
+                    name="curso"
                     className="login-form-input" 
                     value={registerData.curso} 
-                    onChange={e => handleInputChange('curso', e.target.value)}
+                    onChange={handleRegisterInputChange}
                     required
                   >
                     <option value="">Selecione o curso</option>
@@ -340,7 +316,6 @@ export default function Login() {
                     <option value="Sociologia">Sociologia</option>
                     <option value="Agronomia">Agronomia</option>
                     <option value="Veterinária">Veterinária</option>
-                
                   </select>
                 </div>
               </>
@@ -350,9 +325,10 @@ export default function Login() {
               <div className="login-form-group">
                 <label className="login-form-label">Departamento *</label>
                 <select 
+                  name="departamento"
                   className="login-form-input" 
                   value={registerData.departamento} 
-                  onChange={e => handleInputChange('departamento', e.target.value)}
+                  onChange={handleRegisterInputChange}
                   required
                 >
                   <option value="">Selecione o departamento</option>
@@ -392,10 +368,11 @@ export default function Login() {
             <div className="login-form-group">
               <label className="login-form-label">Senha *</label>
               <input 
-                type="password" 
+                type="password"
+                name="password"
                 className="login-form-input" 
                 value={registerData.password} 
-                onChange={e => handleInputChange('password', e.target.value)} 
+                onChange={handleRegisterInputChange}
                 placeholder="Mínimo 6 caracteres"
                 minLength={6}
                 required 
@@ -405,24 +382,19 @@ export default function Login() {
             <div className="login-form-group">
               <label className="login-form-label">Confirmação de senha *</label>
               <input 
-                type="password" 
+                type="password"
+                name="confirmPassword"
                 className="login-form-input" 
                 value={registerData.confirmPassword} 
-                onChange={e => handleInputChange('confirmPassword', e.target.value)} 
+                onChange={handleRegisterInputChange}
                 placeholder="Digite a senha novamente"
                 required 
               />
             </div>
             
-            {registerError && (
-              <div className="login-error-message">
-                {registerError}
-              </div>
-            )}
-            
             <div className="login-form-actions">
-              <button type="submit" className="login-btn-main">
-                Cadastrar
+              <button type="submit" className="login-btn-main" disabled={loading}>
+                {loading ? 'Cadastrando...' : 'Cadastrar'}
               </button>
               <div className="login-secondary-actions">
                 <button 
