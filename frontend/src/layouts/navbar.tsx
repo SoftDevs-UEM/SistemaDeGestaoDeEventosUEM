@@ -7,11 +7,12 @@ import { useAuth } from '../context/AuthContext';
 export default function Navbar() {
   const navigate = useNavigate();
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, userType } = useAuth();
 
   const handleLoginClick = () => {
     navigate("/login");
   };
+  
   const handleLogoutClick = () => {
     logout();
     navigate("/");
@@ -25,12 +26,28 @@ export default function Navbar() {
     setActiveDropdown(null);
   };
 
+  // Função para navegar para seções específicas da página Sobre
+  const handleSobreSectionClick = (sectionId: string) => {
+    navigate('/sobre', { state: { scrollToSection: sectionId } });
+  };
+
+  // Função para navegar para o AdminDashboard com view específica
+  const handleAdminNavigation = (view: string) => {
+    navigate('/admin/dashboard', { state: { activeView: view } });
+  };
+
+  
+
+  // Verificar se o usuário é admin para mostrar menu administrativo
+  const isAdmin = isAuthenticated && userType === 'admin';
+  const showOrganizadoresMenu = isAuthenticated && (userType === 'promotor' || userType === 'admin');
+
   return (
     <>
       {/* Barra superior com idioma e atalhos */}
       <div className="topbar">
         <div className="left-links">
-          <span>EN</span> | <span>PT</span>
+          <span>EN</span> | <span>PT</span> 
         </div>
         <div className="right-links">
           <a href="#">Facebook</a>
@@ -64,14 +81,14 @@ export default function Navbar() {
             onMouseLeave={handleDropdownLeave}
           >
             <Link to="/eventos" className="dropdown-toggle">
-              Eventos 
+              Eventos <span className="dropdown-arrow">▼</span>
             </Link>
             <div className={`dropdown-menu ${activeDropdown === 'eventos' ? 'active' : ''}`}>
               <Link to="/eventos/proximos">Próximos Eventos</Link>
               <Link to="/eventos/passados">Eventos Passados</Link>
               <Link to="/eventos/inscricoes">Minhas Inscrições</Link>
               <Link to="/eventos/categorias">Categorias</Link>
-              <Link to="/eventos/calendario">Calendário</Link>
+             
             </div>
           </div>
 
@@ -81,43 +98,97 @@ export default function Navbar() {
             onMouseLeave={handleDropdownLeave}
           >
             <Link to="/sobre" className="dropdown-toggle">
-              Sobre Nós 
+              Sobre Nós <span className="dropdown-arrow">▼</span>
             </Link>
             <div className={`dropdown-menu ${activeDropdown === 'sobre' ? 'active' : ''}`}>
-              <Link to="/sobre/historia">História</Link>
-              <Link to="/sobre/missao">Missão e Visão</Link>
-              <Link to="/sobre/equipa">Nossa Equipa</Link>
-              <Link to="/sobre/parceiros">Parceiros</Link>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('historia')}
+              >
+                História
+              </button>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('missao')}
+              >
+                Missão e Visão
+              </button>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('equipa')}
+              >
+                Nossa Equipa
+              </button>
+              <button 
+                className="dropdown-link-btn"
+                onClick={() => handleSobreSectionClick('desenvolvedores')}
+              >
+                Desenvolvedores
+              </button>
             </div>
           </div>
 
-          <div 
-            className="dropdown-container"
-            onMouseEnter={() => handleDropdownEnter('organizadores')}
-            onMouseLeave={handleDropdownLeave}
-          >
-            <Link to="/organizadores" className="dropdown-toggle">
-              Para Organizadores 
-            </Link>
-            <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
-              <Link to="/organizadores/criar-evento">Criar Evento</Link>
-              <Link to="/organizadores/meus-eventos">Meus Eventos</Link>
-              <Link to="/organizadores/estatisticas">Estatísticas</Link>
-              <Link to="/organizadores/directrizes">Directrizes</Link>
+          {/* Menu Para Organizadores - apenas para promotores e admin */}
+          {showOrganizadoresMenu && (
+            <div 
+              className="dropdown-container"
+              onMouseEnter={() => handleDropdownEnter('organizadores')}
+              onMouseLeave={handleDropdownLeave}
+            >
+              <Link to="/organizadores" className="dropdown-toggle">
+                Para Organizadores <span className="dropdown-arrow">▼</span>
+              </Link>
+              <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
+              
+              <button 
+                  className="dropdown-link-btn"
+                  onClick={() => handleAdminNavigation('configuracoes')}
+                >
+                  Configurações
+                </button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Menu Administrativo - apenas para admin */}
+          {isAdmin && (
+            <div 
+              className="dropdown-container"
+              onMouseEnter={() => handleDropdownEnter('admin')}
+              onMouseLeave={handleDropdownLeave}
+            >
+              <Link to="/admin/dashboard" className="dropdown-toggle">
+                Administração <span className="dropdown-arrow">▼</span>
+              </Link>
+              <div className={`dropdown-menu ${activeDropdown === 'admin' ? 'active' : ''}`}>
+              
+                {/* <button 
+                  className="dropdown-link-btn"
+                  onClick={() => handleAdminNavigation('gestao-usuarios')}
+                >
+                  Gestão de Usuários
+                </button> */}
+                <button 
+                  className="dropdown-link-btn"
+                  onClick={() => handleAdminNavigation('configuracoes')}
+                >
+                  Configurações
+                </button>
+              </div>
+            </div>
+          )}
 
           <Link to="/contacto">Contacto</Link>
         </div>
 
-        {/* Botão Entrar/Sair posicionado absolutamente à direita */}
+        {/* Botão Entrar/Sair estilizado como o do footer */}
         {isAuthenticated ? (
-          <button className="btn-login" onClick={handleLogoutClick}>
-            Sair
+          <button className="btn-login-footer-style" onClick={handleLogoutClick}>
+            SAIR
           </button>
         ) : (
-          <button className="btn-login" onClick={handleLoginClick}>
-            Entrar
+          <button className="btn-login-footer-style" onClick={handleLoginClick}>
+            ENTRAR
           </button>
         )}
       </nav>

@@ -1,3 +1,127 @@
+/* Eventos.css - Adicionar estas regras para os botões do hero */
+
+/* Botões do Hero Section - ESTILO MELHORADO */
+.btn-hero-primary,
+.btn-hero-secondary {
+  padding: 16px 40px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-align: center;
+  min-width: 200px;
+  border: 3px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Botão Primário - Verde vibrante */
+.btn-hero-primary {
+  background: linear-gradient(135deg, #0f9257, #02663e);
+  color: white;
+  box-shadow: 0 8px 25px rgba(15, 146, 87, 0.4);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-hero-primary:hover {
+  background: linear-gradient(135deg, #02663e, #03492a);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(15, 146, 87, 0.6);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.btn-hero-primary:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(15, 146, 87, 0.5);
+}
+
+/* Botão Secundário - Branco com borda */
+.btn-hero-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.btn-hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.btn-hero-secondary:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Container dos botões do hero */
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+/* Efeito de brilho nos botões */
+.btn-hero-primary::before,
+.btn-hero-secondary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.btn-hero-primary:hover::before,
+.btn-hero-secondary:hover::before {
+  left: 100%;
+}
+
+/* Responsividade para os botões do hero */
+@media (max-width: 768px) {
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    min-width: 250px;
+    padding: 14px 35px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    min-width: 220px;
+    padding: 12px 30px;
+    font-size: 0.95rem;
+  }
+  
+  .hero-buttons {
+    gap: 12px;
+  }
+}
+
+/* Resto do CSS permanece igual... */
 :root {
   --primary-color: #03492a;
   --secondary-color: #02663e;
@@ -71,47 +195,6 @@
   font-weight: 300;
 }
 
-.hero-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
-.btn-primary,
-.btn-secondary {
-  padding: 15px 30px;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: var(--transition);
-  border: none;
-}
-
-.btn-primary {
-  background-color: var(--accent-color);
-  color: white;
-  box-shadow: 0 4px 15px rgba(15, 146, 87, 0.3);
-}
-
-.btn-primary:hover {
-  background-color: #0d7a4c;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(15, 146, 87, 0.4);
-}
-
-.btn-secondary {
-  background-color: transparent;
-  color: white;
-  border: 2px solid white;
-}
-
-.btn-secondary:hover {
-  background-color: white;
-  color: var(--primary-color);
-  transform: translateY(-3px);
-}
-
 /* Títulos de seção */
 .section-title {
   text-align: center;
@@ -146,6 +229,8 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+/* Resto do CSS permanece igual... */
 
 /* Seções seguintes */
 section {
@@ -552,6 +637,33 @@ section {
   border-top: 4px solid var(--secondary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+.loading, .error, .no-events {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+.error button {
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.evento img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 @keyframes spin {

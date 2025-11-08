@@ -1,0 +1,195 @@
+import React, { useState, useEffect } from 'react';
+import { useEventos } from '../context/EventosContext';
+import type { Event } from '../services/eventService';
+import './Eventos.css';
+import Footer from '../layouts/footer';
+import EventModal from '../components/EventModal';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+const Eventos: React.FC = () => {
+  const navigate = useNavigate();
+  const [activeCategory, setActiveCategory] = useState<string>('todos');
+  const { events, loading, error, loadEvents } = useEventos();
+  const { isAuthenticated, userType } = useAuth();
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showEventModal, setShowEventModal] = useState(false);
+
+  // Carregar eventos quando o componente montar
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
+
+  // Filtrar eventos por categoria
+  const filteredEvents = activeCategory === 'todos'
+    ? events
+    : events.filter(event => event.type === activeCategory);
+
+  const handleParticiparClick = (event: Event) => {
+    if (!isAuthenticated) {
+      localStorage.setItem('eventoParaInscricao', JSON.stringify(event));
+      navigate('/login');
+    } else if (userType === 'estudante') {
+      navigate('/registrar', { state: { event } });
+    } else if (userType === 'promotor' || userType === 'admin') {
+      navigate('/organizadores');
+    }
+  };
+
+  const handleVerDetalhes = (event: Event) => {
+    setSelectedEvent(event);
+    setShowEventModal(true);
+  };
+
+  const handleCriarEvento = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else if (userType === 'promotor' || userType === 'admin') {
+      navigate('/criar-evento');
+    }
+  };
+
+  const closeModal = () => {
+    setShowEventModal(false);
+    setSelectedEvent(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Carregando eventos...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p>Erro ao carregar eventos: {error}</p>
+        <button onClick={loadEvents}>Tentar novamente</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="eventos-page">
+      {/* Header Section */}
+      <header className="eventos-header">
+        <div className="container">
+          <h1>Eventos UEM</h1>
+          <p>Descubra os próximos eventos na nossa comunidade acadêmica</p>
+          
+          {(userType === 'promotor' || userType === 'admin') && (
+            <div className="header-actions">
+              <button 
+                className="btn-primary"
+                onClick={handleCriarEvento}
+              >
+                Criar Evento
+              </button>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Categories Section */}
+      <section className="categories-section">
+        <div className="container">
+          <div className="categories-list">
+            <button
+              className={`category-btn ${activeCategory === 'todos' ? 'active' : ''}`}
+              onClick={() => setActiveCategory('todos')}
+            >
+              Todos
+            </button>
+            <button
+              className={`category-btn ${activeCategory === 'academico' ? 'active' : ''}`}
+              onClick={() => setActiveCategory('academico')}
+            >
+              Acadêmicos
+            </button>
+            <button
+              className={`category-btn ${activeCategory === 'cultural' ? 'active' : ''}`}
+              onClick={() => setActiveCategory('cultural')}
+            >
+              Culturais
+            </button>
+            <button
+              className={`category-btn ${activeCategory === 'desportivo' ? 'active' : ''}`}
+              onClick={() => setActiveCategory('desportivo')}
+            >
+              Desportivos
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Events Grid */}
+      <section className="eventos-grid">
+        <div className="container">
+          {filteredEvents.length === 0 ? (
+            <div className="no-events">
+              <h3>Nenhum evento encontrado</h3>
+              <p>Não há eventos disponíveis nesta categoria no momento.</p>
+            </div>
+          ) : (
+            <div className="eventos-list">
+              {filteredEvents.map((event) => (
+                <div key={event.id} className="evento-card">
+                  <div className="evento-image">
+                    <img src={event.image || '/default-event.jpg'} alt={event.title} />
+                  </div>
+                  <div className="evento-content">
+                    <h3>{event.title}</h3>
+                    <p className="evento-details">
+                      <span className="date">{new Date(event.date).toLocaleDateString('pt-BR')}</span>
+                      <span className="time">{event.time}</span>
+                      <span className="location">{event.location}</span>
+                    </p>
+                    <p className="evento-description">{event.description}</p>
+                    <div className="evento-footer">
+                      <span className="category">{event.category}</span>
+                      <div className="evento-actions">
+                        <button 
+                          className="btn-secondary"
+                          onClick={() => handleVerDetalhes(event)}
+                        >
+                          Ver Detalhes
+                        </button>
+                        {event.status === 'aprovado' && (
+                          <button 
+                            className="btn-primary"
+                            onClick={() => handleParticiparClick(event)}
+                          >
+                            Participar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Event Modal */}
+      {showEventModal && selectedEvent && (
+        <EventModal 
+          event={selectedEvent} 
+          onClose={closeModal}
+          onParticipate={() => {
+            closeModal();
+            handleParticiparClick(selectedEvent);
+          }}
+        />
+      )}
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Eventos;

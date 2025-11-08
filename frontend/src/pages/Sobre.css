@@ -339,6 +339,62 @@ section {
   transform: translateY(-3px);
 }
 
+/* Adicione estas regras ao Sobre.css */
+
+.section-padding {
+  padding: 80px 0;
+}
+
+/* Estilo para indicar visualmente a seção ativa */
+.historia-section:target,
+.mvv-section:target,
+.estatisticas-section:target,
+.desenvolvedores-section:target {
+  animation: highlightSection 2s ease;
+}
+
+@keyframes highlightSection {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(3, 73, 42, 0.05);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Melhorar o scroll suave */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ajustar o scroll para considerar a navbar fixa */
+section[id] {
+  scroll-margin-top: 80px;
+}
+
+/* Estilo para os botões da dropdown */
+.dropdown-link-btn {
+  background: none;
+  border: none;
+  color: #333;
+  padding: 10px 20px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-link-btn:hover {
+  background-color: #03492a;
+  color: white;
+}
+
 /* Responsividade */
 @media (max-width: 992px) {
   .sobre-hero h1 {

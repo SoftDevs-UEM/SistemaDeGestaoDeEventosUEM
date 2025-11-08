@@ -41,13 +41,14 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 } */
 
+
 .modal-content {
   background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 20px;
-  max-width: 1200px; /* Aumente a largura máxima */
-  width: 95%; /* Ajuste a largura relativa */
-  max-height: 98vh; /* Aumente ainda mais a altura máxima */
-  height: 90vh; /* Defina uma altura relativa */
+  max-width: 1200px;
+  width: 95%; 
+  max-height: 98vh; 
+  height: 90vh; 
   overflow-y: auto;
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.3),

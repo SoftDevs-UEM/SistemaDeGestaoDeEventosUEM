@@ -115,48 +115,169 @@ body {
 
 /* -------- Dropdown -------- */ 
 .dropdown-container {
-   position: relative; 
-   display: inline-block;
-   }
- .dropdown-toggle { 
-  display: flex;
-   align-items: center; gap: 5px; 
-  }
-    .dropdown-menu { 
-      position: absolute;
-       top: 100%; left: 0;
-        background: #ffffff; /* Fundo branco como na imagem */ 
-        min-width: 250px; /* Largura maior para melhor legibilidade */ box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* Sombra mais suave */ border: 1px solid #ddd; /* Borda sutil */ border-top: 3px solid #03492a; /* Linha superior verde */ display: none; z-index: 1000; border-radius: 0 0 4px 4px; /* Cantos arredondados na parte inferior */ } .dropdown-menu a { padding: 12px 20px; font-size: 14px; font-weight: normal; color: #333; /* Texto escuro como na imagem */ text-decoration: none; border-bottom: 1px solid #f0f0f0; /* Divisor mais suave */ display: block; width: 100%; transition: all 0.3s ease; background: #ffffff; /* Garantir fundo branco */ } .dropdown-menu a:last-child { border-bottom: none; } .dropdown-menu a:hover { background: #ffffff !important; /* Fundo permanece branco */ color: #03492a; /* Apenas o texto muda para verde */ /* Remover qualquer cor de fundo azul */ } .dropdown-container:hover .dropdown-menu { display: block; } /* Garantir que não haja herança de cores indesejadas */ .dropdown-menu a:focus, .dropdown-menu a:active { background: #ffffff !important; color: #03492a; } /* Remover estilos padrão do navegador */ .dropdown-menu a { -webkit-tap-highlight-color: transparent; outline: none; }
+  position: relative; 
+  display: inline-block;
+}
 
-/* -------- Botão login CORRIGIDO -------- */
-.btn-login {
-  background: #ffd700;
-  color: #03492a;
-  padding: 10px 24px;
-  border-radius: 6px;
-  font-weight: bold;
+.dropdown-toggle { 
+  display: flex;
+  align-items: center; 
+  gap: 5px; 
+}
+
+/* Seta do dropdown */
+.dropdown-arrow {
+  font-size: 10px;
+  margin-left: 5px;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-container:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu { 
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  background: #ffffff; /* Fundo branco como na imagem */ 
+  min-width: 250px; /* Largura maior para melhor legibilidade */ 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* Sombra mais suave */ 
+  border: 1px solid #ddd; /* Borda sutil */ 
+  border-top: 3px solid #03492a; /* Linha superior verde */ 
+  display: none; 
+  z-index: 1000; 
+  border-radius: 0 0 4px 4px; /* Cantos arredondados na parte inferior */ 
+}
+
+.dropdown-menu a, 
+.dropdown-link-btn {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: normal;
+  color: #333; /* Texto escuro como na imagem */
+  text-decoration: none;
+  border-bottom: 1px solid #f0f0f0; /* Divisor mais suave */
+  display: block;
+  width: 100%;
+  transition: all 0.3s ease;
+  background: #ffffff; /* Garantir fundo branco */
   border: none;
+  text-align: left;
   cursor: pointer;
-  font-size: 15px;
+}
+
+.dropdown-menu a:last-child,
+.dropdown-link-btn:last-child {
+  border-bottom: none;
+}
+
+.dropdown-menu a:hover,
+.dropdown-link-btn:hover {
+  background: #ffffff !important; /* Fundo permanece branco */
+  color: #03492a; /* Apenas o texto muda para verde */
+  /* Remover qualquer cor de fundo azul */
+}
+
+.dropdown-container:hover .dropdown-menu,
+.dropdown-menu.active {
+  display: block;
+}
+
+/* Garantir que não haja herança de cores indesejadas */
+.dropdown-menu a:focus,
+.dropdown-menu a:active,
+.dropdown-link-btn:focus,
+.dropdown-link-btn:active {
+  background: #ffffff !important;
+  color: #03492a;
+}
+
+/* Remover estilos padrão do navegador */
+.dropdown-menu a,
+.dropdown-link-btn {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+/* Estilo para os botões do dropdown "Sobre Nós" */
+.dropdown-link-btn {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: normal;
+  color: #333;
+  text-decoration: none;
+  border-bottom: 1px solid #f0f0f0;
+  display: block;
+  width: 100%;
+  transition: all 0.3s ease;
+  background: #ffffff;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-link-btn:hover {
+  background: #f8f9fa !important;
+  color: #03492a !important;
+  padding-left: 25px;
+}
+
+.dropdown-link-btn:last-child {
+  border-bottom: none;
+}
+
+/* Garantir que não haja herança de cores indesejadas */
+.dropdown-link-btn:focus,
+.dropdown-link-btn:active {
+  background: #f8f9fa !important;
+  color: #03492a !important;
+}
+
+/* Remover estilos padrão do navegador */
+.dropdown-link-btn {
+  background: none;
+  border: none;
+  padding: 10px 15px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+/* -------- Botão login NOVO ESTILO (igual ao footer) -------- */
+.btn-login-footer-style {
+  background-color: #02663e; ; /* Verde UEM */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  margin-left: 16px;
   min-width: 100px;
   text-align: center;
-  margin-left: 16px;
-  transition: all 0.3s ease;
   display: inline-block;
   text-decoration: none;
   position: relative;
   z-index: 1;
 }
 
-.btn-login:hover {
-  background: #e6c200;
-  color: #03492a !important;
+.btn-login-footer-style:hover {
+  background-color: #02663e; /* Verde UEM mais escuro */
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  color: white !important;
 }
 
 /* Garantir que o texto sempre fique visível */
-.btn-login::before {
+.btn-login-footer-style::before {
   content: '';
   position: absolute;
   top: 0;
@@ -168,13 +289,13 @@ body {
 }
 
 /* Forçar a cor do texto em todos os estados */
-.btn-login,
-.btn-login:link,
-.btn-login:visited,
-.btn-login:hover,
-.btn-login:active,
-.btn-login:focus {
-  color: #e1e7e4 !important;
+.btn-login-footer-style,
+.btn-login-footer-style:link,
+.btn-login-footer-style:visited,
+.btn-login-footer-style:hover,
+.btn-login-footer-style:active,
+.btn-login-footer-style:focus {
+  color: white !important;
   text-decoration: none !important;
 }
 
@@ -189,9 +310,9 @@ body {
     padding: 0 20px;
   }
   
-  .btn-login {
+  .btn-login-footer-style {
     padding: 10px 20px;
-    font-size: 14px;
+    font-size: 0.85rem;
     min-width: 90px;
   }
 }
@@ -221,13 +342,18 @@ body {
     display: none;
   }
   
-  .dropdown-container:hover .dropdown-menu {
+  .dropdown-container:hover .dropdown-menu,
+  .dropdown-menu.active {
     display: block;
   }
   
-  .btn-login {
+  .btn-login-footer-style {
     margin: 10px 0 0 0;
     width: 100%;
     order: 1;
+  }
+  
+  .dropdown-arrow {
+    display: none; /* Esconder seta em mobile para economizar espaço */
   }
 }
