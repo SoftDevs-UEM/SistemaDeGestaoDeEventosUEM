@@ -127,13 +127,13 @@ const Eventos = () => {
                         className="event-btn" 
                         onClick={() => handleParticiparClick(evento)}
                       >
-                        {isAuthenticated && userType === 'estudante' ? 'Participar' : 'Ver Detalhes'}
+                        {isAuthenticated && userType === 'estudante' ? 'Participar' : 'Participar'}
                       </button>
                       <button 
                         className="btn-secondary" 
                         onClick={() => handleVerDetalhes(evento)}
                       >
-                        Mais Info
+                        Ver Detalhes
                       </button>
                     </div>
                   </div>

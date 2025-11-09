@@ -369,12 +369,7 @@ const handleInputChange = (field: string, value: string) => {
   const renderCriarEventoView = () => (
     <div className="criar-evento-container">
       {/* Header */}
-      <div className="criar-evento-header">
-        <button onClick={handleBackToDashboard} className="back-button">
-          ← Voltar para Dashboard
-        </button>
-        <h1>➕ Criar Novo Evento</h1>
-      </div>
+      
 
       {/* Form Section */}
       <div className="criar-evento-content">
@@ -734,9 +729,7 @@ const handleInputChange = (field: string, value: string) => {
               🔄 Atualizar
             </button>
           )}
-          <button className="logout-btn" onClick={handleLogout}>
-            🚪 Sair
-          </button>
+       
         </div>
       </header>
 
