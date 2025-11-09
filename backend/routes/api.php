@@ -31,14 +31,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     // Event routes
     Route::get('/events', [EventController::class, 'index']);
-    Route::post('/events', [EventController::class, 'store'])->middleware('role:promotor,admin');
-    Route::get('/events/{event}', [EventController::class, 'show']);
-    Route::put('/events/{event}', [EventController::class, 'update'])->middleware('role:promotor,admin');
-    Route::delete('/events/{event}', [EventController::class, 'destroy'])->middleware('role:admin');
-    
+    Route::post('/events', [EventController::class, 'store']);
+    Route::get('/events/{id}', [EventController::class, 'show']);
+    Route::put('/events/{id}', [EventController::class, 'update']);
+    Route::delete('/events/{id}', [EventController::class, 'destroy']);
     // Additional event routes
     Route::get('/events/type/{type}', [EventController::class, 'getByType']);
     Route::get('/events/status/{status}', [EventController::class, 'getByStatus']);
-    Route::post('/events/{event}/status', [EventController::class, 'updateStatus'])->middleware('role:admin');
+    Route::post('/events/{id}/status', [EventController::class, 'updateStatus']);
     Route::get('/events/search', [EventController::class, 'search']);
 });

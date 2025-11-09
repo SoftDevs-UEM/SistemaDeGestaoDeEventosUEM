@@ -1,33 +1,29 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useEventos } from '../context/EventosContext';
 import './Home.css';
 import Footer from '../layouts/footer';
 import EventModal from '../components/EventModal';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [events, setEvents] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [popularEvents, setPopularEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showEventModal, setShowEventModal] = useState(false);
   const [heroEvents, setHeroEvents] = useState([]);
 
   const navigate = useNavigate();
   const { isAuthenticated, userType } = useAuth();
+  const { events, loadEvents, loading, error } = useEventos();
 
   // Participar: só estudante autenticado pode se inscrever direto
   const handleParticiparClick = (event) => {
     if (!isAuthenticated) {
-      // Salva evento para pós-login
       localStorage.setItem('eventoParaInscricao', JSON.stringify(event));
       navigate('/login');
     } else if (userType === 'estudante') {
       navigate('/registrar', { state: { event } });
-    } else if (userType === 'promotor') {
-      navigate('/organizadores');
-    } else if (userType === 'admin') {
+    } else if (userType === 'promotor' || userType === 'admin') {
       navigate('/organizadores');
     }
   };
@@ -42,7 +38,20 @@ const Home = () => {
     setSelectedEvent(null);
   };
 
-  // Dados de exemplo
+  // Carregar eventos quando o componente montar
+  useEffect(() => {
+    console.log('🏠 Home: Carregando eventos...');
+    loadEvents();
+  }, [loadEvents]);
+
+  // Log para debug
+  useEffect(() => {
+    console.log('🏠 Home: Eventos carregados:', events.length);
+    console.log('🏠 Home: Loading:', loading);
+    console.log('🏠 Home: Error:', error);
+  }, [events, loading, error]);
+
+  // Dados do carrossel hero
   useEffect(() => {
     const heroEventsData = [
       {
@@ -50,114 +59,39 @@ const Home = () => {
         title: 'Conferência de Ciência e Tecnologia',
         subtitle: 'Inovação e Descobertas Científicas',
         image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-        buttonText: 'Inscrever-se'
       },
       {
         id: 2,
         title: 'Festival Cultural Universitário',
         subtitle: 'Celebrando a Diversidade Cultural',
         image: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-        buttonText: 'Explorar'
       },
       {
         id: 3,
         title: 'Workshop de Empreendedorismo',
         subtitle: 'Desenvolva Sua Ideia de Negócio',
         image: 'https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-        buttonText: 'Participar'
       }
     ];
 
-    const featuredEvents = [
-      {
-        id: 1,
-        title: 'Conferência de Ciência e Tecnologia',
-        date: '15 Out 2023',
-        location: 'Auditório Principal',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-        category: 'Científico',
-        description: 'Uma conferência abrangente sobre os últimos avanços em ciência e tecnologia.',
-        participants: 45,
-        maxParticipants: 200
-      },
-      {
-        id: 2,
-        title: 'Festival Cultural Universitário',
-        date: '22 Out 2023',
-        location: 'Pátio Central',
-        image: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-        category: 'Cultural',
-        description: 'Celebração da diversidade cultural com apresentações de música, dança e arte.',
-        participants: 28,
-        maxParticipants: 150
-      },
-      {
-        id: 3,
-        title: 'Workshop de Empreendedorismo',
-        date: '30 Out 2023',
-        location: 'Sala de Conferências',
-        image: 'https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-        category: 'Workshop',
-        description: 'Workshop prático sobre empreendedorismo e desenvolvimento de startups.',
-        participants: 32,
-        maxParticipants: 50
-      },
-    ];
-
-  // No useEffect, atualize as categorias para usar apenas cores UEM:
-const eventCategories = [
-  { id: 1, name: 'Científicos', icon: '🔬', count: 12, color: '#03492a' },
-  { id: 2, name: 'Culturais', icon: '🎭', count: 8, color: '#03492a' },
-  { id: 3, name: 'Cursos', icon: '📚', count: 15, color: '#03492a' },
-  { id: 4, name: 'Workshops', icon: '🛠️', count: 10, color: '#03492a' },
-  { id: 5, name: 'Palestras', icon: '🎤', count: 20, color: '#03492a' },
-  { id: 6, name: 'Desportivos', icon: '⚽', count: 7, color: '#03492a' },
-];
-
-    const popularEventsData = [
-      {
-        id: 1,
-        title: 'Semana de Engenharia 2023',
-        date: '5-9 Nov 2023',
-        location: 'Faculdade de Engenharia',
-        image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-        attendees: 85,
-        category: 'Científico',
-        description: 'Evento anual da Faculdade de Engenharia.',
-        participants: 85,
-        maxParticipants: 250
-      },
-      {
-        id: 2,
-        title: 'Feira de Emprego',
-        date: '18 Nov 2023',
-        location: 'Pavilhão Desportivo',
-        image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-        attendees: 62,
-        category: 'Profissional',
-        description: 'Feira de emprego com oportunidades de estágio.',
-        participants: 62,
-        maxParticipants: 180
-      },
-      {
-        id: 3,
-        title: 'Noite de Poesia',
-        date: '12 Nov 2023',
-        location: 'Jardim das Letras',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-        attendees: 45,
-        category: 'Cultural',
-        description: 'Noite especial dedicada à poesia.',
-        participants: 45,
-        maxParticipants: 120
-      },
-    ];
-
     setHeroEvents(heroEventsData);
-    setEvents(featuredEvents);
-    setCategories(eventCategories);
-    setPopularEvents(popularEventsData);
   }, []);
+
+  // Categorias com contagem real dos eventos
+  const categories = [
+    { id: 1, name: 'Científicos', icon: '🔬', value: 'cientificos', color: '#03492a' },
+    { id: 2, name: 'Culturais', icon: '🎭', value: 'culturais', color: '#03492a' },
+    { id: 3, name: 'Cursos', icon: '📚', value: 'cursos', color: '#03492a' },
+    { id: 4, name: 'Workshops', icon: '🛠️', value: 'workshops', color: '#03492a' },
+    { id: 5, name: 'Palestras', icon: '🎤', value: 'palestras', color: '#03492a' },
+    { id: 6, name: 'Desportivos', icon: '⚽', value: 'desportivos', color: '#03492a' },
+  ];
+
+  // Calcular contagem por categoria
+  const categoriesWithCount = categories.map(category => ({
+    ...category,
+    count: events.filter(event => event.category === category.value).length
+  }));
 
   // Auto-rotate para hero carousel
   useEffect(() => {
@@ -176,10 +110,33 @@ const eventCategories = [
     setCurrentSlide((prevSlide) => (prevSlide - 1 + heroEvents.length) % heroEvents.length);
   };
 
-  const handleHeroButtonClick = (event) => {
-    // Aqui você pode adicionar lógica específica para cada evento do hero
-    handleVerDetalhes(event);
-  };
+  // Filtrar eventos em destaque (últimos 6 eventos)
+  const featuredEvents = events.slice(0, 6);
+
+  if (loading) {
+    return (
+      <div className="home-container">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Carregando eventos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="home-container">
+        <div className="error-container">
+          <h3>Erro ao carregar eventos</h3>
+          <p>{error}</p>
+          <button onClick={loadEvents} className="btn-primary">
+            Tentar Novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="home-container">
@@ -197,8 +154,10 @@ const eventCategories = [
                 <h1>{event.title}</h1>
                 <p>{event.subtitle}</p>
                 <div className="hero-buttons">
-                
-                  <button className="btn-secondary" onClick={() => navigate('/eventos')}>
+                  <button className="btn-hero-primary" onClick={() => navigate('/eventos')}>
+                    Ver Eventos
+                  </button>
+                  <button className="btn-hero-secondary" onClick={() => navigate('/eventos')}>
                     Explorar Todos
                   </button>
                 </div>
@@ -207,7 +166,6 @@ const eventCategories = [
           ))}
         </div>
 
-        {/* Controles do Carrossel */}
         <button className="hero-carousel-btn prev" onClick={prevHeroSlide}>
           <i className="fas fa-chevron-left"></i>
         </button>
@@ -215,7 +173,6 @@ const eventCategories = [
           <i className="fas fa-chevron-right"></i>
         </button>
 
-        {/* Indicadores */}
         <div className="hero-indicators">
           {heroEvents.map((_, index) => (
             <button
@@ -227,7 +184,6 @@ const eventCategories = [
         </div>
       </section>
 
-
       {/* Categorias de Eventos */}
       <section className="event-categories">
         <div className="container">
@@ -237,11 +193,12 @@ const eventCategories = [
           <p className="section-subtitle">Encontre eventos do seu interesse</p>
 
           <div className="categories-grid">
-            {categories.map((category) => (
+            {categoriesWithCount.map((category) => (
               <div
                 key={category.id}
                 className="category-card"
                 style={{ '--category-color': category.color }}
+                onClick={() => navigate('/eventos')}
               >
                 <div
                   className="category-icon"
@@ -257,58 +214,110 @@ const eventCategories = [
         </div>
       </section>
 
-      {/* Eventos Populares */}
+      {/* Eventos em Destaque */}
       <section className="popular-events">
         <div className="container">
           <h2 className="section-title">
-            Eventos <span className="highlight">Populares</span>
+            Eventos em <span className="highlight">Destaque</span>
           </h2>
           <p className="section-subtitle">
-            Os eventos mais procurados pela comunidade académica
+            Os eventos mais recentes da comunidade académica
           </p>
 
-          <div className="events-grid">
-            {popularEvents.map((event) => (
-              <div key={event.id} className="event-card">
-                <div className="event-image">
-                  <img src={event.image} alt={event.title} />
-                  <div className="event-overlay"></div>
-                </div>
-                <div className="event-info">
-                  <h3>{event.title}</h3>
-                  <div className="event-meta">
-                    <span>
-                      <i className="fas fa-calendar-alt"></i> {event.date}
-                    </span>
-                    <span>
-                      <i className="fas fa-map-marker-alt"></i> {event.location}
-                    </span>
-                    <span>
-                      <i className="fas fa-users"></i> {event.participants} participantes
-                    </span>
-                  </div>
-                  <div className="event-buttons">
-                    <button className="event-btn" onClick={() => handleParticiparClick(event)}>
-                      Participar
-                    </button>
-                    <button className="btn-secondary" onClick={() => handleVerDetalhes(event)}>
-                      Detalhes
-                    </button>
-                  </div>
-                </div>
+          {events.length === 0 ? (
+            <div className="no-events">
+              <div className="no-events-content">
+                <div className="no-events-icon">📅</div>
+                <h3>Nenhum evento disponível</h3>
+                <p>Novos eventos serão adicionados em breve</p>
+                <button 
+                  className="btn-primary" 
+                  onClick={() => navigate('/eventos')}
+                >
+                  Ver Todos os Eventos
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <>
+              <div className="events-grid">
+                {featuredEvents.map((event) => (
+                  <div key={event.id} className="event-card">
+                    <div className="event-image">
+                      <img 
+                        src={event.image || '/default-event-image.jpg'} 
+                        alt={event.title}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/default-event-image.jpg';
+                        }}
+                      />
+                      <div className="event-category-badge">
+                        {event.category}
+                      </div>
+                      <div className="event-overlay"></div>
+                    </div>
+                    <div className="event-info">
+                      <h3>{event.title}</h3>
+                      <p className="event-description">
+                        {event.description && event.description.length > 100 
+                          ? `${event.description.substring(0, 100)}...` 
+                          : event.description || 'Descrição não disponível'
+                        }
+                      </p>
+                      <div className="event-meta">
+                        <span>
+                          <i className="fas fa-calendar-alt"></i> 
+                          {new Date(event.date).toLocaleDateString('pt-BR')} {event.time && `às ${event.time}`}
+                        </span>
+                        <span>
+                          <i className="fas fa-map-marker-alt"></i> {event.location}
+                        </span>
+                        <span>
+                          <i className="fas fa-users"></i> 
+                          {event.registrations_count || 0} / {event.max_participants} participantes
+                        </span>
+                      </div>
+                      <div className="event-buttons">
+                        <button 
+                          className="event-btn" 
+                          onClick={() => handleParticiparClick(event)}
+                        >
+                          {isAuthenticated && userType === 'estudante' ? 'Participar' : 'Ver Detalhes'}
+                        </button>
+                        <button 
+                          className="btn-secondary" 
+                          onClick={() => handleVerDetalhes(event)}
+                        >
+                          Mais Info
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {events.length > 6 && (
+                <div className="view-all-container">
+                  <button 
+                    className="btn-primary view-all-btn"
+                    onClick={() => navigate('/eventos')}
+                  >
+                    Ver Todos os Eventos ({events.length})
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
       {/* Modal de Detalhes do Evento */}
       <EventModal
-  event={selectedEvent}
-  isOpen={showEventModal}
-  onClose={closeModal}
-  onRegister={() => handleParticiparClick(selectedEvent)}
-/>
+        event={selectedEvent}
+        isOpen={showEventModal}
+        onClose={closeModal}
+        onRegister={() => handleParticiparClick(selectedEvent)}
+      />
 
       <Footer />
     </div>
