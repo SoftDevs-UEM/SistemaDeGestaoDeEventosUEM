@@ -23,7 +23,7 @@ return new class extends Migration
             $table->integer('max_participants');
             $table->foreignId('promoter_id')->constrained('users')->onDelete('cascade');
             $table->enum('status', ['pendente', 'aprovado', 'rejeitado', 'cancelado', 'finalizado'])->default('pendente');
-            $table->string('image')->nullable();
+            $table->text('image')->nullable();
             $table->text('requirements')->nullable();
             $table->string('target_audience');
             $table->text('feedback')->nullable();

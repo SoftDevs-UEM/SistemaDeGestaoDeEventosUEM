@@ -9,6 +9,12 @@ use App\Http\Controllers\EventController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
+// ✅ ROTAS PÚBLICAS DE EVENTOS - MOVER PARA FORA DO MIDDLEWARE
+Route::get('/events', [EventController::class, 'index']);
+Route::get('/events/{id}', [EventController::class, 'show']);
+Route::get('/events/type/{type}', [EventController::class, 'getByType']);
+Route::get('/events/search', [EventController::class, 'search']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
@@ -29,16 +35,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/promoters/{promoter}', [PromoterController::class, 'update'])->middleware('role:admin');
     Route::delete('/promoters/{promoter}', [PromoterController::class, 'destroy'])->middleware('role:admin');
     
-    // Event routes
-    Route::get('/events', [EventController::class, 'index']);
-    Route::post('/events', [EventController::class, 'store'])->middleware('role:promotor,admin');
-    Route::get('/events/{event}', [EventController::class, 'show']);
-    Route::put('/events/{event}', [EventController::class, 'update'])->middleware('role:promotor,admin');
-    Route::delete('/events/{event}', [EventController::class, 'destroy'])->middleware('role:admin');
-    
-    // Additional event routes
-    Route::get('/events/type/{type}', [EventController::class, 'getByType']);
+    // ✅ ROTAS PROTEGIDAS DE EVENTOS (apenas para usuários autenticados)
+    Route::post('/events', [EventController::class, 'store']);
+    Route::put('/events/{id}', [EventController::class, 'update']);
+    Route::delete('/events/{id}', [EventController::class, 'destroy']);
     Route::get('/events/status/{status}', [EventController::class, 'getByStatus']);
-    Route::post('/events/{event}/status', [EventController::class, 'updateStatus'])->middleware('role:admin');
-    Route::get('/events/search', [EventController::class, 'search']);
+    Route::post('/events/{id}/status', [EventController::class, 'updateStatus']);
 });
