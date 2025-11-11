@@ -16,6 +16,19 @@ const Home = () => {
   const { isAuthenticated, userType } = useAuth();
   const { events, loadEvents, loading, error } = useEventos();
 
+  // Função para obter número de participantes (com fallback)
+  const getParticipantesCount = (evento: any): number => {
+    // Priorizar participants_count (contagem real), depois participants (coluna da tabela)
+    return evento.participants_count || evento.participants || 0;
+  };
+
+  // Função para calcular porcentagem de ocupação
+  const getOcupacaoPercentual = (evento: any): number => {
+    const participantes = getParticipantesCount(evento);
+    const maxParticipantes = evento.max_participants || 1;
+    return Math.min(100, (participantes / maxParticipantes) * 100);
+  };
+
   // Participar: só estudante autenticado pode se inscrever direto
   const handleParticiparClick = useCallback((event) => {
     if (!isAuthenticated) {
@@ -48,6 +61,16 @@ const Home = () => {
   useEffect(() => {
     if (events.length > 0) {
       console.log('🏠 Home: Eventos carregados:', events.length);
+      // Debug: verificar dados dos primeiros eventos
+      events.slice(0, 2).forEach((event, index) => {
+        console.log(`🏠 Evento ${index + 1}:`, {
+          title: event.title,
+          participants: event.participants,
+          participants_count: event.participants_count,
+          max_participants: event.max_participants,
+          ocupacao: `${getOcupacaoPercentual(event)}%`
+        });
+      });
     }
   }, [events.length]); // ← Só executa quando o length muda
 
@@ -241,59 +264,82 @@ const Home = () => {
           ) : (
             <>
               <div className="events-grid">
-                {featuredEvents.map((event) => (
-                  <div key={event.id} className="event-card">
-                    <div className="event-image">
-                      <img 
-                        src={event.image || '/default-event-image.jpg'} 
-                        alt={event.title}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/default-event-image.jpg';
-                        }}
-                      />
-                      <div className="event-category-badge">
-                        {event.category}
+                {featuredEvents.map((event) => {
+                  const participantesCount = getParticipantesCount(event);
+                  const ocupacaoPercentual = getOcupacaoPercentual(event);
+                  
+                  return (
+                    <div key={event.id} className="event-card">
+                      <div className="event-image">
+                        <img 
+                          src={event.image || '/default-event-image.jpg'} 
+                          alt={event.title}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/default-event-image.jpg';
+                          }}
+                        />
+                        <div className="event-category-badge">
+                          {event.category}
+                        </div>
+                        {/* Barra de progresso na imagem */}
+                        <div className="event-ocupacao-overlay">
+                          <div className="ocupacao-info">
+                            <span>{Math.round(ocupacaoPercentual)}% ocupado</span>
+                            <span>{participantesCount}/{event.max_participants}</span>
+                          </div>
+                          <div className="ocupacao-progress-mini">
+                            <div 
+                              className={`ocupacao-fill ${ocupacaoPercentual >= 90 ? 'high' : ocupacaoPercentual >= 70 ? 'medium' : 'low'}`}
+                              style={{ width: `${ocupacaoPercentual}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        <div className="event-overlay"></div>
                       </div>
-                      <div className="event-overlay"></div>
+                      <div className="event-info">
+                        <h3>{event.title}</h3>
+                        <p className="event-description">
+                          {event.description && event.description.length > 100 
+                            ? `${event.description.substring(0, 100)}...` 
+                            : event.description || 'Descrição não disponível'
+                          }
+                        </p>
+                        <div className="event-meta">
+                          <span>
+                            <i className="fas fa-calendar-alt"></i> 
+                            {new Date(event.date).toLocaleDateString('pt-BR')} {event.time && `às ${event.time}`}
+                          </span>
+                          <span>
+                            <i className="fas fa-map-marker-alt"></i> {event.location}
+                          </span>
+                          <span className="participants-info">
+                            <i className="fas fa-users"></i> 
+                            {participantesCount} / {event.max_participants} participantes
+                            <span className="ocupacao-badge">
+                              {Math.round(ocupacaoPercentual)}% ocupado
+                            </span>
+                          </span>
+                        </div>
+                        <div className="event-buttons">
+                          <button 
+                            className="event-btn" 
+                            onClick={() => handleParticiparClick(event)}
+                            disabled={ocupacaoPercentual >= 100}
+                          >
+                            {ocupacaoPercentual >= 100 ? 'Lotado' : 
+                             isAuthenticated && userType === 'estudante' ? 'Participar' : 'Participar'}
+                          </button>
+                          <button 
+                            className="btn-secondary" 
+                            onClick={() => handleVerDetalhes(event)}
+                          >
+                            Ver Detalhes
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="event-info">
-                      <h3>{event.title}</h3>
-                      <p className="event-description">
-                        {event.description && event.description.length > 100 
-                          ? `${event.description.substring(0, 100)}...` 
-                          : event.description || 'Descrição não disponível'
-                        }
-                      </p>
-                      <div className="event-meta">
-                        <span>
-                          <i className="fas fa-calendar-alt"></i> 
-                          {new Date(event.date).toLocaleDateString('pt-BR')} {event.time && `às ${event.time}`}
-                        </span>
-                        <span>
-                          <i className="fas fa-map-marker-alt"></i> {event.location}
-                        </span>
-                        <span>
-                          <i className="fas fa-users"></i> 
-                          {event.registrations_count || 0} / {event.max_participants} participantes
-                        </span>
-                      </div>
-                      <div className="event-buttons">
-                        <button 
-                          className="event-btn" 
-                          onClick={() => handleParticiparClick(event)}
-                        >
-                          {isAuthenticated && userType === 'estudante' ? 'Participar' : 'Participar'}
-                        </button>
-                        <button 
-                          className="btn-secondary" 
-                          onClick={() => handleVerDetalhes(event)}
-                        >
-                        Ver Detalhes
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {events.length > 6 && (
@@ -313,11 +359,11 @@ const Home = () => {
 
       {/* Modal de Detalhes do Evento */}
       <EventModal
-  event={selectedEvent}
-  isOpen={showEventModal}
-  onClose={closeModal} // ← Esta função deve atualizar o estado
-  onRegister={() => selectedEvent && handleParticiparClick(selectedEvent)}
-/>
+        event={selectedEvent}
+        isOpen={showEventModal}
+        onClose={closeModal}
+        onRegister={() => selectedEvent && handleParticiparClick(selectedEvent)}
+      />
 
       <Footer />
     </div>

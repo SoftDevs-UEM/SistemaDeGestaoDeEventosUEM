@@ -14,14 +14,25 @@ class EventController extends Controller
     public function index()
     {
         try {
-            $events = Event::with(['promoter'])->whereNull('deleted_at')->get();
+            $events = Event::withCount(['registrations as participants_count'])
+                ->with(['promoter'])
+                ->where('deleted_at', null)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($event) {
+                    // Garantir que temos ambos os valores
+                    $event->participants_count = $event->participants_count ?? 0;
+                    $event->participants = $event->participants ?? 0;
+                    return $event;
+                });
+                
             return response()->json($events);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Erro ao carregar eventos: ' . $e->getMessage()
-            ], 500);
+            Log::error('Erro ao carregar eventos: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao carregar eventos'], 500);
         }
     }
+    
 
     /**
      * Store a newly created resource in storage.
@@ -71,17 +82,22 @@ class EventController extends Controller
     public function show($id)
     {
         try {
-            $event = Event::with(['promoter'])->whereNull('deleted_at')->find($id);
-            
+            $event = Event::withCount(['registrations as participants_count'])
+                ->with(['promoter'])
+                ->find($id);
+                
             if (!$event) {
                 return response()->json(['error' => 'Evento não encontrado'], 404);
             }
-
+            
+            // Garantir que temos ambos os valores
+            $event->participants_count = $event->participants_count ?? 0;
+            $event->participants = $event->participants ?? 0;
+            
             return response()->json($event);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Erro ao carregar evento: ' . $e->getMessage()
-            ], 500);
+            Log::error('Erro ao carregar evento: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao carregar evento'], 500);
         }
     }
 

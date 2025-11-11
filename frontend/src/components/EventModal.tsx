@@ -34,11 +34,34 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
     onClose();
   };
 
-  const progressPercentage = event.registrations_count && event.max_participants 
-    ? (event.registrations_count / event.max_participants) * 100 
-    : 0;
+  // ✅ FUNÇÕES ATUALIZADAS: Usar participants_count ou participants
+  const getParticipantesCount = () => {
+    return event.participants_count || event.participants || 0;
+  };
 
-  const isEventFull = event.registrations_count >= event.max_participants;
+  const getOcupacaoPercentual = () => {
+    const participantes = getParticipantesCount();
+    const maxParticipantes = event.max_participants || 1;
+    return Math.min(100, (participantes / maxParticipantes) * 100);
+  };
+
+  const participantesCount = getParticipantesCount();
+  const ocupacaoPercentual = getOcupacaoPercentual();
+  const isEventFull = ocupacaoPercentual >= 100;
+
+  // ✅ DEBUG: Log para verificar dados
+  React.useEffect(() => {
+    if (isOpen && event) {
+      console.log('🔍 EventModal Debug:', {
+        title: event.title,
+        participants: event.participants,
+        participants_count: event.participants_count,
+        max_participants: event.max_participants,
+        ocupacao: `${ocupacaoPercentual}%`,
+        isFull: isEventFull
+      });
+    }
+  }, [isOpen, event]);
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
@@ -73,22 +96,49 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
 
         {/* Modal Body - Layout Compacto */}
         <div className="modal-body">
-          {/* Progress Bar Compacta */}
+          {/* ✅ ATUALIZADO: Progress Bar Compacta com dados corretos */}
           <div className="participants-progress-compact">
             <div className="progress-info-compact">
               <span className="progress-text">
                 <i className="fas fa-users"></i>
-                {event.registrations_count || 0} de {event.max_participants} participantes
+                {participantesCount} de {event.max_participants} participantes
+                {/* ✅ DEBUG INFO - pode remover depois */}
+                <small className="debug-info">
+                  {event.participants_count !== undefined && ` (count: ${event.participants_count})`}
+                  {event.participants !== undefined && ` (db: ${event.participants})`}
+                </small>
               </span>
               <span className="progress-percentage">
-                {Math.round(progressPercentage)}% preenchido
+                {Math.round(ocupacaoPercentual)}% ocupado
               </span>
             </div>
             <div className="progress-bar-compact">
               <div 
-                className="progress-fill" 
-                style={{ width: `${progressPercentage}%` }}
+                className={`progress-fill ${ocupacaoPercentual >= 90 ? 'high' : ocupacaoPercentual >= 70 ? 'medium' : 'low'}`}
+                style={{ width: `${ocupacaoPercentual}%` }}
               ></div>
+            </div>
+          </div>
+
+          {/* ✅ NOVA SEÇÃO: Estatísticas de Ocupação Detalhadas */}
+          <div className="ocupacao-detailed-section">
+            <h3>
+              <i className="fas fa-chart-bar"></i>
+              Estatísticas de Ocupação
+            </h3>
+            <div className="ocupacao-stats-grid">
+              <div className="ocupacao-stat">
+                <div className="stat-value">{participantesCount}</div>
+                <div className="stat-label">Inscritos</div>
+              </div>
+              <div className="ocupacao-stat">
+                <div className="stat-value">{event.max_participants - participantesCount}</div>
+                <div className="stat-label">Vagas Livres</div>
+              </div>
+              <div className="ocupacao-stat">
+                <div className="stat-value">{Math.round(ocupacaoPercentual)}%</div>
+                <div className="stat-label">Ocupação</div>
+              </div>
             </div>
           </div>
 
@@ -155,14 +205,50 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
             </div>
           </div>
 
+          {/* ✅ ATUALIZADO: Informações de Capacidade */}
+          <div className="capacity-info">
+            <h3>
+              <i className="fas fa-chart-pie"></i>
+              Capacidade do Evento
+            </h3>
+            <div className="capacity-details">
+              <div className="capacity-item">
+                <strong>Total de Vagas:</strong>
+                <span>{event.max_participants} participantes</span>
+              </div>
+              <div className="capacity-item">
+                <strong>Inscrições Confirmadas:</strong>
+                <span>{participantesCount} participantes</span>
+              </div>
+              <div className="capacity-item">
+                <strong>Status:</strong>
+                <span className={`status-text ${isEventFull ? 'full' : 'available'}`}>
+                  {isEventFull ? 'Evento Lotado' : 'Inscrições Abertas'}
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Informações Adicionais */}
-          {(event.organizer || event.contact_email) && (
+          {(event.target_audience || event.requirements || event.organizer || event.contact_email) && (
             <div className="additional-info">
               <h3>
                 <i className="fas fa-building"></i>
                 Informações Adicionais
               </h3>
               <div className="additional-grid">
+                {event.target_audience && (
+                  <div className="additional-item">
+                    <strong>Público-Alvo:</strong>
+                    <span>{event.target_audience}</span>
+                  </div>
+                )}
+                {event.requirements && (
+                  <div className="additional-item">
+                    <strong>Requisitos:</strong>
+                    <span>{event.requirements}</span>
+                  </div>
+                )}
                 {event.organizer && (
                   <div className="additional-item">
                     <strong>Organizador:</strong>
@@ -187,7 +273,7 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
             Fechar
           </button>
           <button 
-            className="btn-modal-primary" 
+            className={`btn-modal-primary ${isEventFull ? 'disabled' : ''}`} 
             onClick={handleRegister}
             disabled={isEventFull}
           >

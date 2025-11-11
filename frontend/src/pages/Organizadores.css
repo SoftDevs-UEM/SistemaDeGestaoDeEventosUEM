@@ -1218,3 +1218,102 @@
     font-size: 0.8rem;
   }
 }
+/* Nova card de participantes */
+.participants-stat {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.participants-stat .stat-icon {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Barra de progresso de ocupação */
+.ocupacao-progress {
+  margin-top: 10px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.low {
+  background: #28a745;
+}
+
+.progress-fill.medium {
+  background: #ffc107;
+}
+
+.progress-fill.high {
+  background: #dc3545;
+}
+
+/* Para a tabela */
+.registrations-progress {
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 5px 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-bar-fill.low {
+  background: #28a745;
+}
+
+.progress-bar-fill.medium {
+  background: #ffc107;
+}
+
+.progress-bar-fill.high {
+  background: #dc3545;
+}
+
+.progress-percentage {
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+}
+
+.participants-debug {
+  font-size: 9px;
+  color: #999;
+  margin-top: 2px;
+}
+
+/* Badge no header */
+.total-badge {
+  background: #007bff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}

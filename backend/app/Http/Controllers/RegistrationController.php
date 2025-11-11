@@ -122,22 +122,27 @@ class RegistrationController extends Controller
             Log::info('📋 Dados da inscrição:', $registrationData);
 
             // Criar a inscrição
-            $registration = Registration::create($registrationData);
-            Log::info("✅ Inscrição criada com ID: {$registration->id}");
+// No método store, após criar a inscrição:
+$registration = Registration::create($registrationData);
+Log::info("✅ Inscrição criada com ID: {$registration->id}");
 
-            // ✅ CORREÇÃO: Verificar se a coluna participants existe antes de atualizar
-            if (Schema::hasColumn('events', 'participants')) {
-                $event->increment('participants');
-                Log::info("👥 Contador de participantes atualizado na tabela events: {$event->participants}");
-            } else {
-                Log::warning("⚠️ Coluna 'participants' não encontrada na tabela events - pulando atualização");
-                // Não quebra o processo, apenas registra o warning
-            }
+// ✅ ATUALIZAÇÃO GARANTIDA do contador de participantes
+try {
+    // Método 1: Usando increment (mais eficiente)
+    Event::where('id', $request->event_id)->increment('participants');
+    
+    // Método 2: Recarregar e verificar (para debug)
+    $eventUpdated = Event::find($request->event_id);
+    Log::info("👥 Contador ATUALIZADO: {$eventUpdated->participants}/{$eventUpdated->max_participants}");
+    
+} catch (\Exception $e) {
+    Log::error("❌ Erro ao atualizar contador de participantes: " . $e->getMessage());
+    // Não quebra o processo principal
+}
 
-            // Recarregar contagem atual
-            $updatedCount = Registration::where('event_id', $request->event_id)->count();
-            Log::info("👥 Contador final: {$updatedCount}/{$event->max_participants}");
-
+// Contagem atualizada via relação
+$updatedCount = Registration::where('event_id', $request->event_id)->count();
+Log::info("👥 Contagem real na tabela registrations: {$updatedCount}");
             DB::commit();
             Log::info('🎉 INSCRIÇÃO CONCLUÍDA COM SUCESSO!');
 

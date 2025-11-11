@@ -9,6 +9,7 @@ type EventStats = {
   eventosAtivos: number;
   eventosFinalizados: number;
   eventosArquivados: number;
+  totalParticipantes: number;
 };
 
 type ActiveView = 'dashboard' | 'criar-evento' | 'meus-eventos' | 'editar-evento' | 'eventos-arquivados';
@@ -86,7 +87,8 @@ export default function Organizadores() {
     totalEventos: 0,
     eventosAtivos: 0,
     eventosFinalizados: 0,
-    eventosArquivados: 0
+    eventosArquivados: 0,
+    totalParticipantes: 0
   });
   const [recentEvents, setRecentEvents] = useState<any[]>([]);
   const [arquivedEvents, setArquivedEvents] = useState<any[]>([]);
@@ -163,11 +165,19 @@ export default function Organizadores() {
         new Date(event.date) < new Date()
       );
 
+      // ✅ CALCULAR TOTAL DE PARTICIPANTES EM TODOS OS EVENTOS
+      const totalParticipantes = meusEventos.reduce((total, evento) => {
+        // Usar participants_count da API ou participants da tabela
+        const participantes = evento.participants_count || evento.participants || 0;
+        return total + participantes;
+      }, 0);
+
       setEventStats({
         totalEventos: meusEventos.length,
         eventosAtivos: eventosAtivos.length,
         eventosFinalizados: eventosFinalizados.length,
-        eventosArquivados: eventosArquivados.length
+        eventosArquivados: eventosArquivados.length,
+        totalParticipantes: totalParticipantes
       });
 
       // Eventos recentes (últimos 5) - ordenados por data de criação
@@ -184,7 +194,8 @@ export default function Organizadores() {
         totalEventos: 0,
         eventosAtivos: 0,
         eventosFinalizados: 0,
-        eventosArquivados: 0
+        eventosArquivados: 0,
+        totalParticipantes: 0
       });
       setRecentEvents([]);
       setArquivedEvents([]);
@@ -225,7 +236,10 @@ export default function Organizadores() {
       date: evento.date,
       dateType: typeof evento.date,
       time: evento.time,
-      location: evento.location
+      location: evento.location,
+      participants: evento.participants,
+      participants_count: evento.participants_count,
+      max_participants: evento.max_participants
     });
   };
 
@@ -565,6 +579,19 @@ export default function Organizadores() {
     }
   };
 
+  // Função para obter número de participantes (com fallback)
+  const getParticipantesCount = (evento: any): number => {
+    // Priorizar participants_count (contagem real), depois participants (coluna da tabela)
+    return evento.participants_count || evento.participants || 0;
+  };
+
+  // Função para calcular porcentagem de ocupação
+  const getOcupacaoPercentual = (evento: any): number => {
+    const participantes = getParticipantesCount(evento);
+    const maxParticipantes = evento.max_participants || 1;
+    return Math.min(100, (participantes / maxParticipantes) * 100);
+  };
+
   // Renderização das views
   const renderDashboardView = () => (
     <div className="dashboard-view">
@@ -602,12 +629,13 @@ export default function Organizadores() {
             </div>
           </div>
           
-          <div className="stat-card inscription-stat">
-            <div className="stat-icon">📁</div>
+          {/* ✅ NOVA CARD DE TOTAL DE PARTICIPANTES */}
+          <div className="stat-card participants-stat">
+            <div className="stat-icon">👥</div>
             <div className="stat-info">
-              <h3>Eventos Arquivados</h3>
-              <span className="stat-number">{eventStats.eventosArquivados}</span>
-              <span className="stat-change">Podem ser restaurados</span>
+              <h3>Total de Participantes</h3>
+              <span className="stat-number">{eventStats.totalParticipantes}</span>
+              <span className="stat-change">Em todos os eventos</span>
             </div>
           </div>
         </div>
@@ -623,6 +651,9 @@ export default function Organizadores() {
           <div className="events-list-full">
             {recentEvents.map((evento) => {
               const estado = getEventoState(evento);
+              const participantesCount = getParticipantesCount(evento);
+              const ocupacaoPercentual = getOcupacaoPercentual(evento);
+              
               return (
                 <div key={evento.id} className="event-card-full">
                   <SafeImage 
@@ -643,7 +674,20 @@ export default function Organizadores() {
                       <span>📅 {formatarData(evento.date)}</span>
                       <span>🕒 {evento.time}</span>
                       <span>📍 {evento.location}</span>
-                      <span>👥 {evento.max_participants} participantes</span>
+                      <span>👥 {participantesCount} / {evento.max_participants} participantes</span>
+                    </div>
+                    {/* Barra de progresso de ocupação */}
+                    <div className="ocupacao-progress">
+                      <div className="progress-info">
+                        <span>Ocupação: {Math.round(ocupacaoPercentual)}%</span>
+                        <span>{participantesCount}/{evento.max_participants}</span>
+                      </div>
+                      <div className="progress-bar">
+                        <div 
+                          className={`progress-fill ${ocupacaoPercentual >= 90 ? 'high' : ocupacaoPercentual >= 70 ? 'medium' : 'low'}`}
+                          style={{ width: `${ocupacaoPercentual}%` }}
+                        ></div>
+                      </div>
                     </div>
                     <div className="event-actions">
                       <button 
@@ -898,7 +942,9 @@ export default function Organizadores() {
     <div className="management-view">
       <div className="management-header">
         <h2>📅 Meus Eventos</h2>
-        <span className="total-badge">{eventStats.totalEventos} eventos ativos</span>
+        <span className="total-badge">
+          {eventStats.totalEventos} eventos ativos • {eventStats.totalParticipantes} participantes totais
+        </span>
       </div>
 
       <div className="events-table-container">
@@ -918,6 +964,9 @@ export default function Organizadores() {
               <tbody>
                 {recentEvents.map((evento) => {
                   const estado = getEventoState(evento);
+                  const participantesCount = getParticipantesCount(evento);
+                  const ocupacaoPercentual = getOcupacaoPercentual(evento);
+                  
                   return (
                     <tr key={evento.id} className="event-table-row">
                       <td className="event-info-cell">
@@ -951,15 +1000,21 @@ export default function Organizadores() {
                       </td>
                       <td className="event-registrations">
                         <div className="registrations-count">
-                          {evento.registrations_count || 0} / {evento.max_participants}
+                          {participantesCount} / {evento.max_participants}
+                          <div className="participants-debug">
+                            {/* Debug info - pode remover depois */}
+                            {evento.participants_count !== undefined && `(count: ${evento.participants_count})`}
+                            {evento.participants !== undefined && `(db: ${evento.participants})`}
+                          </div>
                         </div>
                         <div className="registrations-progress">
                           <div 
-                            className="progress-bar" 
-                            style={{ 
-                              width: `${evento.max_participants > 0 ? Math.min(100, ((evento.registrations_count || 0) / evento.max_participants) * 100) : 0}%` 
-                            }}
+                            className={`progress-bar-fill ${ocupacaoPercentual >= 90 ? 'high' : ocupacaoPercentual >= 70 ? 'medium' : 'low'}`}
+                            style={{ width: `${ocupacaoPercentual}%` }}
                           ></div>
+                        </div>
+                        <div className="progress-percentage">
+                          {Math.round(ocupacaoPercentual)}% ocupado
                         </div>
                       </td>
                       <td className="event-actions-cell">
@@ -981,8 +1036,8 @@ export default function Organizadores() {
                           <button 
                             className="btn-archive" 
                             onClick={() => handleArquivarEvento(evento.id, evento.title)}
-                            disabled={evento.registrations_count > 0}
-                            title="Arquivar evento"
+                            disabled={participantesCount > 0}
+                            title={participantesCount > 0 ? "Não é possível arquivar evento com participantes" : "Arquivar evento"}
                           >
                             📁 Arquivar
                           </button>
