@@ -48,6 +48,30 @@ export function EventosProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+
+// Adicione este método ao contexto
+const restoreEvent = async (id: number): Promise<Event> => {
+  try {
+    setLoading(true);
+    setError(null);
+    // Você precisará criar um endpoint específico para restore
+    // Por enquanto, vamos usar update
+    const updatedEvent = await eventService.update(id, { 
+      deleted_at: null, 
+      status: 'pendente' 
+    });
+    setEvents(prev => prev.map(event => event.id === id ? updatedEvent : event));
+    return updatedEvent;
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Erro ao restaurar evento';
+    setError(errorMessage);
+    console.error('Error restoring event:', err);
+    throw err;
+  } finally {
+    setLoading(false);
+  }
+};
+
   // Função para carregar eventos com autenticação
   const loadEvents = useCallback(async () => {
     // Se não estiver autenticado, usa eventos públicos
@@ -202,6 +226,9 @@ export function EventosProvider({ children }: { children: React.ReactNode }) {
     </EventosContext.Provider>
   );
 }
+
+
+
 
 export function useEventos() {
   const context = useContext(EventosContext);

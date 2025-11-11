@@ -1,15 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useEventos } from '../context/EventosContext';
 import './Eventos.css';
 import Footer from '../layouts/footer';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import type { Event } from '../services/eventService';
+import EventModal from '../components/EventModal';
 
 const Eventos = () => {
   const navigate = useNavigate();
   const { events, loadEvents, loading, error } = useEventos();
   const { isAuthenticated, userType } = useAuth();
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showEventModal, setShowEventModal] = useState(false);
 
   useEffect(() => {
     loadEvents();
@@ -27,8 +30,13 @@ const Eventos = () => {
   };
 
   const handleVerDetalhes = (evento: Event) => {
-    // Aqui você pode implementar um modal ou navegar para página de detalhes
-    console.log('Ver detalhes do evento:', evento);
+    setSelectedEvent(evento);
+    setShowEventModal(true);
+  };
+
+  const closeModal = () => {
+    setShowEventModal(false);
+    setSelectedEvent(null);
   };
 
   if (loading) {
@@ -143,6 +151,14 @@ const Eventos = () => {
           )}
         </div>
       </section>
+
+      {/* Modal de Detalhes do Evento */}
+      <EventModal
+  event={selectedEvent}
+  isOpen={showEventModal}
+  onClose={closeModal} // ← Esta função deve atualizar o estado
+  onRegister={() => selectedEvent && handleParticiparClick(selectedEvent)}
+/>
 
       <Footer />
     </div>

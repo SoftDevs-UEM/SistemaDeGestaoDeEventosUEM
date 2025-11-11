@@ -14,7 +14,7 @@ class EventController extends Controller
     public function index()
     {
         try {
-            $events = Event::with(['promoter'])->get();
+            $events = Event::with(['promoter'])->whereNull('deleted_at')->get();
             return response()->json($events);
         } catch (\Exception $e) {
             return response()->json([
@@ -38,7 +38,8 @@ class EventController extends Controller
             'category' => 'required|string',
             'max_participants' => 'required|integer|min:1',
             'promoter_id' => 'required|exists:users,id',
-            'image' => 'nullable|string',
+            'status' => 'sometimes|string|in:pendente,aprovado,rejeitado,cancelado,finalizado',
+            'image' => 'nullable|string', // Aproximadamente 10MB em base64
             'requirements' => 'nullable|string',
             'target_audience' => 'required|string'
         ]);
@@ -48,10 +49,16 @@ class EventController extends Controller
         }
     
         try {
-            // Cria o evento sem definir status
-            $event = Event::create($request->all());
+            // Define status padrão como 'pendente' se não fornecido
+            $eventData = $request->all();
+            if (!isset($eventData['status'])) {
+                $eventData['status'] = 'pendente';
+            }
+            
+            $event = Event::create($eventData);
             return response()->json($event->load('promoter'), 201);
         } catch (\Exception $e) {
+            \Log::error('Erro ao criar evento: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Erro ao criar evento: ' . $e->getMessage()
             ], 500);
@@ -64,7 +71,7 @@ class EventController extends Controller
     public function show($id)
     {
         try {
-            $event = Event::with(['promoter'])->find($id);
+            $event = Event::with(['promoter'])->whereNull('deleted_at')->find($id);
             
             if (!$event) {
                 return response()->json(['error' => 'Evento não encontrado'], 404);
@@ -81,42 +88,60 @@ class EventController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
-    {
-        $event = Event::find($id);
-        
-        if (!$event) {
-            return response()->json(['error' => 'Evento não encontrado'], 404);
-        }
+ 
 
-        $validator = Validator::make($request->all(), [
-            'title' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|required|string',
-            'date' => 'sometimes|required|date',
-            'time' => 'sometimes|required|string',
-            'location' => 'sometimes|required|string',
-            'type' => 'sometimes|required|string|in:academico,cultural,desportivo',
-            'category' => 'sometimes|required|string',
-            'max_participants' => 'sometimes|required|integer|min:1',
-            'status' => 'sometimes|required|in:pendente,aprovado,rejeitado,cancelado,finalizado',
-            'image' => 'nullable|string',
-            'requirements' => 'nullable|string',
-            'target_audience' => 'sometimes|required|string'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        try {
-            $event->update($request->all());
-            return response()->json($event->load('promoter'));
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Erro ao atualizar evento: ' . $e->getMessage()
-            ], 500);
-        }
+public function update(Request $request, $id)
+{
+    $event = Event::whereNull('deleted_at')->find($id);
+    
+    if (!$event) {
+        return response()->json(['error' => 'Evento não encontrado'], 404);
     }
+
+    $validator = Validator::make($request->all(), [
+        'title' => 'sometimes|required|string|max:255',
+        'description' => 'sometimes|required|string',
+        'date' => 'sometimes|required|date',
+        'time' => 'sometimes|required|string',
+        'location' => 'sometimes|required|string',
+        'type' => 'sometimes|required|string|in:academico,cultural,desportivo',
+        'category' => 'sometimes|required|string',
+        'max_participants' => 'sometimes|required|integer|min:1',
+        'status' => 'sometimes|required|in:pendente,aprovado,rejeitado,cancelado,finalizado',
+        'image' => 'nullable|string', // REMOVA O LIMITE MAX
+        'requirements' => 'nullable|string',
+        'target_audience' => 'sometimes|required|string',
+        'deleted_at' => 'nullable|date'
+    ]);
+
+    if ($validator->fails()) {
+        \Log::error('Validação falhou:', $validator->errors()->toArray());
+        return response()->json(['errors' => $validator->errors()], 422);
+    }
+
+    try {
+        $data = $request->all();
+        
+        // Log para debug
+        \Log::info('Atualizando evento ID: ' . $id, [
+            'title' => $data['title'] ?? '',
+            'date' => $data['date'] ?? '',
+            'has_image' => isset($data['image']) ? 'Sim' : 'Não',
+            'image_length' => isset($data['image']) ? strlen($data['image']) : 0
+        ]);
+        
+        $event->update($data);
+        
+        \Log::info('Evento atualizado com sucesso ID: ' . $id);
+        return response()->json($event->load('promoter'));
+    } catch (\Exception $e) {
+        \Log::error('Erro ao atualizar evento ID ' . $id . ': ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+        return response()->json([
+            'error' => 'Erro ao atualizar evento: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
     /**
      * Remove the specified resource from storage.
@@ -130,11 +155,43 @@ class EventController extends Controller
                 return response()->json(['error' => 'Evento não encontrado'], 404);
             }
 
-            $event->delete();
-            return response()->json(null, 204);
+            $event->delete(); // Soft delete
+            return response()->json(['message' => 'Evento arquivado com sucesso'], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Erro ao excluir evento: ' . $e->getMessage()
+                'error' => 'Erro ao arquivar evento: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Método para restaurar evento
+    public function restore($id)
+    {
+        try {
+            $event = Event::withTrashed()->find($id);
+            
+            if (!$event) {
+                return response()->json(['error' => 'Evento não encontrado'], 404);
+            }
+
+            $event->restore();
+            return response()->json(['message' => 'Evento restaurado com sucesso', 'event' => $event->load('promoter')]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Erro ao restaurar evento: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Método para obter eventos arquivados
+    public function archived()
+    {
+        try {
+            $events = Event::onlyTrashed()->with(['promoter'])->get();
+            return response()->json($events);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Erro ao carregar eventos arquivados: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -150,6 +207,7 @@ class EventController extends Controller
             }
 
             $events = Event::where('type', $type)
+                          ->whereNull('deleted_at')
                           ->with(['promoter'])
                           ->get();
             return response()->json($events);
@@ -171,6 +229,7 @@ class EventController extends Controller
             }
 
             $events = Event::where('status', $status)
+                          ->whereNull('deleted_at')
                           ->with(['promoter'])
                           ->get();
             return response()->json($events);
@@ -184,7 +243,7 @@ class EventController extends Controller
     // Método para aprovar/rejeitar evento (admin)
     public function updateStatus(Request $request, $id)
     {
-        $event = Event::find($id);
+        $event = Event::whereNull('deleted_at')->find($id);
         
         if (!$event) {
             return response()->json(['error' => 'Evento não encontrado'], 404);
@@ -218,7 +277,7 @@ class EventController extends Controller
     public function search(Request $request)
     {
         try {
-            $query = Event::query()->with(['promoter']);
+            $query = Event::query()->with(['promoter'])->whereNull('deleted_at');
 
             if ($request->has('search') && $request->search) {
                 $searchTerm = $request->search;

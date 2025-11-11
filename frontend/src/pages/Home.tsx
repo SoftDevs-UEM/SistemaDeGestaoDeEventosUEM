@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useEventos } from '../context/EventosContext';
 import './Home.css';
 import Footer from '../layouts/footer';
 import EventModal from '../components/EventModal';
+import React, { useEffect, useState, useCallback } from 'react';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -17,7 +17,7 @@ const Home = () => {
   const { events, loadEvents, loading, error } = useEventos();
 
   // Participar: só estudante autenticado pode se inscrever direto
-  const handleParticiparClick = (event) => {
+  const handleParticiparClick = useCallback((event) => {
     if (!isAuthenticated) {
       localStorage.setItem('eventoParaInscricao', JSON.stringify(event));
       navigate('/login');
@@ -26,32 +26,32 @@ const Home = () => {
     } else if (userType === 'promotor' || userType === 'admin') {
       navigate('/organizadores');
     }
-  };
+  }, [isAuthenticated, userType, navigate]);
 
-  const handleVerDetalhes = (event) => {
+  const handleVerDetalhes = useCallback((event) => {
     setSelectedEvent(event);
     setShowEventModal(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setShowEventModal(false);
     setSelectedEvent(null);
-  };
+  }, []);
 
-  // Carregar eventos quando o componente montar
+  // CORREÇÃO: useEffect com dependências adequadas
   useEffect(() => {
     console.log('🏠 Home: Carregando eventos...');
     loadEvents();
-  }, [loadEvents]);
+  }, []); // ← Array vazio para executar apenas uma vez
 
-  // Log para debug
+  // Log para debug - CORRIGIDO
   useEffect(() => {
-    console.log('🏠 Home: Eventos carregados:', events.length);
-    console.log('🏠 Home: Loading:', loading);
-    console.log('🏠 Home: Error:', error);
-  }, [events, loading, error]);
+    if (events.length > 0) {
+      console.log('🏠 Home: Eventos carregados:', events.length);
+    }
+  }, [events.length]); // ← Só executa quando o length muda
 
-  // Dados do carrossel hero
+  // Dados do carrossel hero - CORRIGIDO
   useEffect(() => {
     const heroEventsData = [
       {
@@ -313,11 +313,11 @@ const Home = () => {
 
       {/* Modal de Detalhes do Evento */}
       <EventModal
-        event={selectedEvent}
-        isOpen={showEventModal}
-        onClose={closeModal}
-        onRegister={() => handleParticiparClick(selectedEvent)}
-      />
+  event={selectedEvent}
+  isOpen={showEventModal}
+  onClose={closeModal} // ← Esta função deve atualizar o estado
+  onRegister={() => selectedEvent && handleParticiparClick(selectedEvent)}
+/>
 
       <Footer />
     </div>

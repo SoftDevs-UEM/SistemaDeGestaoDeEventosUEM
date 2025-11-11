@@ -15,6 +15,10 @@ Route::get('/events/{id}', [EventController::class, 'show']);
 Route::get('/events/type/{type}', [EventController::class, 'getByType']);
 Route::get('/events/search', [EventController::class, 'search']);
 
+// Rotas para eventos arquivados
+Route::get('/events/archived', [EventController::class, 'archived']);
+Route::post('/events/{id}/restore', [EventController::class, 'restore']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
