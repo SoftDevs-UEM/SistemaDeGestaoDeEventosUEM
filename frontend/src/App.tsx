@@ -17,9 +17,9 @@ import HomeAdmin from './pages/HomeAdmin';
 import HomePromotor from './pages/HomePromotor';
 import HomeEstudante from './pages/HomeEstudante';
 import Organizadores from './pages/Organizadores';
-import Estatisticas from './pages/Estatisticas';
 import CadastrarPromotor from './pages/CadastrarPromotor';
 import AdminDashboard from './pages/AdminDashboard';
+
 
 // Tipo de usuário permitido
 type UserType = 'estudante' | 'docente' | 'cta' | 'admin' | 'promotor';
@@ -114,6 +114,7 @@ function App() {
       <EventosProvider>
         <Router>
           <AppContent />
+      
         </Router>
       </EventosProvider>
     </AuthProvider>

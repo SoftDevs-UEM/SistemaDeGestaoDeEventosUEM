@@ -41,8 +41,39 @@ class Event extends Model
     }
 
     // Relationship with registrations (if you have a registrations table)
+   
+
+
     public function registrations()
     {
         return $this->hasMany(Registration::class);
     }
+
+    // ADICIONAR: Check if event has available spots
+    public function hasAvailableSpots()
+    {
+        return $this->participants < $this->max_participants;
+    }
+
+    // ADICIONAR: Get available spots count
+    public function getAvailableSpots()
+    {
+        return $this->max_participants - $this->participants;
+    }
+
+    // ADICIONAR: Increment participants count
+    public function incrementParticipants()
+    {
+        $this->increment('participants');
+    }
+
+    // ADICIONAR: Decrement participants count
+    public function decrementParticipants()
+    {
+        if ($this->participants > 0) {
+            $this->decrement('participants');
+        }
+    }
+
+    
 }
