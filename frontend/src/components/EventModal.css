@@ -1,83 +1,72 @@
-/* EventModal.css */
-
-/* Previne scroll da página quando modal está aberto */
-body.modal-open {
-  overflow: hidden;
-}
-
-/* Modal Overlay */
+/* Modal UEM - Cores oficiais e uniforme com Home */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(3, 73, 42, 0.95);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10000;
-  padding: 20px;
-  animation: overlayFadeIn 0.3s ease-out;
-}
-
-/* Modal Content - Tamanho fixo sem scroll */
-.modal-content {
-  background: white;
-  border-radius: 20px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 85vh;
-  position: relative;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-  animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  display: flex;
-  flex-direction: column;
+  z-index: 1000;
+  padding: 0;
+  margin: 0;
   overflow: hidden;
 }
 
-/* REMOVIDO: Botão de fechar no canto superior direito */
-
-/* Modal Header Compacto */
-.modal-header {
-  background: linear-gradient(135deg, #03492a, #02663e);
-  color: white;
-  padding: 30px;
-  position: relative;
+.modal-content {
+  width: 95vw;
+  height: 95vh;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 2px solid #03492a; /* Verde UEM */
 }
 
-.modal-header-content {
-  position: relative;
-  z-index: 2;
+/* Header UEM - Cores oficiais */
+.modal-header {
+  padding: 20px;
+  border-bottom: 2px solid #03492a; /* Verde UEM */
+  background: linear-gradient(135deg, #03492a 0%, #02733a 100%); /* Gradiente UEM */
+  flex-shrink: 0;
+}
+
+.modal-header-content h2 {
+  font-size: 20px;
+  margin: 0 0 8px 0;
+  color: white; /* Texto branco sobre fundo verde */
+  line-height: 1.3;
+  font-weight: 600;
 }
 
 .header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
 }
 
 .event-category {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2); /* Verde claro transparente */
   color: white;
-  padding: 6px 15px;
+  padding: 4px 12px;
   border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  backdrop-filter: blur(10px);
+  font-size: 12px;
+  font-weight: 500;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.status-badge {
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
+.event-status .status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .status-badge.full {
@@ -86,191 +75,257 @@ body.modal-open {
 }
 
 .status-badge.available {
-  background: #0f9257;
+  background: #28a745;
   color: white;
-}
-
-.modal-header h2 {
-  font-size: 1.6rem;
-  margin-bottom: 15px;
-  font-weight: 700;
-  line-height: 1.3;
 }
 
 .event-details-modal {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 20px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .event-details-modal span {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.95rem;
-  opacity: 0.9;
+  gap: 6px;
 }
 
 .event-details-modal i {
-  width: 16px;
-  color: #0f9257;
+  color: rgba(255, 255, 255, 0.8);
 }
 
-/* Modal Body - Layout compacto */
+/* Corpo do modal com cores UEM */
 .modal-body {
-  padding: 30px;
   flex: 1;
-  overflow-y: auto;
-  background: white;
-}
-
-/* Progress Bar Compacta */
-.participants-progress-compact {
-  background: #f8f9fa;
   padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 25px;
-  border: 2px solid rgba(15, 146, 87, 0.1);
-}
-
-.progress-info-compact {
+  overflow-y: auto;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 20px;
+  background: #f8f9fa;
 }
 
-.progress-text {
+/* Layout de grid principal */
+.main-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Cards de informações - Cores UEM */
+.stats-card, .details-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border-left: 4px solid #03492a; /* Verde UEM */
+  box-shadow: 0 4px 12px rgba(3, 73, 42, 0.1); /* Sombra verde suave */
+  border: 1px solid #e9ecef;
+}
+
+.details-card {
+  border-left-color: #02733a; /* Verde UEM mais claro */
+}
+
+.stats-card h3, .details-card h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #03492a; /* Verde UEM */
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #03492a;
   font-weight: 600;
-  font-size: 0.9rem;
 }
 
-.progress-percentage {
-  color: #0f9257;
-  font-weight: 700;
-  font-size: 0.9rem;
+.stats-card h3 i {
+  color: #03492a; /* Verde UEM */
 }
 
-.progress-bar-compact {
-  width: 100%;
+.details-card h3 i {
+  color: #02733a; /* Verde UEM mais claro */
+}
+
+/* Grid de estatísticas - Cores UEM */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 12px;
+  background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%); /* Gradiente verde claro */
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(3, 73, 42, 0.1);
+  border: 1px solid #e1f5e1;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: bold;
+  color: #03492a; /* Verde UEM */
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #02733a; /* Verde UEM mais claro */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+/* Barra de progresso - Cores UEM */
+.progress-section {
+  margin-top: 12px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #03492a; /* Verde UEM */
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.progress-bar {
   height: 8px;
   background: #e9ecef;
-  border-radius: 10px;
+  border-radius: 4px;
   overflow: hidden;
+  border: 1px solid #dee2e6;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #0f9257, #02663e);
-  border-radius: 10px;
-  transition: width 0.8s ease;
+  border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
-/* Descrição */
-.description-section {
-  margin-bottom: 25px;
+.progress-fill.low { 
+  background: linear-gradient(90deg, #28a745, #34ce57); /* Verde */
+}
+.progress-fill.medium { 
+  background: linear-gradient(90deg, #ffc107, #ffd351); /* Amarelo */
+}
+.progress-fill.high { 
+  background: linear-gradient(90deg, #dc3545, #e4606d); /* Vermelho */
 }
 
-.description-section h3 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #03492a;
-  margin-bottom: 12px;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.description-section p {
-  color: #666;
-  line-height: 1.6;
-  font-size: 0.95rem;
-  margin: 0;
-}
-
-/* Grid de Informações Compacto */
-.event-info-grid-compact {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin-bottom: 25px;
-}
-
-.info-column {
+/* Lista de detalhes - Cores UEM */
+.details-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-}
-
-.info-item-compact {
-  display: flex;
-  align-items: flex-start;
   gap: 12px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  border-left: 3px solid #0f9257;
 }
 
-.info-icon {
-  color: #0f9257;
-  font-size: 1.1rem;
-  margin-top: 2px;
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f3f4;
 }
 
-.info-content {
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-item i {
+  color: #03492a; /* Verde UEM */
+  width: 16px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.detail-item div {
   flex: 1;
 }
 
-.info-content label {
+.detail-item strong {
   display: block;
-  color: #03492a;
-  font-size: 0.8rem;
+  font-size: 12px;
+  color: #02733a; /* Verde UEM mais claro */
+  margin-bottom: 2px;
   font-weight: 600;
-  text-transform: uppercase;
-  margin-bottom: 4px;
 }
 
-.info-content span {
-  color: #666;
-  font-size: 0.9rem;
-  line-height: 1.4;
+.detail-item span {
+  display: block;
+  font-size: 14px;
+  color: #03492a; /* Verde UEM */
+  font-weight: 500;
 }
 
-/* Informações Adicionais */
-.additional-info {
-  background: #f8f9fa;
-  padding: 20px;
+/* Descrição - Cores UEM */
+.description-section {
+  background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%); /* Gradiente amarelo claro */
   border-radius: 12px;
-  border: 2px solid rgba(15, 146, 87, 0.1);
+  padding: 16px 20px;
+  border-left: 4px solid #ffc107; /* Amarelo */
+  border: 1px solid #ffeaa7;
+}
+
+.description-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #856404; /* Amarelo escuro */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.description-section h3 i {
+  color: #ffc107; /* Amarelo */
+}
+
+.description-section p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #856404; /* Amarelo escuro */
+}
+
+/* Informações adicionais - Cores UEM */
+.additional-info {
+  background: linear-gradient(135deg, #e8f4ff 0%, #d1ecf1 100%); /* Gradiente azul claro */
+  border-radius: 12px;
+  padding: 16px 20px;
+  border-left: 4px solid #17a2b8; /* Azul */
+  border: 1px solid #bee5eb;
 }
 
 .additional-info h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #0c5460; /* Azul escuro */
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #03492a;
-  margin-bottom: 15px;
-  font-size: 1.1rem;
+  gap: 8px;
   font-weight: 600;
+}
+
+.additional-info h3 i {
+  color: #17a2b8; /* Azul */
 }
 
 .additional-grid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .additional-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 12px;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #d1ecf1;
 }
 
 .additional-item:last-child {
@@ -278,332 +333,175 @@ body.modal-open {
 }
 
 .additional-item strong {
-  color: #03492a;
-  font-size: 0.9rem;
+  font-size: 14px;
+  color: #0c5460; /* Azul escuro */
+  min-width: 120px;
+  font-weight: 600;
 }
 
 .additional-item span {
-  color: #666;
-  font-size: 0.9rem;
-  text-align: right;
-}
-
-/* Modal Footer */
-.modal-footer {
-  display: flex;
-  gap: 15px;
-  padding: 25px 30px;
-  background: white;
-  border-top: 2px solid #f8f9fa;
-  margin-top: auto;
-}
-
-.btn-modal-secondary,
-.btn-modal-primary {
+  font-size: 14px;
+  color: #03492a; /* Verde UEM para contraste */
   flex: 1;
-  padding: 14px 25px;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+/* Footer UEM - Cores oficiais */
+.modal-footer {
+  padding: 20px;
+  border-top: 2px solid #03492a; /* Verde UEM */
+  background: linear-gradient(135deg, #03492a 0%, #02733a 100%); /* Gradiente UEM */
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.btn-modal-secondary, .btn-modal-primary {
+  padding: 12px 24px;
   border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn-modal-secondary {
-  background: transparent;
-  color: #03492a;
-  border: 2px solid #03492a;
-}
-
-.btn-modal-secondary:hover {
-  background: #03492a;
-  color: white;
-  transform: translateY(-2px);
-}
-
-.btn-modal-primary {
-  background: linear-gradient(135deg, #0f9257, #02663e);
-  color: white;
-  box-shadow: 0 4px 15px rgba(15, 146, 87, 0.3);
-}
-
-.btn-modal-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #02663e, #03492a);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(15, 146, 87, 0.4);
-}
-
-.btn-modal-primary:disabled {
-  background: #adb5bd;
-  color: #6c757d;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* Animações */
-@keyframes overlayFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .modal-content {
-    width: 95%;
-    max-height: 90vh;
-  }
-
-  .modal-header {
-    padding: 25px 20px;
-  }
-
-  .modal-header h2 {
-    font-size: 1.4rem;
-  }
-
-  .modal-body {
-    padding: 25px 20px;
-  }
-
-  .event-info-grid-compact {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .modal-footer {
-    padding: 20px;
-    flex-direction: column;
-  }
-
-  .btn-modal-secondary,
-  .btn-modal-primary {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .modal-overlay {
-    padding: 10px;
-  }
-
-  .modal-header {
-    padding: 20px 15px;
-  }
-
-  .modal-header h2 {
-    font-size: 1.3rem;
-  }
-
-  .header-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .modal-body {
-    padding: 20px 15px;
-  }
-
-  .participants-progress-compact {
-    padding: 15px;
-  }
-}
-/* ✅ NOVOS ESTILOS PARA AS ATUALIZAÇÕES */
-
-/* Debug info - pode remover depois */
-.debug-info {
-  font-size: 9px;
-  color: #999;
-  margin-left: 5px;
-  opacity: 0.6;
-}
-
-/* Barra de progresso com cores dinâmicas */
-.progress-fill.low {
-  background: #28a745;
-}
-
-.progress-fill.medium {
-  background: #ffc107;
-}
-
-.progress-fill.high {
-  background: #dc3545;
-}
-
-/* Seção de estatísticas de ocupação */
-.ocupacao-detailed-section {
-  background: #f8f9fa;
   border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-left: 4px solid #007bff;
-}
-
-.ocupacao-detailed-section h3 {
-  margin: 0 0 15px 0;
-  font-size: 16px;
-  color: #495057;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.ocupacao-detailed-section h3 i {
-  color: #007bff;
-}
-
-.ocupacao-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-}
-
-.ocupacao-stat {
-  text-align: center;
-  padding: 10px;
-  background: white;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.ocupacao-stat .stat-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #007bff;
-  margin-bottom: 5px;
-}
-
-.ocupacao-stat .stat-label {
-  font-size: 12px;
-  color: #6c757d;
+  transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* Informações de capacidade */
-.capacity-info {
-  background: #fff3cd;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-left: 4px solid #ffc107;
+.btn-modal-secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
-.capacity-info h3 {
-  margin: 0 0 15px 0;
-  font-size: 16px;
-  color: #856404;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.btn-modal-secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
 }
 
-.capacity-info h3 i {
-  color: #ffc107;
+.btn-modal-primary {
+  background: white;
+  color: #03492a; /* Verde UEM */
+  border: 2px solid white;
 }
 
-.capacity-details {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.btn-modal-primary:hover:not(.disabled) {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
 }
 
-.capacity-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #ffeaa7;
-}
-
-.capacity-item:last-child {
-  border-bottom: none;
-}
-
-.capacity-item strong {
-  color: #856404;
-  font-weight: 600;
-}
-
-.status-text.full {
-  color: #dc3545;
-  font-weight: bold;
-}
-
-.status-text.available {
-  color: #28a745;
-  font-weight: bold;
-}
-
-/* Botão desabilitado */
 .btn-modal-primary.disabled {
-  background: #6c757d !important;
-  cursor: not-allowed !important;
-  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.5);
+  color: rgba(3, 73, 42, 0.5);
+  cursor: not-allowed;
+  transform: none;
 }
 
-/* Ajustes responsivos */
+.btn-modal-secondary i, .btn-modal-primary i {
+  font-size: 14px;
+}
+
+/* Responsividade */
 @media (max-width: 768px) {
-  .ocupacao-stats-grid {
+  .modal-content {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+  
+  .main-info-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 16px;
   }
   
-  .ocupacao-stat {
-    padding: 8px;
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
   
-  .ocupacao-stat .stat-value {
+  .stat-number {
     font-size: 20px;
   }
   
-  .capacity-item {
+  .event-details-modal {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+    gap: 8px;
+  }
+  
+  .modal-header {
+    padding: 16px;
+  }
+  
+  .modal-body {
+    padding: 16px;
+  }
+  
+  .modal-footer {
+    padding: 16px;
+  }
+  
+  .btn-modal-secondary, .btn-modal-primary {
+    padding: 10px 16px;
+    font-size: 13px;
   }
 }
 
-/* Melhorias na barra de progresso */
-.progress-bar-compact {
-  height: 8px;
-  background: #e9ecef;
-  border-radius: 4px;
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .stat-item {
+    padding: 10px;
+  }
+  
+  .modal-header-content h2 {
+    font-size: 18px;
+  }
+  
+  .additional-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .additional-item strong {
+    min-width: auto;
+  }
+}
+
+/* Scroll interno suave */
+.modal-body {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #03492a #f1f1f1;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #03492a;
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #02733a;
+}
+
+/* Remover scroll do overlay */
+.modal-overlay {
   overflow: hidden;
-  margin-top: 8px;
-}
-
-.progress-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.3s ease, background-color 0.3s ease;
-}
-
-/* Status badges melhorados */
-.status-badge.full {
-  background: #dc3545;
-  color: white;
-}
-
-.status-badge.available {
-  background: #28a745;
-  color: white;
 }
