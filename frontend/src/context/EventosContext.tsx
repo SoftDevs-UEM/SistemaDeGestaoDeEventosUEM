@@ -1,32 +1,30 @@
 // context/EventosContext.tsx
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { Event } from '../services/eventService';
-import { eventService } from '../services/eventService';
 import { publicEventService, type PublicEvent } from '../services/publicEventService';
 import { useAuth } from './AuthContext';
+import api from '../services/api';
 
 interface EventContextType {
-  events: Event[];
+  events: PublicEvent[];
   loading: boolean;
   error: string | null;
   loadEvents: () => Promise<void>;
   loadPublicEvents: () => Promise<void>;
-  createEvent: (data: Omit<Event, 'id'>) => Promise<void>;
-  updateEvent: (id: number, data: Partial<Event>) => Promise<void>;
+  createEvent: (data: any) => Promise<void>;
+  updateEvent: (id: number, data: any) => Promise<void>;
   deleteEvent: (id: number) => Promise<void>;
   searchEvents: (params: { search?: string; type?: string; status?: string; date?: string }) => Promise<void>;
-  getEventsByType: (type: string) => Promise<Event[]>;
+  getEventsByType: (type: string) => Promise<PublicEvent[]>;
 }
 
 const EventosContext = createContext<EventContextType | undefined>(undefined);
 
 export function EventosProvider({ children }: { children: React.ReactNode }) {
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<PublicEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
 
-  // Função para carregar eventos públicos (sem autenticação)
   const loadPublicEvents = useCallback(async () => {
     try {
       console.log('🔄 Carregando eventos públicos...');
@@ -34,47 +32,29 @@ export function EventosProvider({ children }: { children: React.ReactNode }) {
       setError(null);
       
       const data = await publicEventService.list();
-      console.log('✅ Eventos públicos carregados:', data.length);
+      console.log(`✅ ${data.length} eventos públicos carregados do contexto`);
       
-      // Converter PublicEvent para Event (são compatíveis)
-      setEvents(data as Event[]);
+      // Filtrar apenas eventos ativos e não deletados
+      const activeEvents = data.filter(event => 
+        event.status !== 'cancelado' && 
+        !event.deleted_at &&
+        new Date(event.date) >= new Date()
+      );
+      
+      console.log(`✅ ${activeEvents.length} eventos ativos após filtro`);
+      setEvents(activeEvents);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar eventos';
       console.error('❌ Erro ao carregar eventos públicos:', err);
-      setError(errorMessage);
+      
+      setError('Não foi possível carregar os eventos. Tente novamente mais tarde.');
       setEvents([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
-
-// Adicione este método ao contexto
-const restoreEvent = async (id: number): Promise<Event> => {
-  try {
-    setLoading(true);
-    setError(null);
-    // Você precisará criar um endpoint específico para restore
-    // Por enquanto, vamos usar update
-    const updatedEvent = await eventService.update(id, { 
-      deleted_at: null, 
-      status: 'pendente' 
-    });
-    setEvents(prev => prev.map(event => event.id === id ? updatedEvent : event));
-    return updatedEvent;
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Erro ao restaurar evento';
-    setError(errorMessage);
-    console.error('Error restoring event:', err);
-    throw err;
-  } finally {
-    setLoading(false);
-  }
-};
-
-  // Função para carregar eventos com autenticação
   const loadEvents = useCallback(async () => {
-    // Se não estiver autenticado, usa eventos públicos
     if (!isAuthenticated) {
       console.log('👤 Usuário não autenticado, usando eventos públicos');
       await loadPublicEvents();
@@ -82,74 +62,82 @@ const restoreEvent = async (id: number): Promise<Event> => {
     }
 
     try {
-      console.log('🔐 Usuário autenticado, carregando eventos com token...');
-      setLoading(true);
-      setError(null);
-      const data = await eventService.list();
-      console.log('✅ Eventos autenticados carregados:', data.length);
-      setEvents(data);
+      console.log('🔐 Usuário autenticado, carregando eventos...');
+      await loadPublicEvents();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar eventos';
-      console.error('❌ Erro ao carregar eventos autenticados:', err);
-      
-      // Se for erro de autenticação, fallback para eventos públicos
-      if (errorMessage.includes('autenticação') || errorMessage.includes('Token') || errorMessage.includes('401')) {
-        console.log('🔄 Fallback para eventos públicos devido a erro de autenticação');
-        await loadPublicEvents();
-      } else {
-        setError(errorMessage);
-        setEvents([]);
-      }
-    } finally {
-      setLoading(false);
+      console.error('❌ Erro ao carregar eventos:', err);
+      setError(errorMessage);
     }
   }, [isAuthenticated, loadPublicEvents]);
 
-  const createEvent = async (data: Omit<Event, 'id'>) => {
+  // ✅ CORREÇÃO: createEvent fazendo chamada REAL para a API
+  const createEvent = async (data: any): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
-      const newEvent = await eventService.create(data);
-      setEvents(prev => [...prev, newEvent]);
-      return newEvent;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao criar evento';
+      console.log('📝 Criando evento na API:', data);
+      
+      // ✅ CHAMADA REAL PARA A API
+      const response = await api.post('/events', data);
+      console.log('✅ Evento criado com sucesso:', response.data);
+      
+      // Recarregar eventos após criar
+      await loadEvents();
+      
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message || 'Erro ao criar evento';
       setError(errorMessage);
-      console.error('Error creating event:', err);
-      throw err;
+      console.error('❌ Erro ao criar evento:', err);
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateEvent = async (id: number, data: Partial<Event>) => {
+  // ✅ CORREÇÃO: updateEvent fazendo chamada REAL para a API
+  const updateEvent = async (id: number, data: any): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
-      const updatedEvent = await eventService.update(id, data);
-      setEvents(prev => prev.map(event => event.id === id ? updatedEvent : event));
-      return updatedEvent;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar evento';
+      console.log('✏️ Atualizando evento na API:', id, data);
+      
+      // ✅ CHAMADA REAL PARA A API
+      const response = await api.put(`/events/${id}`, data);
+      console.log('✅ Evento atualizado com sucesso:', response.data);
+      
+      // Recarregar eventos após atualizar
+      await loadEvents();
+      
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message || 'Erro ao atualizar evento';
       setError(errorMessage);
-      console.error('Error updating event:', err);
-      throw err;
+      console.error('❌ Erro ao atualizar evento:', err);
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteEvent = async (id: number) => {
+  // ✅ CORREÇÃO: deleteEvent fazendo chamada REAL para a API
+  const deleteEvent = async (id: number): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
-      await eventService.delete(id);
-      setEvents(prev => prev.filter(event => event.id !== id));
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao deletar evento';
+      console.log('🗑️ Excluindo evento na API:', id);
+      
+      // ✅ CHAMADA REAL PARA A API
+      const response = await api.delete(`/events/${id}`);
+      console.log('✅ Evento excluído com sucesso:', response.data);
+      
+      // Recarregar eventos após excluir
+      await loadEvents();
+      
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message || 'Erro ao excluir evento';
       setError(errorMessage);
-      console.error('Error deleting event:', err);
-      throw err;
+      console.error('❌ Erro ao excluir evento:', err);
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -160,9 +148,10 @@ const restoreEvent = async (id: number): Promise<Event> => {
       setLoading(true);
       setError(null);
       
-      // Usar serviço público para busca
+      console.log('🔍 Buscando eventos com parâmetros:', params);
       const data = await publicEventService.search(params);
-      setEvents(data as Event[]);
+      setEvents(data);
+      
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao buscar eventos';
@@ -174,14 +163,14 @@ const restoreEvent = async (id: number): Promise<Event> => {
     }
   };
 
-  const getEventsByType = async (type: string): Promise<Event[]> => {
+  const getEventsByType = async (type: string): Promise<PublicEvent[]> => {
     try {
       setLoading(true);
       setError(null);
       
-      // Usar serviço público
+      console.log(`🎯 Buscando eventos do tipo: ${type}`);
       const data = await publicEventService.getByType(type);
-      return data as Event[];
+      return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao buscar eventos por tipo';
       setError(errorMessage);
@@ -192,12 +181,10 @@ const restoreEvent = async (id: number): Promise<Event> => {
     }
   };
 
-  // Carregar eventos quando o componente montar
   useEffect(() => {
     loadEvents();
   }, [loadEvents]);
 
-  // Limpar erro após 5 segundos
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -207,7 +194,7 @@ const restoreEvent = async (id: number): Promise<Event> => {
     }
   }, [error]);
 
-  const value = {
+  const value: EventContextType = {
     events,
     loading,
     error,
@@ -226,9 +213,6 @@ const restoreEvent = async (id: number): Promise<Event> => {
     </EventosContext.Provider>
   );
 }
-
-
-
 
 export function useEventos() {
   const context = useContext(EventosContext);

@@ -17,8 +17,21 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            
+            // ✅ CAMPOS ADICIONAIS PARA O SISTEMA
+            $table->string('telefone')->nullable();
+            $table->enum('tipo', ['estudante', 'docente', 'cta', 'admin', 'promotor'])->default('estudante');
+            $table->string('nr_estudante')->nullable()->unique();
+            $table->string('curso')->nullable();
+            $table->string('departamento')->nullable();
+            $table->string('faculdade')->nullable();
+            
             $table->rememberToken();
             $table->timestamps();
+            
+            // ✅ ÍNDICES PARA MELHOR PERFORMANCE
+            $table->index('tipo');
+            $table->index('departamento');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
