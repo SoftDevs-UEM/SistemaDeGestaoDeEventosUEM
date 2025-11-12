@@ -36,10 +36,9 @@ export default function Navbar() {
     navigate('/admin/dashboard', { state: { activeView: view } });
   };
 
-  
-
   // Verificar se o usuário é admin para mostrar menu administrativo
   const isAdmin = isAuthenticated && userType === 'admin';
+  const isPromotor = isAuthenticated && userType === 'promotor';
   const showOrganizadoresMenu = isAuthenticated && (userType === 'promotor' || userType === 'admin');
 
   return (
@@ -73,112 +72,133 @@ export default function Navbar() {
       <nav className="navbar" id="navbar">
         {/* Links centralizados */}
         <div className="nav-links">
-          <Link to="/">Página Inicial</Link>
-          
-          <div 
-            className="dropdown-container"
-            onMouseEnter={() => handleDropdownEnter('eventos')}
-            onMouseLeave={handleDropdownLeave}
-          >
-            <Link to="/eventos" className="dropdown-toggle">
-              Eventos <span className="dropdown-arrow">▼</span>
-            </Link>
-            <div className={`dropdown-menu ${activeDropdown === 'eventos' ? 'active' : ''}`}>
-              <Link to="/eventos/proximos">Próximos Eventos</Link>
-              <Link to="/eventos/passados">Eventos Passados</Link>
-              <Link to="/eventos/inscricoes">Minhas Inscrições</Link>
-              <Link to="/eventos/categorias">Categorias</Link>
-             
-            </div>
-          </div>
-
-          <div 
-            className="dropdown-container"
-            onMouseEnter={() => handleDropdownEnter('sobre')}
-            onMouseLeave={handleDropdownLeave}
-          >
-            <Link to="/sobre" className="dropdown-toggle">
-              Sobre Nós <span className="dropdown-arrow">▼</span>
-            </Link>
-            <div className={`dropdown-menu ${activeDropdown === 'sobre' ? 'active' : ''}`}>
-              <button 
-                className="dropdown-link-btn"
-                onClick={() => handleSobreSectionClick('historia')}
+          {/* Se for promotor, mostrar apenas os menus específicos */}
+          {isPromotor ? (
+            <>
+              {/* Menu Para Organizadores - apenas para promotores */}
+              <div 
+                className="dropdown-container"
+                onMouseEnter={() => handleDropdownEnter('organizadores')}
+                onMouseLeave={handleDropdownLeave}
               >
-                História
-              </button>
-              <button 
-                className="dropdown-link-btn"
-                onClick={() => handleSobreSectionClick('missao')}
-              >
-                Missão e Visão
-              </button>
-              <button 
-                className="dropdown-link-btn"
-                onClick={() => handleSobreSectionClick('equipa')}
-              >
-                Nossa Equipa
-              </button>
-              <button 
-                className="dropdown-link-btn"
-                onClick={() => handleSobreSectionClick('desenvolvedores')}
-              >
-                Desenvolvedores
-              </button>
-            </div>
-          </div>
-
-          {/* Menu Para Organizadores - apenas para promotores e admin */}
-          {showOrganizadoresMenu && (
-            <div 
-              className="dropdown-container"
-              onMouseEnter={() => handleDropdownEnter('organizadores')}
-              onMouseLeave={handleDropdownLeave}
-            >
-              <Link to="/organizadores" className="dropdown-toggle">
-                Para Organizadores <span className="dropdown-arrow">▼</span>
-              </Link>
-              <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
-              
-              <button 
-                  className="dropdown-link-btn"
-                  onClick={() => handleAdminNavigation('configuracoes')}
-                >
-                  Configurações
-                </button>
+                <Link to="/organizadores" className="dropdown-toggle">
+                  Organizadores <span className="dropdown-arrow">▼</span>
+                </Link>
+                <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
+                  
+                  <button 
+                    className="dropdown-link-btn"
+                    onClick={() => handleAdminNavigation('configuracoes')}
+                  >
+                    Configurações
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* Menu Administrativo - apenas para admin */}
-          {isAdmin && (
-            <div 
-              className="dropdown-container"
-              onMouseEnter={() => handleDropdownEnter('admin')}
-              onMouseLeave={handleDropdownLeave}
-            >
-              <Link to="/admin/dashboard" className="dropdown-toggle">
-                Administração <span className="dropdown-arrow">▼</span>
-              </Link>
-              <div className={`dropdown-menu ${activeDropdown === 'admin' ? 'active' : ''}`}>
+              <Link to="/contacto">Contacto</Link>
+            </>
+          ) : (
+            /* Menu normal para não-promotores (usuários não autenticados, admin, etc.) */
+            <>
+              <Link to="/">Página Inicial</Link>
               
-                {/* <button 
-                  className="dropdown-link-btn"
-                  onClick={() => handleAdminNavigation('gestao-usuarios')}
-                >
-                  Gestão de Usuários
-                </button> */}
-                <button 
-                  className="dropdown-link-btn"
-                  onClick={() => handleAdminNavigation('configuracoes')}
-                >
-                  Configurações
-                </button>
+              <div 
+                className="dropdown-container"
+                onMouseEnter={() => handleDropdownEnter('eventos')}
+                onMouseLeave={handleDropdownLeave}
+              >
+                <Link to="/eventos" className="dropdown-toggle">
+                  Eventos <span className="dropdown-arrow">▼</span>
+                </Link>
+                <div className={`dropdown-menu ${activeDropdown === 'eventos' ? 'active' : ''}`}>
+                  <Link to="/eventos/proximos">Próximos Eventos</Link>
+                  <Link to="/eventos/passados">Eventos Passados</Link>
+                  <Link to="/eventos/inscricoes">Minhas Inscrições</Link>
+                  <Link to="/eventos/categorias">Categorias</Link>
+                </div>
               </div>
-            </div>
-          )}
 
-          <Link to="/contacto">Contacto</Link>
+              <div 
+                className="dropdown-container"
+                onMouseEnter={() => handleDropdownEnter('sobre')}
+                onMouseLeave={handleDropdownLeave}
+              >
+                <Link to="/sobre" className="dropdown-toggle">
+                  Sobre Nós <span className="dropdown-arrow">▼</span>
+                </Link>
+                <div className={`dropdown-menu ${activeDropdown === 'sobre' ? 'active' : ''}`}>
+                  <button 
+                    className="dropdown-link-btn"
+                    onClick={() => handleSobreSectionClick('historia')}
+                  >
+                    História
+                  </button>
+                  <button 
+                    className="dropdown-link-btn"
+                    onClick={() => handleSobreSectionClick('missao')}
+                  >
+                    Missão e Visão
+                  </button>
+                  <button 
+                    className="dropdown-link-btn"
+                    onClick={() => handleSobreSectionClick('equipa')}
+                  >
+                    Nossa Equipa
+                  </button>
+                  <button 
+                    className="dropdown-link-btn"
+                    onClick={() => handleSobreSectionClick('desenvolvedores')}
+                  >
+                    Desenvolvedores
+                  </button>
+                </div>
+              </div>
+
+              {/* Menu Para Organizadores - para admin */}
+              {showOrganizadoresMenu && !isPromotor && (
+                <div 
+                  className="dropdown-container"
+                  onMouseEnter={() => handleDropdownEnter('organizadores')}
+                  onMouseLeave={handleDropdownLeave}
+                >
+                  <Link to="/organizadores" className="dropdown-toggle">
+                    Para Organizadores <span className="dropdown-arrow">▼</span>
+                  </Link>
+                  <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
+                    <button 
+                      className="dropdown-link-btn"
+                      onClick={() => handleAdminNavigation('configuracoes')}
+                    >
+                      Configurações
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Menu Administrativo - apenas para admin */}
+              {isAdmin && (
+                <div 
+                  className="dropdown-container"
+                  onMouseEnter={() => handleDropdownEnter('admin')}
+                  onMouseLeave={handleDropdownLeave}
+                >
+                  <Link to="/admin/dashboard" className="dropdown-toggle">
+                    Administração <span className="dropdown-arrow">▼</span>
+                  </Link>
+                  <div className={`dropdown-menu ${activeDropdown === 'admin' ? 'active' : ''}`}>
+                    <button 
+                      className="dropdown-link-btn"
+                      onClick={() => handleAdminNavigation('configuracoes')}
+                    >
+                      Configurações
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <Link to="/contacto">Contacto</Link>
+            </>
+          )}
         </div>
 
         {/* Botão Entrar/Sair estilizado como o do footer */}
