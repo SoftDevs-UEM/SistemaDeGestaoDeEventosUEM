@@ -106,6 +106,14 @@ const AppContent = React.memo(() => {
         } 
       />
       <Route 
+        path="/organizadores/configuracoes" 
+        element={
+          <ProtectedRoute allowedUserTypes={['promotor', 'admin']}>
+            <Organizadores />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
         path="/criar-evento" 
         element={
           <ProtectedRoute allowedUserTypes={['promotor', 'admin']}>

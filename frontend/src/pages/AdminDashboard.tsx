@@ -1039,14 +1039,7 @@ export default function AdminDashboard() {
             }
           </p>
         </div>
-        <div className="header-actions">
-          {activeView === 'dashboard' && (
-            <button className="refresh-btn" onClick={loadStatistics}>
-              🔄 Atualizar
-            </button>
-          )}
-         
-        </div>
+  
       </header>
 
       <div className="admin-content">

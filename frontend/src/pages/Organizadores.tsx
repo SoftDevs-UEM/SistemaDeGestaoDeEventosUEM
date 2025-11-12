@@ -12,7 +12,7 @@ type EventStats = {
   totalParticipantes: number;
 };
 
-type ActiveView = 'dashboard' | 'criar-evento' | 'meus-eventos' | 'editar-evento' | 'eventos-arquivados';
+type ActiveView = 'dashboard' | 'criar-evento' | 'meus-eventos' | 'editar-evento' | 'eventos-arquivados' | 'configuracoes';
 
 // Componente de imagem seguro
 const SafeImage = ({ src, alt, className, fallback = '📅' }: { 
@@ -23,11 +23,9 @@ const SafeImage = ({ src, alt, className, fallback = '📅' }: {
 }) => {
   const [hasError, setHasError] = useState(false);
 
-  // Função para verificar se o base64 é válido
   const isValidBase64 = (str: string): boolean => {
     if (!str || typeof str !== 'string') return false;
     try {
-      // Verificar se começa com data:image e tem formato base64
       return str.startsWith('data:image') && str.includes('base64,') && str.length > 100;
     } catch {
       return false;
@@ -59,8 +57,6 @@ const validarDataEvento = (data: string): boolean => {
   try {
     const dataEvento = new Date(data);
     const hoje = new Date();
-    
-    // Resetar horas para comparar apenas as datas
     const hojeSemHoras = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
     const dataEventoSemHoras = new Date(dataEvento.getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
     
@@ -70,9 +66,62 @@ const validarDataEvento = (data: string): boolean => {
   }
 };
 
+// ✅ FUNÇÕES PARA DATAS - ADICIONAR ESTAS FUNÇÕES
+const formatarDataSegura = (dataString: string | undefined | null): string => {
+  if (!dataString) {
+    return 'A carregar...';
+  }
+  
+  try {
+    const data = new Date(dataString);
+    if (isNaN(data.getTime())) {
+      return 'Data inválida';
+    }
+    
+    return data.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch (error) {
+    return 'Erro na data';
+  }
+};
+
+const formatarDataCompletaSegura = (dataString: string | undefined | null): string => {
+  if (!dataString) {
+    return 'A carregar...';
+  }
+  
+  try {
+    const data = new Date(dataString);
+    if (isNaN(data.getTime())) {
+      return 'Data inválida';
+    }
+    
+    return data.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    return 'Erro na data';
+  }
+};
+
 export default function Organizadores() {
   const navigate = useNavigate();
-  const { isAuthenticated, userType, logout, user } = useAuth();
+  const { 
+    isAuthenticated, 
+    userType, 
+    logout, 
+    user, 
+    updateUserProfile,
+    changePassword,
+    loadUserData 
+  } = useAuth();
   const { 
     events, 
     loading, 
@@ -114,6 +163,23 @@ export default function Organizadores() {
   const [successMessage, setSuccessMessage] = useState('');
   const [formLoading, setFormLoading] = useState(false);
 
+  // Estados para configurações
+  const [dadosPessoais, setDadosPessoais] = useState({
+    name: '',
+    email: '',
+    telefone: '',
+    departamento: ''
+  });
+  
+  const [senhaData, setSenhaData] = useState({
+    current_password: '',
+    new_password: '',
+    new_password_confirmation: ''
+  });
+  
+  const [configLoading, setConfigLoading] = useState(false);
+  const [configMessage, setConfigMessage] = useState({ type: '', text: '' });
+
   const categories = [
     { value: 'cientificos', label: '🔬 Científicos' },
     { value: 'culturais', label: '🎭 Culturais' },
@@ -124,6 +190,121 @@ export default function Organizadores() {
     { value: 'social', label: '🎉 Social' },
     { value: 'academico', label: '🏛️ Académico' },
   ];
+
+  // ✅ LISTA DE DEPARTAMENTOS DA UEM
+  const departamentos = [
+    'Departamento de Matemática e Informática',
+    'Departamento de Física',
+    'Departamento de Química',
+    'Departamento de Biologia',
+    'Departamento de Geologia',
+    'Departamento de Engenharia Civil',
+    'Departamento de Engenharia Mecânica',
+    'Departamento de Engenharia Química',
+    'Departamento de Engenharia Eletrotécnica',
+    'Departamento de Arquitetura e Planeamento Físico',
+    'Departamento de Economia',
+    'Departamento de Gestão',
+    'Departamento de Contabilidade e Auditoria',
+    'Departamento de Direito',
+    'Departamento de Ciências da Educação',
+    'Departamento de Línguas e Literaturas',
+    'Departamento de História',
+    'Departamento de Geografia',
+    'Departamento de Sociologia',
+    'Departamento de Psicologia',
+    'Departamento de Medicina',
+    'Departamento de Cirurgia',
+    'Departamento de Pediatria',
+    'Departamento de Ginecologia e Obstetrícia',
+    'Departamento de Saúde Pública',
+    'Departamento de Agronomia',
+    'Departamento de Engenharia Rural',
+    'Departamento de Ciências Animais',
+    'Departamento de Veterinária'
+  ];
+
+  // ✅ EFEITO ATUALIZADO: Carregar dados do usuário
+  useEffect(() => {
+    if (user) {
+      setDadosPessoais({
+        name: user.name || user.nome || '',
+        email: user.email || '',
+        telefone: user.telefone || '',
+        departamento: user.departamento || ''
+      });
+      
+      // ✅ SE NÃO TEM DATAS, FORÇAR CARREGAMENTO
+      if (!user.created_at || !user.updated_at) {
+        loadUserData();
+      }
+    }
+  }, [user]);
+
+  // ✅ NOVO EFEITO: Carregar dados quando o componente monta
+  useEffect(() => {
+    if (isAuthenticated && userType && (userType === 'promotor' || userType === 'admin')) {
+      loadUserData();
+    }
+  }, [isAuthenticated, userType]);
+
+  // ✅ FUNÇÃO ATUALIZADA: Verificar se o promotor pode editar o evento
+  const podeEditarEvento = (evento: any) => {
+    // Admin pode editar qualquer evento
+    if (userType === 'admin') return true;
+    // Promotor só pode editar seus próprios eventos
+    return evento.promoter_id === user?.id;
+  };
+
+  // ✅ FUNÇÃO ATUALIZADA: Verificar se o promotor pode arquivar o evento
+  const podeArquivarEvento = (evento: any) => {
+    if (!podeEditarEvento(evento)) return false;
+    // Não pode arquivar evento com participantes
+    const participantesCount = getParticipantesCount(evento);
+    return participantesCount === 0;
+  };
+
+  // ✅ COMPONENTE ATUALIZADO: Botão de editar com verificação de permissão
+  const renderBotaoEditar = (evento: any) => {
+    if (!podeEditarEvento(evento)) {
+      return null;
+    }
+    
+    return (
+      <button 
+        className="btn-edit"
+        onClick={() => handleEditarEvento(evento)}
+      >
+        ✏️ Editar
+      </button>
+    );
+  };
+
+  // ✅ COMPONENTE ATUALIZADO: Botão de arquivar com verificação de permissão
+  const renderBotaoArquivar = (evento: any) => {
+    if (!podeArquivarEvento(evento)) {
+      const participantesCount = getParticipantesCount(evento);
+      return (
+        <button 
+          className="btn-archive disabled"
+          disabled
+          title={!podeEditarEvento(evento) ? "Não autorizado" : participantesCount > 0 ? "Não é possível arquivar evento com participantes" : "Arquivar evento"}
+        >
+          📁 Arquivar
+        </button>
+      );
+    }
+    
+    return (
+      <button 
+        className="btn-archive" 
+        onClick={() => handleArquivarEvento(evento.id, evento.title)}
+        title="Arquivar evento"
+      >
+        📁 Arquivar
+      </button>
+    );
+  };
 
   // Redirecionar se não for promotor ou admin
   useEffect(() => {
@@ -144,34 +325,37 @@ export default function Organizadores() {
     setStatsLoading(true);
     
     try {
-      // Filtrar eventos do promotor logado (não arquivados)
-      const meusEventos = events.filter(event => 
-        (event.promoter_id === user?.id || userType === 'admin') && 
-        !event.deleted_at
-      );
-
-      // Eventos arquivados
-      const eventosArquivados = events.filter(event => 
-        (event.promoter_id === user?.id || userType === 'admin') && 
-        event.deleted_at
-      );
+      // ✅ FILTRAR APENAS EVENTOS DO PROMOTOR LOGADO
+      const meusEventos = events.filter(event => {
+        // Admin pode ver todos os eventos
+        if (userType === 'admin') {
+          return !event.deleted_at;
+        }
+        // Promotor vê apenas seus próprios eventos
+        return event.promoter_id === user?.id && !event.deleted_at;
+      });
+  
+      // ✅ FILTRAR EVENTOS ARQUIVADOS DO PROMOTOR LOGADO
+      const eventosArquivados = events.filter(event => {
+        if (userType === 'admin') {
+          return event.deleted_at;
+        }
+        return event.promoter_id === user?.id && event.deleted_at;
+      });
       
-      // Estatísticas baseadas apenas na data (sem status)
       const eventosAtivos = meusEventos.filter(event => 
-        new Date(event.date) >= new Date()
+        new Date(event.date) >= new Date() && event.status === 'ativo'
       );
       
       const eventosFinalizados = meusEventos.filter(event => 
-        new Date(event.date) < new Date()
+        new Date(event.date) < new Date() || event.status === 'finalizado'
       );
-
-      // ✅ CALCULAR TOTAL DE PARTICIPANTES EM TODOS OS EVENTOS
+  
       const totalParticipantes = meusEventos.reduce((total, evento) => {
-        // Usar participants_count da API ou participants da tabela
         const participantes = evento.participants_count || evento.participants || 0;
         return total + participantes;
       }, 0);
-
+  
       setEventStats({
         totalEventos: meusEventos.length,
         eventosAtivos: eventosAtivos.length,
@@ -179,14 +363,12 @@ export default function Organizadores() {
         eventosArquivados: eventosArquivados.length,
         totalParticipantes: totalParticipantes
       });
-
-      // Eventos recentes (últimos 5) - ordenados por data de criação
+  
+      // ✅ ORDENAR EVENTOS RECENTES DO PROMOTOR
       const eventosOrdenados = [...meusEventos].sort((a, b) => 
         new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
       );
       setRecentEvents(eventosOrdenados.slice(0, 5));
-
-      // Eventos arquivados
       setArquivedEvents(eventosArquivados);
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error);
@@ -203,6 +385,7 @@ export default function Organizadores() {
       setStatsLoading(false);
     }
   };
+  
 
   const handleBackToDashboard = () => {
     setActiveView('dashboard');
@@ -228,42 +411,26 @@ export default function Organizadores() {
     setSuccessMessage('');
   };
 
-  // Função para debug - verificar dados do evento
-  const debugEvento = (evento: any) => {
-    console.log('🔍 Debug evento:', {
-      id: evento.id,
-      title: evento.title,
-      date: evento.date,
-      dateType: typeof evento.date,
-      time: evento.time,
-      location: evento.location,
-      participants: evento.participants,
-      participants_count: evento.participants_count,
-      max_participants: evento.max_participants
-    });
-  };
-
-  // Função para editar evento - MELHORADA
   const handleEditarEvento = (evento: any) => {
     console.log('✏️ Editando evento:', evento);
-    debugEvento(evento);
+    
+    // ✅ VERIFICAR PERMISSÃO ANTES DE EDITAR
+    if (!podeEditarEvento(evento)) {
+      alert('Não autorizado a editar este evento.');
+      return;
+    }
     
     setEventoEditando(evento);
     
-    // Converter a data do formato ISO para o formato do input (YYYY-MM-DD)
     const dataISO = evento.date;
     let dataFormatada = '';
     
     if (dataISO) {
-      console.log('📅 Data original:', dataISO);
-      
       try {
-        // Criar objeto Date para garantir formatação correta
         const dataObj = new Date(dataISO);
         if (!isNaN(dataObj.getTime())) {
           dataFormatada = dataObj.toISOString().split('T')[0];
         } else {
-          // Fallback para o método anterior se a data for inválida
           if (dataISO.includes('T')) {
             dataFormatada = dataISO.split('T')[0];
           } else if (dataISO.includes(' ')) {
@@ -272,7 +439,6 @@ export default function Organizadores() {
             dataFormatada = dataISO;
           }
         }
-        console.log('📅 Data formatada para input:', dataFormatada);
       } catch (error) {
         console.error('Erro ao formatar data:', error);
         dataFormatada = '';
@@ -295,14 +461,10 @@ export default function Organizadores() {
     setActiveView('editar-evento');
   };
 
-  // Função CORRIGIDA para ver detalhes do evento - abre modal ou página de detalhes
   const handleVerDetalhes = (evento: any) => {
-    console.log('👀 Ver detalhes do evento:', evento);
-    // Navega para a página de detalhes do evento específico
     navigate(`/evento/${evento.id}`);
   };
 
-  // Função para comprimir imagem
   const compressImage = (file: File, maxWidth = 800, quality = 0.6): Promise<string> => {
     return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
@@ -312,7 +474,6 @@ export default function Organizadores() {
       img.onload = () => {
         let { width, height } = img;
         
-        // Redimensionar mantendo aspect ratio
         if (width > maxWidth) {
           height = (height * maxWidth) / width;
           width = maxWidth;
@@ -321,13 +482,10 @@ export default function Organizadores() {
         canvas.width = width;
         canvas.height = height;
         
-        // Desenhar imagem comprimida
         ctx?.drawImage(img, 0, 0, width, height);
         
-        // Converter para base64 com qualidade reduzida
         try {
           const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-          console.log('📷 Imagem comprimida. Tamanho:', compressedBase64.length);
           resolve(compressedBase64);
         } catch (error) {
           reject(new Error('Erro ao converter imagem para base64'));
@@ -339,20 +497,17 @@ export default function Organizadores() {
     });
   };
 
-  // Função para lidar com upload de imagem - ATUALIZADA com compressão
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Verificar tipo de arquivo
     if (!file.type.startsWith('image/')) {
       alert('Por favor, selecione apenas arquivos de imagem.');
       e.target.value = '';
       return;
     }
 
-    // Verificar tamanho do arquivo (limitar para 2MB)
-    const maxSize = 2 * 1024 * 1024; // 2MB em bytes
+    const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
       alert('A imagem é muito grande. Por favor, selecione uma imagem menor que 2MB.');
       e.target.value = '';
@@ -363,7 +518,6 @@ export default function Organizadores() {
 
     try {
       const compressedBase64 = await compressImage(file);
-      
       setEventoData(prev => ({
         ...prev,
         image: compressedBase64
@@ -377,7 +531,6 @@ export default function Organizadores() {
     }
   };
 
-  // Função para remover imagem
   const handleRemoverImagem = () => {
     setEventoData(prev => ({
       ...prev,
@@ -385,8 +538,21 @@ export default function Organizadores() {
     }));
   };
 
-  // Função para arquivar evento (soft delete)
+  // ✅ FUNÇÃO ATUALIZADA: Arquivar evento com verificação de permissão
   const handleArquivarEvento = async (eventId: number, eventTitle: string) => {
+    const evento = events.find(event => event.id === eventId);
+    
+    if (!evento) {
+      alert('Evento não encontrado.');
+      return;
+    }
+
+    // ✅ VERIFICAR PERMISSÃO
+    if (!podeEditarEvento(evento)) {
+      alert('Não autorizado a arquivar este evento.');
+      return;
+    }
+
     if (window.confirm(`Tem certeza que deseja arquivar o evento "${eventTitle}"?\n\nO evento será marcado como cancelado e não aparecerá para os usuários, mas poderá ser restaurado posteriormente.`)) {
       try {
         await deleteEvent(eventId);
@@ -398,19 +564,25 @@ export default function Organizadores() {
           setSuccess(false);
           setSuccessMessage('');
         }, 3000);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao arquivar evento:', error);
-        alert('Erro ao arquivar evento.');
+        const errorMessage = error.response?.data?.message || 'Erro ao arquivar evento';
+        alert(`Erro ao arquivar evento: ${errorMessage}`);
       }
     }
   };
 
-  // Função para restaurar evento
   const handleRestaurarEvento = async (eventId: number) => {
     try {
       const evento = arquivedEvents.find(event => event.id === eventId);
       if (!evento) {
         alert('Evento não encontrado.');
+        return;
+      }
+
+      // ✅ VERIFICAR PERMISSÃO PARA RESTAURAR
+      if (!podeEditarEvento(evento)) {
+        alert('Não autorizado a restaurar este evento.');
         return;
       }
   
@@ -429,7 +601,6 @@ export default function Organizadores() {
     }
   };
 
-  // Funções auxiliares
   const formatarData = (data: string) => {
     try {
       return new Date(data).toLocaleDateString('pt-BR');
@@ -465,27 +636,149 @@ export default function Organizadores() {
     }));
   };
 
+  const handleDadosPessoaisChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setDadosPessoais(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSenhaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSenhaData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // ✅ FUNÇÃO ATUALIZADA: Atualizar dados pessoais
+  const atualizarDadosPessoais = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setConfigLoading(true);
+    setConfigMessage({ type: '', text: '' });
+    
+    try {
+      console.log('📤 Enviando dados para atualização:', dadosPessoais);
+      
+      const result = await updateUserProfile(dadosPessoais);
+      
+      if (result.success) {
+        setConfigMessage({
+          type: 'success',
+          text: result.message
+        });
+        
+        // Recarregar dados para garantir sincronização
+        await loadUserData();
+        
+        console.log('✅ Dados pessoais atualizados com sucesso');
+      } else {
+        setConfigMessage({
+          type: 'error',
+          text: result.message
+        });
+        console.error('❌ Erro ao atualizar dados:', result.message);
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Erro inesperado ao atualizar dados:', error);
+      setConfigMessage({
+        type: 'error',
+        text: 'Erro inesperado ao atualizar dados. Tente novamente.'
+      });
+    } finally {
+      setConfigLoading(false);
+    }
+  };
+
+  // ✅ FUNÇÃO ATUALIZADA: Alterar senha
+  const alterarSenha = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setConfigMessage({ type: '', text: '' });
+    
+    // Validações no frontend
+    if (!senhaData.current_password) {
+      setConfigMessage({
+        type: 'error',
+        text: 'A senha atual é obrigatória'
+      });
+      return;
+    }
+    
+    if (senhaData.new_password.length < 6) {
+      setConfigMessage({
+        type: 'error',
+        text: 'A nova senha deve ter pelo menos 6 caracteres'
+      });
+      return;
+    }
+    
+    if (senhaData.new_password !== senhaData.new_password_confirmation) {
+      setConfigMessage({
+        type: 'error',
+        text: 'As senhas não coincidem'
+      });
+      return;
+    }
+    
+    setConfigLoading(true);
+    
+    try {
+      console.log('📤 Alterando senha...');
+      
+      const result = await changePassword(senhaData);
+      
+      if (result.success) {
+        setConfigMessage({
+          type: 'success',
+          text: result.message
+        });
+        
+        // Limpar formulário
+        setSenhaData({
+          current_password: '',
+          new_password: '',
+          new_password_confirmation: ''
+        });
+        
+        console.log('✅ Senha alterada com sucesso');
+      } else {
+        setConfigMessage({
+          type: 'error',
+          text: result.message
+        });
+        console.error('❌ Erro ao alterar senha:', result.message);
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Erro inesperado ao alterar senha:', error);
+      setConfigMessage({
+        type: 'error',
+        text: 'Erro inesperado ao alterar senha. Tente novamente.'
+      });
+    } finally {
+      setConfigLoading(false);
+    }
+  };
+
+  // ✅ FUNÇÃO ATUALIZADA: Criar evento
   const handleCriarEvento = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
     
     try {
-      // VALIDAÇÃO DE DATA - IMPEDIR DATAS PASSADAS
       if (!validarDataEvento(eventoData.date)) {
         throw new Error('Não é possível criar eventos em datas passadas. Por favor, selecione uma data futura.');
       }
 
-      // Validar e formatar dados antes de enviar
       const dadosParaEnviar = {
         ...eventoData,
         max_participants: parseInt(eventoData.max_participants) || 0,
-        promoter_id: user?.id || 0,
+        // ✅ O promoter_id será automaticamente definido pelo backend com o ID do usuário logado
         status: 'pendente',
-        // Garantir que a data está no formato correto
         date: eventoData.date ? new Date(eventoData.date).toISOString().split('T')[0] : ''
       };
-      
-      console.log('📤 Dados para criar evento:', dadosParaEnviar);
       
       await createEvent(dadosParaEnviar);
       
@@ -500,7 +793,7 @@ export default function Organizadores() {
       }, 3000);
     } catch (error: any) {
       console.error('Erro ao criar evento:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Erro ao criar evento';
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Erro ao criar evento';
       alert(`Erro ao criar evento: ${errorMessage}`);
     } finally {
       setFormLoading(false);
@@ -514,7 +807,6 @@ export default function Organizadores() {
     setFormLoading(true);
     
     try {
-      // Validar dados antes de enviar
       if (!eventoData.title.trim()) {
         throw new Error('O título do evento é obrigatório');
       }
@@ -523,12 +815,10 @@ export default function Organizadores() {
         throw new Error('A data do evento é obrigatória');
       }
 
-      // VALIDAÇÃO DE DATA - IMPEDIR DATAS PASSADAS
       if (!validarDataEvento(eventoData.date)) {
         throw new Error('Não é possível atualizar eventos para datas passadas. Por favor, selecione uma data futura.');
       }
 
-      // Validar e formatar dados antes de enviar
       const dadosParaEnviar = {
         title: eventoData.title.trim(),
         description: eventoData.description.trim(),
@@ -540,19 +830,14 @@ export default function Organizadores() {
         max_participants: parseInt(eventoData.max_participants) || 0,
         target_audience: eventoData.target_audience.trim(),
         requirements: eventoData.requirements.trim(),
-        // Enviar imagem apenas se foi alterada
         image: eventoData.image !== eventoEditando.image ? eventoData.image : undefined
       };
 
-      // Remover campos undefined para não sobrescrever com null
       Object.keys(dadosParaEnviar).forEach(key => {
         if (dadosParaEnviar[key as keyof typeof dadosParaEnviar] === undefined) {
           delete dadosParaEnviar[key as keyof typeof dadosParaEnviar];
         }
       });
-      
-      console.log('📤 Dados para atualizar evento:', dadosParaEnviar);
-      console.log('🆔 ID do evento:', eventoEditando.id);
       
       await updateEvent(eventoEditando.id, dadosParaEnviar);
       
@@ -568,7 +853,6 @@ export default function Organizadores() {
       console.error('Erro ao atualizar evento:', error);
       const errorMessage = error.response?.data?.error || error.message || 'Erro ao atualizar evento';
       
-      // Mostrar erro mais amigável
       if (errorMessage.includes('image') && errorMessage.includes('max')) {
         alert('A imagem é muito grande. Por favor, selecione uma imagem menor ou remova a imagem.');
       } else {
@@ -579,31 +863,32 @@ export default function Organizadores() {
     }
   };
 
-  // Função para obter número de participantes (com fallback)
   const getParticipantesCount = (evento: any): number => {
-    // Priorizar participants_count (contagem real), depois participants (coluna da tabela)
     return evento.participants_count || evento.participants || 0;
   };
 
-  // Função para calcular porcentagem de ocupação
   const getOcupacaoPercentual = (evento: any): number => {
     const participantes = getParticipantesCount(evento);
     const maxParticipantes = evento.max_participants || 1;
     return Math.min(100, (participantes / maxParticipantes) * 100);
   };
 
-  // Renderização das views
+  // ========== FUNÇÕES DE RENDERIZAÇÃO COMPLETAS ==========
+
+  // ✅ ATUALIZAR a renderização do dashboard para mostrar mensagem personalizada
   const renderDashboardView = () => (
     <div className="dashboard-view">
       <div className="stats-section">
-        <h2>📊 Visão Geral</h2>
+        <h2>📊 Visão Geral {userType === 'promotor' ? ' - Meus Eventos' : ' - Todos os Eventos'}</h2>
         <div className="stats-grid">
           <div className="stat-card event-stat">
             <div className="stat-icon">📅</div>
             <div className="stat-info">
               <h3>Total de Eventos</h3>
               <span className="stat-number">{eventStats.totalEventos}</span>
-              <span className="stat-change">+{eventStats.totalEventos} este mês</span>
+              <span className="stat-change">
+                {userType === 'promotor' ? 'Meus eventos' : 'Todos os eventos'}
+              </span>
             </div>
           </div>
           
@@ -629,7 +914,6 @@ export default function Organizadores() {
             </div>
           </div>
           
-          {/* ✅ NOVA CARD DE TOTAL DE PARTICIPANTES */}
           <div className="stat-card participants-stat">
             <div className="stat-icon">👥</div>
             <div className="stat-info">
@@ -643,7 +927,7 @@ export default function Organizadores() {
 
       <div className="recent-events-full">
         <div className="section-header">
-          <h2>📋 Eventos Recentes</h2>
+          <h2>📋 {userType === 'promotor' ? 'Meus Eventos Recentes' : 'Eventos Recentes'}</h2>
           <span className="section-badge">Últimos 5 eventos</span>
         </div>
         
@@ -668,6 +952,11 @@ export default function Organizadores() {
                       <span className={`event-status ${estado.class}`}>
                         {estado.icon} {estado.label}
                       </span>
+                      {userType === 'admin' && (
+                        <span className="event-promoter">
+                          👤 Promotor: {evento.promoter_name || `ID: ${evento.promoter_id}`}
+                        </span>
+                      )}
                     </div>
                     <p className="event-description">{evento.description}</p>
                     <div className="event-details">
@@ -676,7 +965,6 @@ export default function Organizadores() {
                       <span>📍 {evento.location}</span>
                       <span>👥 {participantesCount} / {evento.max_participants} participantes</span>
                     </div>
-                    {/* Barra de progresso de ocupação */}
                     <div className="ocupacao-progress">
                       <div className="progress-info">
                         <span>Ocupação: {Math.round(ocupacaoPercentual)}%</span>
@@ -696,12 +984,8 @@ export default function Organizadores() {
                       >
                         👀 Ver Detalhes
                       </button>
-                      <button 
-                        className="btn-edit"
-                        onClick={() => handleEditarEvento(evento)}
-                      >
-                        ✏️ Editar
-                      </button>
+                      {renderBotaoEditar(evento)}
+                      {renderBotaoArquivar(evento)}
                     </div>
                   </div>
                 </div>
@@ -712,14 +996,20 @@ export default function Organizadores() {
           <div className="no-events-full">
             <div className="no-events-content">
               <div className="no-events-icon">📅</div>
-              <h3>Nenhum evento criado</h3>
-              <p>Comece criando seu primeiro evento para ver as estatísticas aqui.</p>
-              <button 
-                className="btn-primary"
-                onClick={() => setActiveView('criar-evento')}
-              >
-                ➕ Criar Primeiro Evento
-              </button>
+              <h3>{userType === 'promotor' ? 'Nenhum evento criado' : 'Nenhum evento disponível'}</h3>
+              <p>
+                {userType === 'promotor' 
+                  ? 'Comece criando seu primeiro evento para ver as estatísticas aqui.' 
+                  : 'Não há eventos disponíveis no momento.'}
+              </p>
+              {userType === 'promotor' && (
+                <button 
+                  className="btn-primary"
+                  onClick={() => setActiveView('criar-evento')}
+                >
+                  ➕ Criar Primeiro Evento
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -785,7 +1075,7 @@ export default function Organizadores() {
                 value={eventoData.date}
                 onChange={handleInputChange}
                 required
-                min={new Date().toISOString().split('T')[0]} // Impede seleção de datas passadas
+                min={new Date().toISOString().split('T')[0]}
               />
               <small className="form-help">
                 Não é possível criar eventos em datas passadas
@@ -941,7 +1231,7 @@ export default function Organizadores() {
   const renderMeusEventosView = () => (
     <div className="management-view">
       <div className="management-header">
-        <h2>📅 Meus Eventos</h2>
+        <h2>📅 {userType === 'promotor' ? 'Meus Eventos' : 'Todos os Eventos'}</h2>
         <span className="total-badge">
           {eventStats.totalEventos} eventos ativos • {eventStats.totalParticipantes} participantes totais
         </span>
@@ -982,6 +1272,11 @@ export default function Organizadores() {
                             <div className="event-meta">
                               <span className="event-category">{evento.category}</span>
                               <span className="event-type">{evento.type}</span>
+                              {userType === 'admin' && (
+                                <span className="event-promoter-badge">
+                                  👤 {evento.promoter_name || `ID: ${evento.promoter_id}`}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1001,11 +1296,6 @@ export default function Organizadores() {
                       <td className="event-registrations">
                         <div className="registrations-count">
                           {participantesCount} / {evento.max_participants}
-                          <div className="participants-debug">
-                            {/* Debug info - pode remover depois */}
-                            {evento.participants_count !== undefined && `(count: ${evento.participants_count})`}
-                            {evento.participants !== undefined && `(db: ${evento.participants})`}
-                          </div>
                         </div>
                         <div className="registrations-progress">
                           <div 
@@ -1026,21 +1316,8 @@ export default function Organizadores() {
                           >
                             👀 Ver
                           </button>
-                          <button 
-                            className="btn-edit-table" 
-                            onClick={() => handleEditarEvento(evento)}
-                            title="Editar evento"
-                          >
-                            ✏️ Editar
-                          </button>
-                          <button 
-                            className="btn-archive" 
-                            onClick={() => handleArquivarEvento(evento.id, evento.title)}
-                            disabled={participantesCount > 0}
-                            title={participantesCount > 0 ? "Não é possível arquivar evento com participantes" : "Arquivar evento"}
-                          >
-                            📁 Arquivar
-                          </button>
+                          {renderBotaoEditar(evento)}
+                          {renderBotaoArquivar(evento)}
                         </div>
                       </td>
                     </tr>
@@ -1053,23 +1330,28 @@ export default function Organizadores() {
           <div className="no-data">
             <div className="no-data-content">
               <div className="no-data-icon">📅</div>
-              <h3>Nenhum evento criado ainda</h3>
-              <p>Crie seu primeiro evento para começar a gerenciar suas atividades.</p>
-              <button 
-                className="btn-primary"
-                onClick={() => setActiveView('criar-evento')}
-              >
-                ➕ Criar Primeiro Evento
-              </button>
+              <h3>{userType === 'promotor' ? 'Nenhum evento criado ainda' : 'Nenhum evento disponível'}</h3>
+              <p>
+                {userType === 'promotor' 
+                  ? 'Crie seu primeiro evento para começar a gerenciar suas atividades.' 
+                  : 'Não há eventos disponíveis no momento.'}
+              </p>
+              {userType === 'promotor' && (
+                <button 
+                  className="btn-primary"
+                  onClick={() => setActiveView('criar-evento')}
+                >
+                  ➕ Criar Primeiro Evento
+                </button>
+              )}
             </div>
           </div>
         )}
       </div>
 
-      {/* Seção de Eventos Arquivados */}
       {arquivedEvents.length > 0 && (
         <div className="archived-section">
-          <h3>📁 Eventos Arquivados</h3>
+          <h3>📁 {userType === 'promotor' ? 'Meus Eventos Arquivados' : 'Eventos Arquivados'}</h3>
           <div className="events-table-container">
             <div className="table-responsive">
               <table className="events-table archived-table">
@@ -1098,6 +1380,11 @@ export default function Organizadores() {
                             <div className="event-meta">
                               <span className="event-category">{evento.category}</span>
                               <span className="event-type">{evento.type}</span>
+                              {userType === 'admin' && (
+                                <span className="event-promoter-badge">
+                                  👤 {evento.promoter_name || `ID: ${evento.promoter_id}`}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1193,7 +1480,7 @@ export default function Organizadores() {
                 value={eventoData.date}
                 onChange={handleInputChange}
                 required
-                min={new Date().toISOString().split('T')[0]} // Impede seleção de datas passadas
+                min={new Date().toISOString().split('T')[0]}
               />
               {eventoEditando?.date && (
                 <small className="form-help">
@@ -1351,6 +1638,194 @@ export default function Organizadores() {
     </div>
   );
 
+  const renderConfiguracoesView = () => {
+    // ✅ USAR AS NOVAS FUNÇÕES DE DATA
+    const dataRegisto = user?.created_at ? formatarDataSegura(user.created_at) : 'A carregar...';
+    const dataAtualizacao = user?.updated_at ? formatarDataCompletaSegura(user.updated_at) : dataRegisto;
+
+    return (
+      <div className="configuracoes-view">
+        <div className="configuracoes-header">
+          <h2>⚙️ Configurações da Conta</h2>
+          <p>Gerencie suas informações pessoais e segurança da conta</p>
+        </div>
+
+        {configMessage.text && (
+          <div className={`message ${configMessage.type}`}>
+            {configMessage.type === 'success' ? '✅' : '❌'} {configMessage.text}
+          </div>
+        )}
+
+        <div className="configuracoes-grid">
+          <div className="config-card">
+            <div className="config-card-header">
+              <h3>👤 Dados Pessoais</h3>
+              <span className="config-badge">Informações básicas</span>
+            </div>
+            
+            <form onSubmit={atualizarDadosPessoais} className="config-form">
+              <div className="form-group">
+                <label htmlFor="name">Nome Completo *</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={dadosPessoais.name}
+                  onChange={handleDadosPessoaisChange}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="email">Email *</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={dadosPessoais.email}
+                  onChange={handleDadosPessoaisChange}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="telefone">Telefone</label>
+                <input
+                  type="tel"
+                  id="telefone"
+                  name="telefone"
+                  value={dadosPessoais.telefone}
+                  onChange={handleDadosPessoaisChange}
+                  placeholder="(+258) 8X XXX XXXX"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="departamento">Departamento</label>
+                <select 
+                  name="departamento"
+                  value={dadosPessoais.departamento} 
+                  onChange={handleDadosPessoaisChange}
+                  className="form-select"
+                >
+                  <option value="">Selecione o departamento</option>
+                  {departamentos.map((depto, index) => (
+                    <option key={index} value={depto}>
+                      {depto}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <button 
+                type="submit" 
+                className="btn-primary"
+                disabled={configLoading}
+              >
+                {configLoading ? '🔄 Atualizando...' : '💾 Salvar Alterações'}
+              </button>
+            </form>
+          </div>
+
+          <div className="config-card">
+            <div className="config-card-header">
+              <h3>🔒 Alterar Senha</h3>
+              <span className="config-badge">Segurança</span>
+            </div>
+            
+            <form onSubmit={alterarSenha} className="config-form">
+              <div className="form-group">
+                <label htmlFor="current_password">Senha Atual *</label>
+                <input
+                  type="password"
+                  id="current_password"
+                  name="current_password"
+                  value={senhaData.current_password}
+                  onChange={handleSenhaChange}
+                  required
+                  placeholder="Digite sua senha atual"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="new_password">Nova Senha *</label>
+                <input
+                  type="password"
+                  id="new_password"
+                  name="new_password"
+                  value={senhaData.new_password}
+                  onChange={handleSenhaChange}
+                  required
+                  placeholder="Mínimo 6 caracteres"
+                  minLength={6}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="new_password_confirmation">Confirmar Nova Senha *</label>
+                <input
+                  type="password"
+                  id="new_password_confirmation"
+                  name="new_password_confirmation"
+                  value={senhaData.new_password_confirmation}
+                  onChange={handleSenhaChange}
+                  required
+                  placeholder="Digite novamente a nova senha"
+                />
+              </div>
+              
+              <button 
+                type="submit" 
+                className="btn-primary"
+                disabled={configLoading}
+              >
+                {configLoading ? '🔄 Alterando...' : '🔐 Alterar Senha'}
+              </button>
+            </form>
+          </div>
+
+          <div className="config-card">
+            <div className="config-card-header">
+              <h3>📋 Informações da Conta</h3>
+              <span className="config-badge">Leitura apenas</span>
+            </div>
+            
+            <div className="account-info">
+              <div className="info-item">
+                <span className="info-label">Tipo de Usuário:</span>
+                <span className="info-value">
+                  {userType === 'promotor' ? '🎯 Organizador/Promotor' : 
+                   userType === 'admin' ? '👑 Administrador' : 
+                   userType || 'A carregar...'}
+                </span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">ID do Usuário:</span>
+                <span className="info-value">{user?.id || 'A carregar...'}</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Data de Registro:</span>
+                <span className="info-value">{dataRegisto}</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Última Atualização:</span>
+                <span className="info-value">{dataAtualizacao}</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Status da Conta:</span>
+                <span className="info-value status-ativo">✅ Ativa</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderSidebar = () => (
     <aside className="admin-sidebar">
       <nav className="sidebar-nav">
@@ -1376,25 +1851,30 @@ export default function Organizadores() {
             className={`nav-btn ${activeView === 'meus-eventos' ? 'active' : ''}`}
             onClick={() => setActiveView('meus-eventos')}
           >
-            📋 Meus Eventos
+            📋 {userType === 'promotor' ? 'Meus Eventos' : 'Todos os Eventos'}
           </button>
           {eventStats.eventosArquivados > 0 && (
             <button 
               className={`nav-btn ${activeView === 'eventos-arquivados' ? 'active' : ''}`}
               onClick={() => setActiveView('meus-eventos')}
             >
-              📁 Eventos Arquivados ({eventStats.eventosArquivados})
+              📁 {userType === 'promotor' ? 'Meus Eventos Arquivados' : 'Eventos Arquivados'} ({eventStats.eventosArquivados})
             </button>
           )}
+        </div>
+
+        <div className="nav-section">
+          <h3>⚙️ Configurações</h3>
+          <button 
+            className={`nav-btn ${activeView === 'configuracoes' ? 'active' : ''}`}
+            onClick={() => setActiveView('configuracoes')}
+          >
+            👤 Minha Conta
+          </button>
         </div>
       </nav>
     </aside>
   );
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
 
   if (loading && statsLoading) {
     return (
@@ -1409,28 +1889,20 @@ export default function Organizadores() {
     <div className="organizadores-dashboard">
       <header className="admin-header">
         <div className="header-content">
-          <h1>🎯 Dashboard do Organizador</h1>
-          <p>Bem-vindo, {user?.name || 'Organizador'}! Gerencie seus eventos aqui.</p>
+          <h1>🎯 Dashboard do {userType === 'promotor' ? 'Organizador' : 'Administrador'}</h1>
+          <p>Bem-vindo, {user?.name || (userType === 'promotor' ? 'Organizador' : 'Administrador')}! Gerencie seus eventos aqui.</p>
         </div>
-        {/* <div className="header-actions">
-          <button className="refresh-btn" onClick={loadStatistics}>
-            🔄 Atualizar
-          </button>
-          <button className="logout-btn" onClick={handleLogout}>
-            🚪 Sair
-          </button>
-        </div> */}
       </header>
 
       <div className="admin-content">
         {renderSidebar()}
 
-        {/* Main Content */}
         <main className="admin-main">
           {activeView === 'dashboard' && renderDashboardView()}
           {activeView === 'criar-evento' && renderCriarEventoView()}
           {activeView === 'meus-eventos' && renderMeusEventosView()}
           {activeView === 'editar-evento' && renderEditarEventoView()}
+          {activeView === 'configuracoes' && renderConfiguracoesView()}
         </main>
       </div>
     </div>

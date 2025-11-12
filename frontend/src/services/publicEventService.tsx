@@ -1,132 +1,129 @@
 // services/publicEventService.ts
+import api from './api';
+
 export interface PublicEvent {
-    id: number;
-    title: string;
-    description: string;
-    date: string;
-    time: string;
-    location: string;
-    type: 'academico' | 'cultural' | 'desportivo';
-    category: string;
-    max_participants: number;
-    promoter_id: number;
-    status: 'pendente' | 'aprovado' | 'rejeitado' | 'cancelado' | 'finalizado';
-    image?: string;
-    requirements?: string;
-    target_audience: string;
-    feedback?: string;
-    created_at?: string;
-    updated_at?: string;
-    promoter?: {
-      id: number;
-      name: string;
-      email: string;
-    };
-    registrations_count?: number;
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  type: 'academico' | 'cultural' | 'desportivo';
+  category: string;
+  max_participants: number;
+  promoter_id: number;
+  status: 'pendente' | 'ativo' | 'cancelado' | 'finalizado';
+  image: string;
+  requirements: string;
+  target_audience: string;
+  feedback?: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string;
+  participants_count: number;
+  participants: number;
+  promoter_name: string;
+}
+
+const handleResponse = (response: any): PublicEvent[] => {
+  console.log('📡 Public Events Response status:', response.status);
+  console.log('📡 Public Events Response data:', response.data);
+  
+  let eventsData = response.data;
+  
+  // ✅ ACEITAR DIFERENTES ESTRUTURAS DE RESPOSTA
+  if (response.data && Array.isArray(response.data.data)) {
+    eventsData = response.data.data;
+    console.log('✅ Estrutura com "data" encontrada');
+  }
+  else if (Array.isArray(response.data)) {
+    eventsData = response.data;
+    console.log('✅ Estrutura array direto encontrada');
+  }
+  else if (response.data && Array.isArray(response.data.events)) {
+    eventsData = response.data.events;
+    console.log('✅ Estrutura com "events" encontrada');
+  }
+  else if (!response.data || typeof response.data !== 'object') {
+    console.warn('⚠️ Resposta vazia ou inválida da API');
+    return [];
   }
   
-  class PublicEventService {
-    private baseURL = 'http://localhost:8000/api';
-  
-    private async handleResponse(response: Response) {
-      console.log('📡 Public Events Response status:', response.status);
-      
-      if (!response.ok) {
-        let errorMessage = 'Erro ao carregar eventos';
-        
-        try {
-          const errorData = await response.json();
-          console.error('❌ Public Events Error data:', errorData);
-          errorMessage = errorData.error || errorData.message || errorData.errors || errorMessage;
-        } catch (parseError) {
-          console.error('❌ Erro ao parsear resposta pública:', parseError);
-          errorMessage = `Erro ${response.status}: ${response.statusText}`;
-        }
-        
-        throw new Error(errorMessage);
-      }
-      
-      return response.json();
-    }
-  
-    async list(): Promise<PublicEvent[]> {
-      try {
-        console.log('🔄 Buscando eventos públicos...');
-        
-        const response = await fetch(`${this.baseURL}/events`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          credentials: 'include'
-        });
-        
-        const events = await this.handleResponse(response);
-        console.log('✅ Eventos públicos carregados:', events.length);
-        return events;
-      } catch (error) {
-        console.error('❌ Erro no PublicEventService.list:', error);
-        throw error;
-      }
-    }
-  
-    async getById(id: number): Promise<PublicEvent> {
-      try {
-        console.log(`🔄 Buscando evento público ID: ${id}...`);
-        
-        const response = await fetch(`${this.baseURL}/events/${id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        });
-        
-        return await this.handleResponse(response);
-      } catch (error) {
-        console.error('❌ Erro no PublicEventService.getById:', error);
-        throw error;
-      }
-    }
-  
-    async search(params: { search?: string; type?: string; status?: string; date?: string }): Promise<PublicEvent[]> {
-      try {
-        const queryParams = new URLSearchParams();
-        
-        Object.entries(params).forEach(([key, value]) => {
-          if (value) queryParams.append(key, value);
-        });
-  
-        const response = await fetch(`${this.baseURL}/events/search?${queryParams}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        });
-        
-        return await this.handleResponse(response);
-      } catch (error) {
-        console.error('❌ Erro no PublicEventService.search:', error);
-        throw error;
-      }
-    }
-  
-    async getByType(type: string): Promise<PublicEvent[]> {
-      try {
-        const response = await fetch(`${this.baseURL}/events/type/${type}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        });
-        
-        return await this.handleResponse(response);
-      } catch (error) {
-        console.error('❌ Erro no PublicEventService.getByType:', error);
-        throw error;
-      }
-    }
+  if (!Array.isArray(eventsData)) {
+    console.warn('⚠️ Estrutura de resposta não reconhecida, retornando array vazio');
+    console.log('Tipo recebido:', typeof eventsData);
+    return [];
   }
   
-  export const publicEventService = new PublicEventService();
+  console.log(`✅ ${eventsData.length} eventos processados da API`);
+  
+  // MAPEAR OS DADOS PARA O FORMATO PublicEvent
+  const mappedEvents: PublicEvent[] = eventsData.map((event: any) => ({
+    id: event.id,
+    title: event.title || 'Sem título',
+    description: event.description || '',
+    date: event.date,
+    time: event.time || '',
+    location: event.location || '',
+    type: event.type || 'academico',
+    category: event.category || '',
+    max_participants: event.max_participants || 0,
+    promoter_id: event.promoter_id,
+    status: event.status || 'pendente',
+    image: event.image || '',
+    requirements: event.requirements || '',
+    target_audience: event.target_audience || '',
+    feedback: event.feedback || '',
+    created_at: event.created_at,
+    updated_at: event.updated_at,
+    deleted_at: event.deleted_at,
+    participants_count: event.participants_count || event.participants || 0,
+    participants: event.participants || event.participants_count || 0,
+    promoter_name: event.promoter_name || event.promoter?.name || 'Promotor',
+  }));
+  
+  return mappedEvents;
+};
+
+export const publicEventService = {
+  async list(): Promise<PublicEvent[]> {
+    try {
+      console.log('🔄 Buscando eventos públicos da API...');
+      const response = await api.get('/events');
+      return handleResponse(response);
+    } catch (error) {
+      console.error('❌ Erro ao carregar eventos públicos:', error);
+      throw new Error('Não foi possível carregar os eventos. Tente novamente.');
+    }
+  },
+
+  async getByType(type: string): Promise<PublicEvent[]> {
+    try {
+      const response = await api.get(`/events/type/${type}`);
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Erro ao buscar eventos por tipo:', error);
+      throw error;
+    }
+  },
+
+  async search(params: { search?: string; type?: string; status?: string; date?: string }): Promise<PublicEvent[]> {
+    try {
+      const response = await api.get('/events/search', { params });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Erro ao buscar eventos:', error);
+      throw error;
+    }
+  },
+
+  async getById(id: number): Promise<PublicEvent> {
+    try {
+      const response = await api.get(`/events/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar evento:', error);
+      throw error;
+    }
+  }
+};

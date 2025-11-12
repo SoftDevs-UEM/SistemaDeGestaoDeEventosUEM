@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,7 +14,7 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -26,12 +25,13 @@ class User extends Authenticatable
         'nr_estudante',
         'curso',
         'departamento',
+        'faculdade',
     ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -39,16 +39,59 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    /**
      * The attributes that should be cast.
      *
-     * @var array<string,string>
+     * @var array<string, string>
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Check if user is a promoter
+     */
+    public function isPromoter()
+    {
+        return $this->tipo === 'promotor';
+    }
+
+    /**
+     * Check if user is an admin
+     */
+    public function isAdmin()
+    {
+        return $this->tipo === 'admin';
+    }
+
+    /**
+     * Check if user is promoter or admin
+     */
+    public function isPromoterOrAdmin()
+    {
+        return $this->isPromoter() || $this->isAdmin();
+    }
+
+    /**
+     * Check if user is student
+     */
+    public function isStudent()
+    {
+        return $this->tipo === 'estudante';
+    }
+
+    /**
+     * Get user type label
+     */
+    public function getTipoLabelAttribute()
+    {
+        $labels = [
+            'estudante' => 'Estudante',
+            'docente' => 'Docente',
+            'cta' => 'CTA',
+            'admin' => 'Administrador',
+            'promotor' => 'Promotor/Organizador',
+        ];
+
+        return $labels[$this->tipo] ?? $this->tipo;
+    }
 }

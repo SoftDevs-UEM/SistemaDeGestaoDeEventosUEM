@@ -98,4 +98,131 @@ class PromoterController extends Controller
 
         return response()->json(['message' => 'Promoter deleted']);
     }
+
+    // ✅ ATUALIZADO: Buscar dados do promotor logado
+  // ✅ NO MÉTODO getProfile - Garantir que retorna created_at
+public function getProfile(Request $request)
+{
+    $user = $request->user();
+    
+    if (!$user) {
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+
+    // Verificar se o usuário é promotor ou admin
+    if ($user->tipo !== 'promotor' && $user->tipo !== 'admin') {
+        return response()->json(['message' => 'Unauthorized - Apenas promotores e administradores'], 403);
+    }
+
+    return response()->json([
+        'id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email,
+        'telefone' => $user->telefone,
+        'tipo' => $user->tipo,
+        'departamento' => $user->departamento,
+        'created_at' => $user->created_at, // ✅ GARANTIR QUE ESTÁ SENDO RETORNADO
+        'updated_at' => $user->updated_at,
+    ]);
+}
+
+    // ✅ ATUALIZADO: Atualizar perfil do promotor
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Verificar se o usuário é promotor ou admin
+        if ($user->tipo !== 'promotor' && $user->tipo !== 'admin') {
+            return response()->json(['message' => 'Unauthorized - Apenas promotores e administradores'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'telefone' => 'nullable|string|max:50',
+            'departamento' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->telefone = $request->telefone;
+            $user->departamento = $request->departamento;
+
+            $user->save();
+
+            return response()->json([
+                'message' => 'Perfil atualizado com sucesso!',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'telefone' => $user->telefone,
+                    'tipo' => $user->tipo,
+                    'departamento' => $user->departamento,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro ao atualizar perfil',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ✅ ATUALIZADO: Alterar senha do promotor
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Verificar se o usuário é promotor ou admin
+        if ($user->tipo !== 'promotor' && $user->tipo !== 'admin') {
+            return response()->json(['message' => 'Unauthorized - Apenas promotores e administradores'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Verificar senha atual
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'A senha atual está incorreta'
+            ], 422);
+        }
+
+        try {
+            // Atualizar senha
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return response()->json([
+                'message' => 'Senha alterada com sucesso!'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro ao alterar senha',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

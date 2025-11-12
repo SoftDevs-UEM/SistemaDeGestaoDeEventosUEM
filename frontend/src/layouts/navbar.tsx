@@ -26,20 +26,9 @@ export default function Navbar() {
     setActiveDropdown(null);
   };
 
-  // Função para navegar para seções específicas da página Sobre
-  const handleSobreSectionClick = (sectionId: string) => {
-    navigate('/sobre', { state: { scrollToSection: sectionId } });
-  };
-
-  // Função para navegar para o AdminDashboard com view específica
-  const handleAdminNavigation = (view: string) => {
-    navigate('/admin/dashboard', { state: { activeView: view } });
-  };
-
   // Verificar se o usuário é admin para mostrar menu administrativo
   const isAdmin = isAuthenticated && userType === 'admin';
   const isPromotor = isAuthenticated && userType === 'promotor';
-  const showOrganizadoresMenu = isAuthenticated && (userType === 'promotor' || userType === 'admin');
 
   return (
     <>
@@ -72,33 +61,29 @@ export default function Navbar() {
       <nav className="navbar" id="navbar">
         {/* Links centralizados */}
         <div className="nav-links">
-          {/* Se for promotor, mostrar apenas os menus específicos */}
-          {isPromotor ? (
+          {/* Se for admin, mostrar apenas os menus administrativos */}
+          {isAdmin ? (
+            <>
+              {/* Menu Para Organizadores - para admin */}
+              <Link to="/organizadores">
+                Para Organizadores
+              </Link>
+
+              {/* Menu Administrativo - apenas para admin */}
+              <Link to="/admin/dashboard">
+                Administração
+              </Link>
+            </>
+          ) : isPromotor ? (
+            /* Se for promotor, mostrar apenas os menus específicos */
             <>
               {/* Menu Para Organizadores - apenas para promotores */}
-              <div 
-                className="dropdown-container"
-                onMouseEnter={() => handleDropdownEnter('organizadores')}
-                onMouseLeave={handleDropdownLeave}
-              >
-                <Link to="/organizadores" className="dropdown-toggle">
-                  Organizadores <span className="dropdown-arrow">▼</span>
-                </Link>
-                <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
-                  
-                  <button 
-                    className="dropdown-link-btn"
-                    onClick={() => handleAdminNavigation('configuracoes')}
-                  >
-                    Configurações
-                  </button>
-                </div>
-              </div>
-
-              <Link to="/contacto">Contacto</Link>
+              <Link to="/organizadores">
+                Organizadores
+              </Link>
             </>
           ) : (
-            /* Menu normal para não-promotores (usuários não autenticados, admin, etc.) */
+            /* Menu normal para não-autenticados e outros usuários (estudante, docente, cta) */
             <>
               <Link to="/">Página Inicial</Link>
               
@@ -129,72 +114,30 @@ export default function Navbar() {
                 <div className={`dropdown-menu ${activeDropdown === 'sobre' ? 'active' : ''}`}>
                   <button 
                     className="dropdown-link-btn"
-                    onClick={() => handleSobreSectionClick('historia')}
+                    onClick={() => navigate('/sobre', { state: { scrollToSection: 'historia' } })}
                   >
                     História
                   </button>
                   <button 
                     className="dropdown-link-btn"
-                    onClick={() => handleSobreSectionClick('missao')}
+                    onClick={() => navigate('/sobre', { state: { scrollToSection: 'missao' } })}
                   >
                     Missão e Visão
                   </button>
                   <button 
                     className="dropdown-link-btn"
-                    onClick={() => handleSobreSectionClick('equipa')}
+                    onClick={() => navigate('/sobre', { state: { scrollToSection: 'equipa' } })}
                   >
                     Nossa Equipa
                   </button>
                   <button 
                     className="dropdown-link-btn"
-                    onClick={() => handleSobreSectionClick('desenvolvedores')}
+                    onClick={() => navigate('/sobre', { state: { scrollToSection: 'desenvolvedores' } })}
                   >
                     Desenvolvedores
                   </button>
                 </div>
               </div>
-
-              {/* Menu Para Organizadores - para admin */}
-              {showOrganizadoresMenu && !isPromotor && (
-                <div 
-                  className="dropdown-container"
-                  onMouseEnter={() => handleDropdownEnter('organizadores')}
-                  onMouseLeave={handleDropdownLeave}
-                >
-                  <Link to="/organizadores" className="dropdown-toggle">
-                    Para Organizadores <span className="dropdown-arrow">▼</span>
-                  </Link>
-                  <div className={`dropdown-menu ${activeDropdown === 'organizadores' ? 'active' : ''}`}>
-                    <button 
-                      className="dropdown-link-btn"
-                      onClick={() => handleAdminNavigation('configuracoes')}
-                    >
-                      Configurações
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Menu Administrativo - apenas para admin */}
-              {isAdmin && (
-                <div 
-                  className="dropdown-container"
-                  onMouseEnter={() => handleDropdownEnter('admin')}
-                  onMouseLeave={handleDropdownLeave}
-                >
-                  <Link to="/admin/dashboard" className="dropdown-toggle">
-                    Administração <span className="dropdown-arrow">▼</span>
-                  </Link>
-                  <div className={`dropdown-menu ${activeDropdown === 'admin' ? 'active' : ''}`}>
-                    <button 
-                      className="dropdown-link-btn"
-                      onClick={() => handleAdminNavigation('configuracoes')}
-                    >
-                      Configurações
-                    </button>
-                  </div>
-                </div>
-              )}
 
               <Link to="/contacto">Contacto</Link>
             </>

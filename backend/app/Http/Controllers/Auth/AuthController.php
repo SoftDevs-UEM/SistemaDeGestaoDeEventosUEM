@@ -33,6 +33,8 @@ class AuthController extends Controller
             'nr_estudante' => $request->nrEstudante,
             'curso' => $request->curso,
             'departamento' => $request->departamento,
+            'created_at' => $user->created_at, // ✅ INCLUIR
+            'updated_at' => $user->updated_at, // ✅ INCLUIR
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;
