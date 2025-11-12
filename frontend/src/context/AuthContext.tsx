@@ -8,6 +8,12 @@ interface UserPayload {
   name?: string;
   email?: string;
   tipo?: UserType;
+  // ✅ ADICIONAR campos que podem vir do backend
+  nome?: string;
+  telefone?: string;
+  nr_estudante?: string;
+  curso?: string;
+  departamento?: string;
 }
 
 interface AuthContextType {
@@ -28,44 +34,117 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // On mount, try to restore session from token
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return;
-
-    // fetch current user
-    api.get('/user')
-      .then((res) => {
-        const u = res.data;
-        setUser(u);
-        setUserType(u?.tipo ?? null);
-        setIsAuthenticated(true);
-      })
-      .catch(() => {
-        // if token invalid, clear it
-        localStorage.removeItem('token');
-        setUser(null);
-        setUserType(null);
-        setIsAuthenticated(false);
-      });
+    const savedUser = localStorage.getItem('usuarioLogado'); // ✅ Buscar usuário salvo
+    
+    if (token && savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        console.log('🔄 Restaurando sessão do localStorage:', userData);
+        
+        // ✅ VERIFICAR SE TEM ID
+        if (!userData.id) {
+          console.warn('⚠️ Usuário salvo sem ID, buscando da API...');
+          // Se não tem ID, buscar da API
+          fetchCurrentUser();
+        } else {
+          setUser(userData);
+          setUserType(userData?.tipo ?? null);
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('❌ Erro ao restaurar sessão:', error);
+        fetchCurrentUser();
+      }
+    } else if (token) {
+      // Se tem token mas não tem usuário salvo, buscar da API
+      fetchCurrentUser();
+    }
   }, []);
 
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await api.get('/user');
+      const u = res.data;
+      console.log('👤 Usuário da API:', u);
+      
+      // ✅ GARANTIR que o ID está presente
+      if (!u.id) {
+        console.error('❌ API não retornou ID do usuário:', u);
+        throw new Error('ID do usuário não encontrado na resposta da API');
+      }
+      
+      // ✅ SALVAR usuário completo no localStorage
+      const userToSave = {
+        id: u.id,
+        name: u.name || u.nome,
+        email: u.email,
+        tipo: u.tipo,
+        nome: u.nome,
+        telefone: u.telefone,
+        nr_estudante: u.nr_estudante,
+        curso: u.curso,
+        departamento: u.departamento
+      };
+      
+      localStorage.setItem('usuarioLogado', JSON.stringify(userToSave));
+      console.log('💾 Usuário salvo no localStorage:', userToSave);
+      
+      setUser(userToSave);
+      setUserType(userToSave.tipo ?? null);
+      setIsAuthenticated(true);
+      
+    } catch (error) {
+      console.error('❌ Erro ao buscar usuário:', error);
+      // Se token invalid, clear it
+      localStorage.removeItem('token');
+      localStorage.removeItem('usuarioLogado');
+      setUser(null);
+      setUserType(null);
+      setIsAuthenticated(false);
+    }
+  };
+
   const login = async (u: UserPayload) => {
-    // assumes token already saved to localStorage by the caller
-    setUser(u);
-    setUserType(u?.tipo ?? null);
+    console.log('🔐 Fazendo login com usuário:', u);
+    
+    // ✅ GARANTIR que o ID está presente
+    if (!u.id) {
+      console.error('❌ Tentativa de login sem ID:', u);
+      throw new Error('ID do usuário é obrigatório para login');
+    }
+    
+    // ✅ SALVAR usuário completo no localStorage
+    const userToSave = {
+      id: u.id,
+      name: u.name || u.nome,
+      email: u.email,
+      tipo: u.tipo,
+      nome: u.nome,
+      telefone: u.telefone,
+      nr_estudante: u.nr_estudante,
+      curso: u.curso,
+      departamento: u.departamento
+    };
+    
+    localStorage.setItem('usuarioLogado', JSON.stringify(userToSave));
+    console.log('💾 Usuário salvo no localStorage durante login:', userToSave);
+    
+    setUser(userToSave);
+    setUserType(userToSave.tipo ?? null);
     setIsAuthenticated(true);
   };
 
   const logout = async () => {
     try {
-      // try to call backend logout (optional)
       await api.post('/logout');
     } catch (e) {
       // ignore
     }
     localStorage.removeItem('token');
+    localStorage.removeItem('usuarioLogado'); // ✅ Limpar usuário também
     setIsAuthenticated(false);
     setUserType(null);
     setUser(null);
-    // redirect to login optionally
     window.location.href = '/login';
   };
 

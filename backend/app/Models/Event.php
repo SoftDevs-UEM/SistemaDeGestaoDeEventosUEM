@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'title',
@@ -26,6 +27,8 @@ class Event extends Model
         'feedback'
     ];
 
+    protected $dates = ['deleted_at'];
+    
     protected $casts = [
         'date' => 'date',
         'max_participants' => 'integer'
@@ -38,8 +41,39 @@ class Event extends Model
     }
 
     // Relationship with registrations (if you have a registrations table)
+   
+
+
     public function registrations()
     {
         return $this->hasMany(Registration::class);
     }
+
+    // ADICIONAR: Check if event has available spots
+    public function hasAvailableSpots()
+    {
+        return $this->participants < $this->max_participants;
+    }
+
+    // ADICIONAR: Get available spots count
+    public function getAvailableSpots()
+    {
+        return $this->max_participants - $this->participants;
+    }
+
+    // ADICIONAR: Increment participants count
+    public function incrementParticipants()
+    {
+        $this->increment('participants');
+    }
+
+    // ADICIONAR: Decrement participants count
+    public function decrementParticipants()
+    {
+        if ($this->participants > 0) {
+            $this->decrement('participants');
+        }
+    }
+
+    
 }

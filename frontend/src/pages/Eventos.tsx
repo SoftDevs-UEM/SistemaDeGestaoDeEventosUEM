@@ -1,19 +1,35 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useEventos } from '../context/EventosContext';
 import './Eventos.css';
 import Footer from '../layouts/footer';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import type { Event } from '../services/eventService';
+import EventModal from '../components/EventModal';
 
 const Eventos = () => {
   const navigate = useNavigate();
   const { events, loadEvents, loading, error } = useEventos();
   const { isAuthenticated, userType } = useAuth();
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showEventModal, setShowEventModal] = useState(false);
 
   useEffect(() => {
     loadEvents();
   }, [loadEvents]);
+
+  // Função para obter número de participantes (com fallback)
+  const getParticipantesCount = (evento: Event): number => {
+    // Priorizar participants_count (contagem real), depois participants (coluna da tabela)
+    return evento.participants_count || evento.participants || 0;
+  };
+
+  // Função para calcular porcentagem de ocupação
+  const getOcupacaoPercentual = (evento: Event): number => {
+    const participantes = getParticipantesCount(evento);
+    const maxParticipantes = evento.max_participants || 1;
+    return Math.min(100, (participantes / maxParticipantes) * 100);
+  };
 
   const handleParticiparClick = (evento: Event) => {
     if (!isAuthenticated) {
@@ -27,8 +43,13 @@ const Eventos = () => {
   };
 
   const handleVerDetalhes = (evento: Event) => {
-    // Aqui você pode implementar um modal ou navegar para página de detalhes
-    console.log('Ver detalhes do evento:', evento);
+    setSelectedEvent(evento);
+    setShowEventModal(true);
+  };
+
+  const closeModal = () => {
+    setShowEventModal(false);
+    setSelectedEvent(null);
   };
 
   if (loading) {
@@ -73,7 +94,7 @@ const Eventos = () => {
             Todos os <span className="highlight">Eventos</span>
           </h2>
           <p className="section-subtitle">
-            Explore todos os eventos disponíveis
+            Explore todos os eventos disponíveis ({events.length} eventos)
           </p>
 
           {events.length === 0 ? (
@@ -86,63 +107,94 @@ const Eventos = () => {
             </div>
           ) : (
             <div className="events-grid">
-              {events.map((evento: Event) => (
-                <div key={evento.id} className="event-card">
-                  <div className="event-image">
-                    <img 
-                      src={evento.image || '/default-event-image.jpg'} 
-                      alt={evento.title}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/default-event-image.jpg';
-                      }}
-                    />
-                    <div className="event-category-badge">
-                      {evento.category}
+              {events.map((evento: Event) => {
+                const participantesCount = getParticipantesCount(evento);
+                const ocupacaoPercentual = getOcupacaoPercentual(evento);
+                
+                return (
+                  <div key={evento.id} className="event-card">
+                    <div className="event-image">
+                      <img 
+                        src={evento.image || '/default-event-image.jpg'} 
+                        alt={evento.title}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/default-event-image.jpg';
+                        }}
+                      />
+                      <div className="event-category-badge">
+                        {evento.category}
+                      </div>
+                      {/* Barra de progresso na imagem */}
+                      <div className="event-ocupacao-overlay">
+                        <div className="ocupacao-info">
+                          <span>{Math.round(ocupacaoPercentual)}% ocupado</span>
+                          <span>{participantesCount}/{evento.max_participants}</span>
+                        </div>
+                        <div className="ocupacao-progress-mini">
+                          <div 
+                            className={`ocupacao-fill ${ocupacaoPercentual >= 90 ? 'high' : ocupacaoPercentual >= 70 ? 'medium' : 'low'}`}
+                            style={{ width: `${ocupacaoPercentual}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      <div className="event-overlay"></div>
                     </div>
-                    <div className="event-overlay"></div>
+                    <div className="event-info">
+                      <h3>{evento.title}</h3>
+                      <p className="event-description">
+                        {evento.description && evento.description.length > 100 
+                          ? `${evento.description.substring(0, 100)}...` 
+                          : evento.description || 'Descrição não disponível'
+                        }
+                      </p>
+                      <div className="event-meta">
+                        <span>
+                          <i className="fas fa-calendar-alt"></i> 
+                          {new Date(evento.date).toLocaleDateString('pt-BR')} {evento.time && `às ${evento.time}`}
+                        </span>
+                        <span>
+                          <i className="fas fa-map-marker-alt"></i> {evento.location}
+                        </span>
+                        <span className="participants-info">
+                          <i className="fas fa-users"></i> 
+                          {participantesCount} / {evento.max_participants} participantes
+                          <span className="ocupacao-badge">
+                            {Math.round(ocupacaoPercentual)}% ocupado
+                          </span>
+                        </span>
+                      </div>
+                      <div className="event-buttons">
+                        <button 
+                          className="event-btn" 
+                          onClick={() => handleParticiparClick(evento)}
+                          disabled={ocupacaoPercentual >= 100}
+                        >
+                          {ocupacaoPercentual >= 100 ? 'Lotado' : 
+                           isAuthenticated && userType === 'estudante' ? 'Participar' : 'Participar'}
+                        </button>
+                        <button 
+                          className="btn-secondary" 
+                          onClick={() => handleVerDetalhes(evento)}
+                        >
+                          Ver Detalhes
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="event-info">
-                    <h3>{evento.title}</h3>
-                    <p className="event-description">
-                      {evento.description && evento.description.length > 100 
-                        ? `${evento.description.substring(0, 100)}...` 
-                        : evento.description || 'Descrição não disponível'
-                      }
-                    </p>
-                    <div className="event-meta">
-                      <span>
-                        <i className="fas fa-calendar-alt"></i> 
-                        {new Date(evento.date).toLocaleDateString('pt-BR')} {evento.time && `às ${evento.time}`}
-                      </span>
-                      <span>
-                        <i className="fas fa-map-marker-alt"></i> {evento.location}
-                      </span>
-                      <span>
-                        <i className="fas fa-users"></i> 
-                        {evento.registrations_count || 0} / {evento.max_participants} participantes
-                      </span>
-                    </div>
-                    <div className="event-buttons">
-                      <button 
-                        className="event-btn" 
-                        onClick={() => handleParticiparClick(evento)}
-                      >
-                        {isAuthenticated && userType === 'estudante' ? 'Participar' : 'Participar'}
-                      </button>
-                      <button 
-                        className="btn-secondary" 
-                        onClick={() => handleVerDetalhes(evento)}
-                      >
-                        Ver Detalhes
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       </section>
+
+      {/* Modal de Detalhes do Evento */}
+      <EventModal
+        event={selectedEvent}
+        isOpen={showEventModal}
+        onClose={closeModal}
+        onRegister={() => selectedEvent && handleParticiparClick(selectedEvent)}
+      />
 
       <Footer />
     </div>

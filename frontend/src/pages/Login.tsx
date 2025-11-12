@@ -51,11 +51,34 @@ export default function Login() {
       const response = await api.post('/login', formData);
       const { token, user } = response.data;
       
+      console.log('🔐 Resposta do login:', { token, user });
+      
+      // ✅ VERIFICAR se o user tem ID
+      if (!user.id) {
+        console.error('❌ Servidor não retornou ID do usuário:', user);
+        throw new Error('Erro de autenticação: ID do usuário não recebido');
+      }
+      
       // Salvar token
       localStorage.setItem('token', token);
       
+      // ✅ PREPARAR usuário com todos os campos
+      const userToSave = {
+        id: user.id,
+        name: user.name || user.nome,
+        email: user.email,
+        tipo: user.tipo,
+        nome: user.nome,
+        telefone: user.telefone,
+        nr_estudante: user.nr_estudante,
+        curso: user.curso,
+        departamento: user.departamento
+      };
+      
+      console.log('💾 Salvando usuário no AuthContext:', userToSave);
+      
       // Atualizar contexto de autenticação
-      await login(user);
+      await login(userToSave);
       
       // Redirecionar baseado no tipo de usuário
       switch (user.tipo) {
@@ -70,7 +93,8 @@ export default function Login() {
           navigate('/');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Falha ao fazer login');
+      console.error('❌ Erro no login:', err);
+      setError(err.response?.data?.message || err.message || 'Falha ao fazer login');
     } finally {
       setLoading(false);
     }
