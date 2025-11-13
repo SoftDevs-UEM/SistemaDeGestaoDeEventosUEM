@@ -26,7 +26,7 @@ type SystemStats = {
   eventosEsteMes: number;
 };
 
-type ActiveView = 'dashboard' | 'cadastrar-promotor' | 'lista-usuarios' | 'estudantes' | 'promotores' | 'gestao-eventos' | 'relatorios';
+type ActiveView = 'dashboard' | 'cadastrar-promotor' | 'lista-usuarios' | 'estudantes' | 'promotores' | 'gestao-eventos' | 'relatorios' | 'configuracoes';
 
 type Usuario = {
   id: string;
@@ -45,7 +45,15 @@ type Usuario = {
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, userType, logout } = useAuth();
+  const { 
+    isAuthenticated, 
+    userType, 
+    logout, 
+    user, 
+    updateUserProfile,
+    changePassword,
+    loadUserData 
+  } = useAuth();
   const [userStats, setUserStats] = useState<UserStats>({
     totalUsuarios: 0,
     totalEstudantes: 0,
@@ -102,6 +110,56 @@ export default function AdminDashboard() {
     anoAcademico: ''
   });
 
+  // Estados para configurações
+  const [dadosPessoais, setDadosPessoais] = useState({
+    name: '',
+    email: '',
+    telefone: '',
+    departamento: ''
+  });
+  
+  const [senhaData, setSenhaData] = useState({
+    current_password: '',
+    new_password: '',
+    new_password_confirmation: ''
+  });
+  
+  const [configLoading, setConfigLoading] = useState(false);
+  const [configMessage, setConfigMessage] = useState({ type: '', text: '' });
+
+  // ✅ LISTA DE DEPARTAMENTOS DA UEM
+  const departamentos = [
+    'Departamento de Matemática e Informática',
+    'Departamento de Física',
+    'Departamento de Química',
+    'Departamento de Biologia',
+    'Departamento de Geologia',
+    'Departamento de Engenharia Civil',
+    'Departamento de Engenharia Mecânica',
+    'Departamento de Engenharia Química',
+    'Departamento de Engenharia Eletrotécnica',
+    'Departamento de Arquitetura e Planeamento Físico',
+    'Departamento de Economia',
+    'Departamento de Gestão',
+    'Departamento de Contabilidade e Auditoria',
+    'Departamento de Direito',
+    'Departamento de Ciências da Educação',
+    'Departamento de Línguas e Literaturas',
+    'Departamento de História',
+    'Departamento de Geografia',
+    'Departamento de Sociologia',
+    'Departamento de Psicologia',
+    'Departamento de Medicina',
+    'Departamento de Cirurgia',
+    'Departamento de Pediatria',
+    'Departamento de Ginecologia e Obstetrícia',
+    'Departamento de Saúde Pública',
+    'Departamento de Agronomia',
+    'Departamento de Engenharia Rural',
+    'Departamento de Ciências Animais',
+    'Departamento de Veterinária'
+  ];
+
   // Redirecionar se não for admin
   React.useEffect(() => {
     if (!isAuthenticated || userType !== 'admin') {
@@ -120,6 +178,18 @@ export default function AdminDashboard() {
       setActiveView(location.state.activeView);
     }
   }, [location.state]);
+
+  // ✅ EFEITO ATUALIZADO: Carregar dados do usuário
+  useEffect(() => {
+    if (user) {
+      setDadosPessoais({
+        name: user.name || user.nome || '',
+        email: user.email || '',
+        telefone: user.telefone || '',
+        departamento: user.departamento || ''
+      });
+    }
+  }, [user]);
 
   const loadStatistics = async () => {
     setLoading(true);
@@ -420,6 +490,178 @@ export default function AdminDashboard() {
       ...prev,
       [field]: value
     }));
+  };
+
+  // ✅ FUNÇÕES PARA CONFIGURAÇÕES
+  const handleDadosPessoaisChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setDadosPessoais(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSenhaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSenhaData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // ✅ FUNÇÃO ATUALIZADA: Atualizar dados pessoais
+  const atualizarDadosPessoais = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setConfigLoading(true);
+    setConfigMessage({ type: '', text: '' });
+    
+    try {
+      console.log('📤 Enviando dados para atualização:', dadosPessoais);
+      
+      const result = await updateUserProfile(dadosPessoais);
+      
+      if (result.success) {
+        setConfigMessage({
+          type: 'success',
+          text: result.message
+        });
+        
+        // Recarregar dados para garantir sincronização
+        await loadUserData();
+        
+        console.log('✅ Dados pessoais atualizados com sucesso');
+      } else {
+        setConfigMessage({
+          type: 'error',
+          text: result.message
+        });
+        console.error('❌ Erro ao atualizar dados:', result.message);
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Erro inesperado ao atualizar dados:', error);
+      setConfigMessage({
+        type: 'error',
+        text: 'Erro inesperado ao atualizar dados. Tente novamente.'
+      });
+    } finally {
+      setConfigLoading(false);
+    }
+  };
+
+  // ✅ FUNÇÃO ATUALIZADA: Alterar senha
+  const alterarSenha = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setConfigMessage({ type: '', text: '' });
+    
+    // Validações no frontend
+    if (!senhaData.current_password) {
+      setConfigMessage({
+        type: 'error',
+        text: 'A senha atual é obrigatória'
+      });
+      return;
+    }
+    
+    if (senhaData.new_password.length < 6) {
+      setConfigMessage({
+        type: 'error',
+        text: 'A nova senha deve ter pelo menos 6 caracteres'
+      });
+      return;
+    }
+    
+    if (senhaData.new_password !== senhaData.new_password_confirmation) {
+      setConfigMessage({
+        type: 'error',
+        text: 'As senhas não coincidem'
+      });
+      return;
+    }
+    
+    setConfigLoading(true);
+    
+    try {
+      console.log('📤 Alterando senha...');
+      
+      const result = await changePassword(senhaData);
+      
+      if (result.success) {
+        setConfigMessage({
+          type: 'success',
+          text: result.message
+        });
+        
+        // Limpar formulário
+        setSenhaData({
+          current_password: '',
+          new_password: '',
+          new_password_confirmation: ''
+        });
+        
+        console.log('✅ Senha alterada com sucesso');
+      } else {
+        setConfigMessage({
+          type: 'error',
+          text: result.message
+        });
+        console.error('❌ Erro ao alterar senha:', result.message);
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Erro inesperado ao alterar senha:', error);
+      setConfigMessage({
+        type: 'error',
+        text: 'Erro inesperado ao alterar senha. Tente novamente.'
+      });
+    } finally {
+      setConfigLoading(false);
+    }
+  };
+
+  // ✅ FUNÇÕES PARA DATAS
+  const formatarDataSegura = (dataString: string | undefined | null): string => {
+    if (!dataString) {
+      return 'A carregar...';
+    }
+    
+    try {
+      const data = new Date(dataString);
+      if (isNaN(data.getTime())) {
+        return 'Data inválida';
+      }
+      
+      return data.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return 'Erro na data';
+    }
+  };
+
+  const formatarDataCompletaSegura = (dataString: string | undefined | null): string => {
+    if (!dataString) {
+      return 'A carregar...';
+    }
+    
+    try {
+      const data = new Date(dataString);
+      if (isNaN(data.getTime())) {
+        return 'Data inválida';
+      }
+      
+      return data.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Erro na data';
+    }
   };
 
   const renderDashboardView = () => (
@@ -1003,6 +1245,192 @@ export default function AdminDashboard() {
     </div>
   );
 
+  // ✅ NOVA FUNÇÃO: Renderizar view de configurações
+  const renderConfiguracoesView = () => {
+    const dataRegisto = user?.created_at ? formatarDataSegura(user.created_at) : 'A carregar...';
+    const dataAtualizacao = user?.updated_at ? formatarDataCompletaSegura(user.updated_at) : dataRegisto;
+
+    return (
+      <div className="configuracoes-view">
+        <div className="configuracoes-header">
+          <h2>⚙️ Configurações da Conta</h2>
+          <p>Gerencie suas informações pessoais e segurança da conta</p>
+        </div>
+
+        {configMessage.text && (
+          <div className={`message ${configMessage.type}`}>
+            {configMessage.type === 'success' ? '✅' : '❌'} {configMessage.text}
+          </div>
+        )}
+
+        <div className="configuracoes-grid">
+          <div className="config-card">
+            <div className="config-card-header">
+              <h3>👤 Dados Pessoais</h3>
+              <span className="config-badge">Informações básicas</span>
+            </div>
+            
+            <form onSubmit={atualizarDadosPessoais} className="config-form">
+              <div className="form-group">
+                <label htmlFor="name">Nome Completo *</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={dadosPessoais.name}
+                  onChange={handleDadosPessoaisChange}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="email">Email *</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={dadosPessoais.email}
+                  onChange={handleDadosPessoaisChange}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="telefone">Telefone</label>
+                <input
+                  type="tel"
+                  id="telefone"
+                  name="telefone"
+                  value={dadosPessoais.telefone}
+                  onChange={handleDadosPessoaisChange}
+                  placeholder="(+258) 8X XXX XXXX"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="departamento">Departamento</label>
+                <select 
+                  name="departamento"
+                  value={dadosPessoais.departamento} 
+                  onChange={handleDadosPessoaisChange}
+                  className="form-select"
+                >
+                  <option value="">Selecione o departamento</option>
+                  {departamentos.map((depto, index) => (
+                    <option key={index} value={depto}>
+                      {depto}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <button 
+                type="submit" 
+                className="btn-primary"
+                disabled={configLoading}
+              >
+                {configLoading ? '🔄 Atualizando...' : '💾 Salvar Alterações'}
+              </button>
+            </form>
+          </div>
+
+          <div className="config-card">
+            <div className="config-card-header">
+              <h3>🔒 Alterar Senha</h3>
+              <span className="config-badge">Segurança</span>
+            </div>
+            
+            <form onSubmit={alterarSenha} className="config-form">
+              <div className="form-group">
+                <label htmlFor="current_password">Senha Atual *</label>
+                <input
+                  type="password"
+                  id="current_password"
+                  name="current_password"
+                  value={senhaData.current_password}
+                  onChange={handleSenhaChange}
+                  required
+                  placeholder="Digite sua senha atual"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="new_password">Nova Senha *</label>
+                <input
+                  type="password"
+                  id="new_password"
+                  name="new_password"
+                  value={senhaData.new_password}
+                  onChange={handleSenhaChange}
+                  required
+                  placeholder="Mínimo 6 caracteres"
+                  minLength={6}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="new_password_confirmation">Confirmar Nova Senha *</label>
+                <input
+                  type="password"
+                  id="new_password_confirmation"
+                  name="new_password_confirmation"
+                  value={senhaData.new_password_confirmation}
+                  onChange={handleSenhaChange}
+                  required
+                  placeholder="Digite novamente a nova senha"
+                />
+              </div>
+              
+              <button 
+                type="submit" 
+                className="btn-primary"
+                disabled={configLoading}
+              >
+                {configLoading ? '🔄 Alterando...' : '🔐 Alterar Senha'}
+              </button>
+            </form>
+          </div>
+
+          <div className="config-card">
+            <div className="config-card-header">
+              <h3>📋 Informações da Conta</h3>
+              <span className="config-badge">Leitura apenas</span>
+            </div>
+            
+            <div className="account-info">
+              <div className="info-item">
+                <span className="info-label">Tipo de Usuário:</span>
+                <span className="info-value">
+                  {userType === 'admin' ? '👑 Administrador' : userType || 'A carregar...'}
+                </span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">ID do Usuário:</span>
+                <span className="info-value">{user?.id || 'A carregar...'}</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Data de Registro:</span>
+                <span className="info-value">{dataRegisto}</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Última Atualização:</span>
+                <span className="info-value">{dataAtualizacao}</span>
+              </div>
+              
+              <div className="info-item">
+                <span className="info-label">Status da Conta:</span>
+                <span className="info-value status-ativo">✅ Ativa</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -1024,6 +1452,7 @@ export default function AdminDashboard() {
              activeView === 'cadastrar-promotor' ? '👨‍🏫 Cadastrar Promotor' :
              activeView === 'estudantes' ? '🎓 Gestão de Estudantes' :
              activeView === 'promotores' ? '👨‍🏫 Gestão de Promotores' :
+             activeView === 'configuracoes' ? '⚙️ Configurações' :
              'Editar Usuário'}
           </h1>
           <p>
@@ -1035,6 +1464,8 @@ export default function AdminDashboard() {
               ? 'Gerencie os estudantes cadastrados no sistema'
               : activeView === 'promotores'
               ? 'Gerencie os promotores cadastrados no sistema'
+              : activeView === 'configuracoes'
+              ? 'Gerencie suas informações pessoais e segurança da conta'
               : 'Edite os dados do usuário selecionado'
             }
           </p>
@@ -1080,9 +1511,12 @@ export default function AdminDashboard() {
             </div>
 
             <div className="nav-section">
-              <h3>📅 Gestão de Eventos</h3>
-              <button className="nav-btn">
-                📊 Todos os Eventos
+              <h3>⚙️ Configurações</h3>
+              <button 
+                className={`nav-btn ${activeView === 'configuracoes' ? 'active' : ''}`}
+                onClick={() => setActiveView('configuracoes')}
+              >
+                👤 Minha Conta
               </button>
             </div>
           </nav>
@@ -1094,6 +1528,7 @@ export default function AdminDashboard() {
           {activeView === 'cadastrar-promotor' && renderCadastrarPromotorView()}
           {activeView === 'estudantes' && renderEstudantesView()}
           {activeView === 'promotores' && renderPromotoresView()}
+          {activeView === 'configuracoes' && renderConfiguracoesView()}
           {editandoUsuario && renderEdicaoUsuarioView()}
         </main>
       </div>
