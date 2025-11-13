@@ -24,25 +24,46 @@ class AuthController extends Controller
             'departamento' => 'required_if:tipo,docente,organizador,cta,promotor',
         ]);
 
-        $user = User::create([
-            'name' => $request->nome,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'telefone' => $request->telefone,
-            'tipo' => $request->tipo,
-            'nr_estudante' => $request->nrEstudante,
-            'curso' => $request->curso,
-            'departamento' => $request->departamento,
-            'created_at' => $user->created_at, // ✅ INCLUIR
-            'updated_at' => $user->updated_at, // ✅ INCLUIR
-        ]);
+        try {
+            // Criar o usuário
+            $user = User::create([
+                'name' => $request->nome,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'telefone' => $request->telefone,
+                'tipo' => $request->tipo,
+                'nr_estudante' => $request->nrEstudante,
+                'curso' => $request->curso,
+                'departamento' => $request->departamento,
+            ]);
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+            // Criar token
+            $token = $user->createToken('auth-token')->plainTextToken;
 
-        return response()->json([
-            'user' => $user,
-            'token' => $token
-        ], 201);
+            // Retornar resposta com usuário e token
+            return response()->json([
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'tipo' => $user->tipo,
+                    'nome' => $user->name, // mantendo compatibilidade
+                    'telefone' => $user->telefone,
+                    'nr_estudante' => $user->nr_estudante,
+                    'curso' => $user->curso,
+                    'departamento' => $user->departamento,
+                    'created_at' => $user->created_at,
+                    'updated_at' => $user->updated_at,
+                ],
+                'token' => $token
+            ], 201);
+
+        } catch (\Exception $e) {
+            \Log::error('Erro no registro: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Erro ao criar usuário: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function login(Request $request)
@@ -63,7 +84,19 @@ class AuthController extends Controller
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'tipo' => $user->tipo,
+                'nome' => $user->name, // mantendo compatibilidade
+                'telefone' => $user->telefone,
+                'nr_estudante' => $user->nr_estudante,
+                'curso' => $user->curso,
+                'departamento' => $user->departamento,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ],
             'token' => $token
         ]);
     }

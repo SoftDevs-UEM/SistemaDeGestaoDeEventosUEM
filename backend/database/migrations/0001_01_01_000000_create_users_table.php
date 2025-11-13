@@ -20,7 +20,7 @@ return new class extends Migration
             
             // ✅ CAMPOS ADICIONAIS PARA O SISTEMA
             $table->string('telefone')->nullable();
-            $table->enum('tipo', ['estudante', 'docente', 'cta', 'admin', 'promotor'])->default('estudante');
+            $table->enum('tipo', ['estudante', 'docente', 'organizador', 'admin', 'cta', 'promotor'])->default('estudante');
             $table->string('nr_estudante')->nullable()->unique();
             $table->string('curso')->nullable();
             $table->string('departamento')->nullable();

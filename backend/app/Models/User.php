@@ -87,9 +87,10 @@ class User extends Authenticatable
         $labels = [
             'estudante' => 'Estudante',
             'docente' => 'Docente',
+            'organizador' => 'Organizador',
             'cta' => 'CTA',
             'admin' => 'Administrador',
-            'promotor' => 'Promotor/Organizador',
+            'promotor' => 'Promotor',
         ];
 
         return $labels[$this->tipo] ?? $this->tipo;
