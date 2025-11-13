@@ -462,26 +462,7 @@ const RegistrarEvento = () => {
               <div className="form-section">
                 <h3>Dados de Pagamento</h3>
                 <div className="form-grid">
-                  <div className="form-group">
-                    <label htmlFor="pagamento">Número para Pagamento *</label>
-                    <input
-                      type="text"
-                      id="pagamento"
-                      name="pagamento"
-                      value={formData.pagamento}
-                      onChange={handleChange}
-                      required
-                      placeholder="Ex: 84 123 4567"
-                      disabled={loading}
-                      className={formErrors.pagamento ? 'error' : ''}
-                    />
-                    {formErrors.pagamento && (
-                      <span className="error-message">{formErrors.pagamento}</span>
-                    )}
-                    <small className="form-help">
-                      Digite o número do seu celular para receber a solicitação de pagamento
-                    </small>
-                  </div>
+
 
                   <div className="form-group">
                     <label htmlFor="metodoPagamento">Método de Pagamento *</label>
@@ -505,6 +486,28 @@ const RegistrarEvento = () => {
                     )}
                     <small className="form-help">
                       Selecione o método de pagamento móvel que você utiliza
+                    </small>
+                  </div>
+
+
+                  <div className="form-group">
+                    <label htmlFor="pagamento">Número para Pagamento *</label>
+                    <input
+                      type="text"
+                      id="pagamento"
+                      name="pagamento"
+                      value={formData.pagamento}
+                      onChange={handleChange}
+                      required
+                      placeholder="Ex: 84 123 4567"
+                      disabled={loading}
+                      className={formErrors.pagamento ? 'error' : ''}
+                    />
+                    {formErrors.pagamento && (
+                      <span className="error-message">{formErrors.pagamento}</span>
+                    )}
+                    <small className="form-help">
+                      Digite o número do seu celular para receber a solicitação de pagamento
                     </small>
                   </div>
                 </div>
