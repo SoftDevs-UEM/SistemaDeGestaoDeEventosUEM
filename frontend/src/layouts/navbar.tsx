@@ -96,10 +96,12 @@ export default function Navbar() {
                   Eventos <span className="dropdown-arrow">▼</span>
                 </Link>
                 <div className={`dropdown-menu ${activeDropdown === 'eventos' ? 'active' : ''}`}>
-                  <Link to="/eventos/proximos">Próximos Eventos</Link>
-                  <Link to="/eventos/passados">Eventos Passados</Link>
-                  <Link to="/eventos/inscricoes">Minhas Inscrições</Link>
-                  <Link to="/eventos/categorias">Categorias</Link>
+                  {/* <Link to="/eventos/proximos">Próximos Eventos</Link>
+                  <Link to="/eventos/passados">Eventos Passados</Link>// */}
+                  {/* <Link to="/eventos/inscricoes">Minhas Inscrições</Link>
+                  // No dropdown de Eventos, atualize o link: */}
+<Link to="/minhas-inscricoes">Minhas Inscrições</Link>
+                  {/* <Link to="/eventos/categorias">Categorias</Link> */}
                 </div>
               </div>
 

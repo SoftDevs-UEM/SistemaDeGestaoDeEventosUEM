@@ -19,6 +19,7 @@ import HomeEstudante from './pages/HomeEstudante';
 import Organizadores from './pages/Organizadores';
 import CadastrarPromotor from './pages/CadastrarPromotor';
 import AdminDashboard from './pages/AdminDashboard';
+import MinhasInscricoes from './pages/MinhasInscricoes';
 
 // Tipo de usuário permitido
 type UserType = 'estudante' | 'docente' | 'cta' | 'admin' | 'promotor';
@@ -113,6 +114,12 @@ const AppContent = React.memo(() => {
           </ProtectedRoute>
         } 
       />
+
+
+<Route 
+  path="/minhas-inscricoes" 
+  element={<MinhasInscricoes />} 
+/>
       <Route 
         path="/criar-evento" 
         element={
