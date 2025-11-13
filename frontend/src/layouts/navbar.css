@@ -113,6 +113,169 @@ body {
   background: #02663e;
 }
 
+/* -------- Área do Usuário -------- */
+.user-area {
+  position: relative;
+  margin-left: 16px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-height: 40px;
+}
+
+.user-info:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.user-avatar {
+  font-size: 16px;
+  color: white;
+}
+
+.user-name {
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.user-info .dropdown-arrow {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  transition: transform 0.3s ease;
+}
+
+.user-area:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* Dropdown do Usuário */
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  min-width: 200px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e0e0e0;
+  display: none;
+  z-index: 1001;
+  margin-top: 5px;
+}
+
+.user-dropdown.active {
+  display: block;
+  animation: fadeInDown 0.2s ease;
+}
+
+.user-dropdown-header {
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.user-welcome {
+  font-weight: 600;
+  color: #03492a;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.user-email {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+.user-dropdown-links {
+  padding: 8px 0;
+}
+
+.user-dropdown-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.user-dropdown-link:hover {
+  background: #f8f9fa;
+  color: #03492a;
+}
+
+.user-dropdown-link i {
+  width: 14px;
+  color: #6c757d;
+  font-size: 12px;
+}
+
+.user-dropdown-link:hover i {
+  color: #03492a;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 4px 0;
+}
+
+.logout-btn {
+  color: #dc3545;
+}
+
+.logout-btn i {
+  color: #dc3545;
+}
+
+.logout-btn:hover {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.logout-btn:hover i {
+  color: #721c24;
+}
+
+/* -------- Botão Login -------- */
+.btn-login {
+  background-color: #02663e;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  margin-left: 16px;
+  min-width: 80px;
+  text-align: center;
+  height: 40px;
+}
+
+.btn-login:hover {
+  background-color: #03492a;
+  transform: translateY(-1px);
+}
+
 /* -------- Dropdown -------- */ 
 .dropdown-container {
   position: relative; 
@@ -140,28 +303,28 @@ body {
   position: absolute;
   top: 100%; 
   left: 0;
-  background: #ffffff; /* Fundo branco como na imagem */ 
-  min-width: 250px; /* Largura maior para melhor legibilidade */ 
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* Sombra mais suave */ 
-  border: 1px solid #ddd; /* Borda sutil */ 
-  border-top: 3px solid #03492a; /* Linha superior verde */ 
+  background: #ffffff;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 1px solid #ddd;
+  border-top: 2px solid #03492a;
   display: none; 
   z-index: 1000; 
-  border-radius: 0 0 4px 4px; /* Cantos arredondados na parte inferior */ 
+  border-radius: 0 0 4px 4px;
 }
 
 .dropdown-menu a, 
 .dropdown-link-btn {
-  padding: 12px 20px;
+  padding: 10px 16px;
   font-size: 14px;
   font-weight: normal;
-  color: #333; /* Texto escuro como na imagem */
+  color: #333;
   text-decoration: none;
-  border-bottom: 1px solid #f0f0f0; /* Divisor mais suave */
+  border-bottom: 1px solid #f0f0f0;
   display: block;
   width: 100%;
   transition: all 0.3s ease;
-  background: #ffffff; /* Garantir fundo branco */
+  background: #ffffff;
   border: none;
   text-align: left;
   cursor: pointer;
@@ -174,9 +337,8 @@ body {
 
 .dropdown-menu a:hover,
 .dropdown-link-btn:hover {
-  background: #ffffff !important; /* Fundo permanece branco */
-  color: #03492a; /* Apenas o texto muda para verde */
-  /* Remover qualquer cor de fundo azul */
+  background: #f8f9fa;
+  color: #03492a;
 }
 
 .dropdown-container:hover .dropdown-menu,
@@ -184,25 +346,9 @@ body {
   display: block;
 }
 
-/* Garantir que não haja herança de cores indesejadas */
-.dropdown-menu a:focus,
-.dropdown-menu a:active,
-.dropdown-link-btn:focus,
-.dropdown-link-btn:active {
-  background: #ffffff !important;
-  color: #03492a;
-}
-
-/* Remover estilos padrão do navegador */
-.dropdown-menu a,
-.dropdown-link-btn {
-  -webkit-tap-highlight-color: transparent;
-  outline: none;
-}
-
 /* Estilo para os botões do dropdown "Sobre Nós" */
 .dropdown-link-btn {
-  padding: 12px 20px;
+  padding: 10px 16px;
   font-size: 14px;
   font-weight: normal;
   color: #333;
@@ -218,88 +364,27 @@ body {
 }
 
 .dropdown-link-btn:hover {
-  background: #f8f9fa !important;
-  color: #03492a !important;
-  padding-left: 25px;
+  background: #f8f9fa;
+  color: #03492a;
 }
 
 .dropdown-link-btn:last-child {
   border-bottom: none;
 }
 
-/* Garantir que não haja herança de cores indesejadas */
-.dropdown-link-btn:focus,
-.dropdown-link-btn:active {
-  background: #f8f9fa !important;
-  color: #03492a !important;
+/* Animações */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Remover estilos padrão do navegador */
-.dropdown-link-btn {
-  background: none;
-  border: none;
-  padding: 10px 15px;
-  text-align: left;
-  width: 100%;
-  cursor: pointer;
-  color: #333;
-  text-decoration: none;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-/* -------- Botão login NOVO ESTILO (igual ao footer) -------- */
-.btn-login-footer-style {
-  background-color: #02663e; ; /* Verde UEM */
-  color: white;
-  border: none;
-  padding: 12px 25px;
-  border-radius: 4px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-  margin-left: 16px;
-  min-width: 100px;
-  text-align: center;
-  display: inline-block;
-  text-decoration: none;
-  position: relative;
-  z-index: 1;
-}
-
-.btn-login-footer-style:hover {
-  background-color: #02663e; /* Verde UEM mais escuro */
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  color: white !important;
-}
-
-/* Garantir que o texto sempre fique visível */
-.btn-login-footer-style::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: transparent;
-  z-index: -1;
-}
-
-/* Forçar a cor do texto em todos os estados */
-.btn-login-footer-style,
-.btn-login-footer-style:link,
-.btn-login-footer-style:visited,
-.btn-login-footer-style:hover,
-.btn-login-footer-style:active,
-.btn-login-footer-style:focus {
-  color: white !important;
-  text-decoration: none !important;
-}
-
-/* Responsividade básica */
+/* Responsividade */
 @media (max-width: 1200px) {
   .nav-links a {
     padding: 18px 15px;
@@ -310,10 +395,10 @@ body {
     padding: 0 20px;
   }
   
-  .btn-login-footer-style {
-    padding: 10px 20px;
-    font-size: 0.85rem;
-    min-width: 90px;
+  .btn-login {
+    padding: 8px 16px;
+    font-size: 13px;
+    min-width: 70px;
   }
 }
 
@@ -333,7 +418,7 @@ body {
     border-right: none;
     border-bottom: 1px solid #02663e;
     text-align: center;
-    padding: 15px 20px;
+    padding: 12px 20px;
   }
   
   .dropdown-menu {
@@ -346,14 +431,39 @@ body {
   .dropdown-menu.active {
     display: block;
   }
-  
-  .btn-login-footer-style {
-    margin: 10px 0 0 0;
+
+  .user-area {
+    margin: 8px 0 0 0;
     width: 100%;
-    order: 1;
+  }
+
+  .user-info {
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .user-dropdown {
+    position: static;
+    width: 100%;
+    margin-top: 8px;
+  }
+  
+  .btn-login {
+    margin: 8px 0 0 0;
+    width: 100%;
   }
   
   .dropdown-arrow {
-    display: none; /* Esconder seta em mobile para economizar espaço */
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-name {
+    font-size: 13px;
+  }
+  
+  .user-info {
+    padding: 6px 10px;
   }
 }

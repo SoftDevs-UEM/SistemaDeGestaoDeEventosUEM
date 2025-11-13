@@ -228,13 +228,7 @@ const MinhasInscricoes = () => {
               <i className="fas fa-exclamation-triangle"></i>
               <h2>Acesso Restrito</h2>
               <p>Você precisa estar logado para visualizar suas inscrições.</p>
-              <button 
-                onClick={() => navigate('/login')}
-                className="btn-primary"
-              >
-                <i className="fas fa-sign-in-alt"></i>
-                Fazer Login
-              </button>
+           
             </div>
           </div>
         </div>
@@ -394,21 +388,10 @@ const MinhasInscricoes = () => {
                 <p>
                   {filter === 'todas' && searchTerm === ''
                     ? 'Você ainda não se inscreveu em nenhum evento.'
-                    : `Nenhuma inscrição encontrada com os filtros aplicados.`
+                    : `Nenhuma inscrição encontrada.`
                   }
                 </p>
-                {(filter !== 'todas' || searchTerm !== '') && (
-                  <button 
-                    onClick={() => {
-                      setFilter('todas');
-                      setSearchTerm('');
-                    }}
-                    className="btn-outline"
-                  >
-                    <i className="fas fa-times"></i>
-                    Limpar Filtros
-                  </button>
-                )}
+              
                 {filter === 'todas' && searchTerm === '' && (
                   <button 
                     onClick={() => navigate('/eventos')}

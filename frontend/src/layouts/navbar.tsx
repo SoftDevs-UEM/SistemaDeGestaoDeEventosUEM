@@ -7,7 +7,8 @@ import { useAuth } from '../context/AuthContext';
 export default function Navbar() {
   const navigate = useNavigate();
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const { isAuthenticated, logout, userType } = useAuth();
+  const [userDropdown, setUserDropdown] = useState(false);
+  const { isAuthenticated, logout, userType, user } = useAuth();
 
   const handleLoginClick = () => {
     navigate("/login");
@@ -26,9 +27,29 @@ export default function Navbar() {
     setActiveDropdown(null);
   };
 
+  const handleUserDropdownToggle = () => {
+    setUserDropdown(!userDropdown);
+  };
+
+  const handleUserDropdownLeave = () => {
+    setUserDropdown(false);
+  };
+
   // Verificar se o usuário é admin para mostrar menu administrativo
   const isAdmin = isAuthenticated && userType === 'admin';
   const isPromotor = isAuthenticated && userType === 'promotor';
+  const isEstudante = isAuthenticated && userType === 'estudante';
+
+  // Obter o nome do usuário ou email
+  const getUserDisplayName = () => {
+    if (user?.name) {
+      return user.name.split(' ')[0]; // Retorna apenas o primeiro nome
+    }
+    if (user?.email) {
+      return user.email.split('@')[0]; // Retorna a parte antes do @ do email
+    }
+    return 'Usuário';
+  };
 
   return (
     <>
@@ -96,12 +117,10 @@ export default function Navbar() {
                   Eventos <span className="dropdown-arrow">▼</span>
                 </Link>
                 <div className={`dropdown-menu ${activeDropdown === 'eventos' ? 'active' : ''}`}>
-                  {/* <Link to="/eventos/proximos">Próximos Eventos</Link>
-                  <Link to="/eventos/passados">Eventos Passados</Link>// */}
-                  {/* <Link to="/eventos/inscricoes">Minhas Inscrições</Link>
-                  // No dropdown de Eventos, atualize o link: */}
-<Link to="/minhas-inscricoes">Minhas Inscrições</Link>
-                  {/* <Link to="/eventos/categorias">Categorias</Link> */}
+                  {isAuthenticated && (
+                    <Link to="/minhas-inscricoes">Minhas Inscrições</Link>
+                  )}
+                  <Link to="/eventos">Todos os Eventos</Link>
                 </div>
               </div>
 
@@ -146,13 +165,50 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Botão Entrar/Sair estilizado como o do footer */}
+        {/* Área do usuário logado ou botão de login */}
         {isAuthenticated ? (
-          <button className="btn-login-footer-style" onClick={handleLogoutClick}>
-            SAIR
-          </button>
+          <div 
+            className="user-area"
+            onMouseEnter={handleUserDropdownToggle}
+            onMouseLeave={handleUserDropdownLeave}
+          >
+            <div className="user-info">
+              <div className="user-avatar">
+                <i className="fas fa-user"></i>
+              </div>
+              <span className="user-name">{getUserDisplayName()}</span>
+              <span className="dropdown-arrow">▼</span>
+            </div>
+            
+            {/* Dropdown do usuário */}
+            <div className={`user-dropdown ${userDropdown ? 'active' : ''}`}>
+              <div className="user-dropdown-header">
+                <div className="user-welcome">Olá, {getUserDisplayName()}!</div>
+                <div className="user-email">{user?.email}</div>
+              </div>
+              
+              <div className="user-dropdown-links">
+                {isEstudante && (
+                  <Link to="/minhas-inscricoes" className="user-dropdown-link">
+                    <i className="fas fa-ticket-alt"></i>
+                    Minhas Inscrições
+                  </Link>
+                )}
+                
+                <div className="dropdown-divider"></div>
+                
+                <button 
+                  onClick={handleLogoutClick}
+                  className="user-dropdown-link logout-btn"
+                >
+                  <i className="fas fa-sign-out-alt"></i>
+                  Sair
+                </button>
+              </div>
+            </div>
+          </div>
         ) : (
-          <button className="btn-login-footer-style" onClick={handleLoginClick}>
+          <button className="btn-login" onClick={handleLoginClick}>
             ENTRAR
           </button>
         )}
