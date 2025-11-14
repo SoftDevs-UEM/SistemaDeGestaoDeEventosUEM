@@ -10,7 +10,7 @@ import EventModal from '../components/EventModal';
 const Eventos = () => {
   const navigate = useNavigate();
   const { events, loadEvents, loading, error } = useEventos();
-  const { isAuthenticated, userType } = useAuth();
+  const { isAuthenticated, userType, user } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
 
@@ -18,13 +18,42 @@ const Eventos = () => {
     loadEvents();
   }, [loadEvents]);
 
-  // Função para obter número de participantes (com fallback)
+  // ✅ FUNÇÃO MELHORADA: Verificar se usuário está inscrito no evento
+  const userIsRegisteredInEvent = (evento: Event): boolean => {
+    if (!user || !isAuthenticated) return false;
+    return evento.user_is_registered || false;
+  };
+
+  // ✅ FUNÇÃO MELHORADA: Verificar se evento deve ser mostrado
+  const shouldShowEvent = (evento: Event): boolean => {
+    // Admin vê todos os eventos
+    if (userType === 'admin') return true;
+    
+    // Promotor vê seus eventos + eventos ativos/pendentes
+    if (userType === 'promotor') {
+      return evento.promoter_id === user?.id || 
+             evento.status === 'ativo' || 
+             evento.status === 'pendente';
+    }
+    
+    // Estudante vê eventos ativos/pendentes + eventos cancelados em que está inscrito
+    if (userType === 'estudante') {
+      return evento.status === 'ativo' || 
+             evento.status === 'pendente' ||
+             (evento.status === 'cancelado' && userIsRegisteredInEvent(evento));
+    }
+    
+    // Usuário não logado vê apenas eventos ativos
+    return evento.status === 'ativo';
+  };
+
+  // Filtrar eventos baseado nas regras
+  const filteredEvents = events.filter(shouldShowEvent);
+
   const getParticipantesCount = (evento: Event): number => {
-    // Priorizar participants_count (contagem real), depois participants (coluna da tabela)
     return evento.participants_count || evento.participants || 0;
   };
 
-  // Função para calcular porcentagem de ocupação
   const getOcupacaoPercentual = (evento: Event): number => {
     const participantes = getParticipantesCount(evento);
     const maxParticipantes = evento.max_participants || 1;
@@ -50,6 +79,27 @@ const Eventos = () => {
   const closeModal = () => {
     setShowEventModal(false);
     setSelectedEvent(null);
+  };
+
+  // ✅ FUNÇÃO PARA OBTER BADGE DE STATUS
+  const getStatusBadge = (evento: Event) => {
+    const statusConfig = {
+      ativo: { label: 'Ativo', class: 'status-ativo', icon: '🟢' },
+      pendente: { label: 'Pendente', class: 'status-pendente', icon: '🟡' },
+      cancelado: { label: 'Cancelado', class: 'status-cancelado', icon: '🔴' },
+      concluido: { label: 'Concluído', class: 'status-concluido', icon: '✅' }
+    };
+
+    const config = statusConfig[evento.status as keyof typeof statusConfig] || statusConfig.pendente;
+    
+    return (
+      <span className={`status-badge ${config.class}`}>
+        {config.icon} {config.label}
+        {evento.status === 'cancelado' && userIsRegisteredInEvent(evento) && (
+          <span className="registered-badge"> (Inscrito)</span>
+        )}
+      </span>
+    );
   };
 
   if (loading) {
@@ -84,6 +134,12 @@ const Eventos = () => {
         <div className="eventos-hero-content">
           <h1>Todos os Eventos</h1>
           <p>Descubra e participe dos eventos da comunidade académica</p>
+          <div className="events-count">
+            {filteredEvents.length} de {events.length} eventos disponíveis
+            {userType === 'admin' && <span> (Visão Admin)</span>}
+            {userType === 'promotor' && <span> (Meus eventos + Ativos)</span>}
+            {userType === 'estudante' && <span> (Ativos + Inscritos)</span>}
+          </div>
         </div>
       </section>
 
@@ -94,25 +150,32 @@ const Eventos = () => {
             Todos os <span className="highlight">Eventos</span>
           </h2>
           <p className="section-subtitle">
-            Explore todos os eventos disponíveis ({events.length} eventos)
+            Explore todos os eventos disponíveis ({filteredEvents.length} eventos)
           </p>
 
-          {events.length === 0 ? (
+          {filteredEvents.length === 0 ? (
             <div className="no-events">
               <div className="no-events-content">
                 <div className="no-events-icon">📅</div>
                 <h3>Nenhum evento disponível</h3>
-                <p>Novos eventos serão adicionados em breve</p>
+                <p>
+                  {events.length > 0 
+                    ? 'Não há eventos que correspondam aos seus critérios de visualização.'
+                    : 'Novos eventos serão adicionados em breve'
+                  }
+                </p>
               </div>
             </div>
           ) : (
             <div className="events-grid">
-              {events.map((evento: Event) => {
+              {filteredEvents.map((evento: Event) => {
                 const participantesCount = getParticipantesCount(evento);
                 const ocupacaoPercentual = getOcupacaoPercentual(evento);
+                const isUserRegistered = userIsRegisteredInEvent(evento);
+                const isEventCanceled = evento.status === 'cancelado';
                 
                 return (
-                  <div key={evento.id} className="event-card">
+                  <div key={evento.id} className={`event-card ${isEventCanceled ? 'event-canceled' : ''}`}>
                     <div className="event-image">
                       <img 
                         src={evento.image || '/default-event-image.jpg'} 
@@ -124,6 +187,12 @@ const Eventos = () => {
                       <div className="event-category-badge">
                         {evento.category}
                       </div>
+                      
+                      {/* Badge de Status */}
+                      <div className="event-status-overlay">
+                        {getStatusBadge(evento)}
+                      </div>
+
                       {/* Barra de progresso na imagem */}
                       <div className="event-ocupacao-overlay">
                         <div className="ocupacao-info">
@@ -165,11 +234,13 @@ const Eventos = () => {
                       </div>
                       <div className="event-buttons">
                         <button 
-                          className="event-btn" 
+                          className={`event-btn ${isEventCanceled ? 'btn-canceled' : ''}`}
                           onClick={() => handleParticiparClick(evento)}
-                          disabled={ocupacaoPercentual >= 100}
+                          disabled={ocupacaoPercentual >= 100 || isEventCanceled}
+                          title={isEventCanceled ? 'Evento cancelado' : ocupacaoPercentual >= 100 ? 'Evento lotado' : 'Participar do evento'}
                         >
-                          {ocupacaoPercentual >= 100 ? 'Lotado' : 
+                          {isEventCanceled ? 'Cancelado' : 
+                           ocupacaoPercentual >= 100 ? 'Lotado' : 
                            isAuthenticated && userType === 'estudante' ? 'Participar' : 'Participar'}
                         </button>
                         <button 

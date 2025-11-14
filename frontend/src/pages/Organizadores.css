@@ -1620,3 +1620,109 @@
   margin: 10px 0;
   text-align: center;
 }
+
+/* Estilos para o seletor de status */
+.status-selector {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  border-left: 4px solid #f39c12;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.status-selector:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.status-selector option {
+  font-weight: 600;
+}
+
+/* Badges de status */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.status-badge.pendente {
+  background-color: #f39c12;
+}
+
+.status-badge.ativo {
+  background-color: #27ae60;
+}
+
+.status-badge.cancelado {
+  background-color: #e74c3c;
+}
+
+.status-badge.concluido {
+  background-color: #3498db;
+}
+
+.status-badge.evento-arquivado {
+  background-color: #7f8c8d;
+}
+
+/* Seletor de status no formulário */
+.status-select {
+  border-left: 4px solid #f39c12 !important;
+  font-weight: 600;
+}
+
+.status-select option {
+  font-weight: 600;
+}
+
+/* Seção de status no header do evento */
+.status-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Ajustes para a tabela */
+.event-status-cell {
+  min-width: 120px;
+}
+
+/* Mensagens de ajuda */
+.form-help {
+  color: #7f8c8d;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Botões desabilitados */
+.btn-archive.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading states */
+.loading-spinner-small {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

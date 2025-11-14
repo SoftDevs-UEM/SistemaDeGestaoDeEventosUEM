@@ -13,23 +13,51 @@ const Home = () => {
   const [heroEvents, setHeroEvents] = useState([]);
 
   const navigate = useNavigate();
-  const { isAuthenticated, userType } = useAuth();
+  const { isAuthenticated, userType, user } = useAuth();
   const { events, loadEvents, loading, error } = useEventos();
 
-  // Função para obter número de participantes (com fallback)
+  // ✅ FUNÇÃO MELHORADA: Verificar se usuário está inscrito no evento
+  const userIsRegisteredInEvent = (evento: any): boolean => {
+    if (!user || !isAuthenticated) return false;
+    return evento.user_is_registered || false;
+  };
+
+  // ✅ FUNÇÃO MELHORADA: Verificar se evento deve ser mostrado
+  const shouldShowEvent = (evento: any): boolean => {
+    // Admin vê todos os eventos
+    if (userType === 'admin') return true;
+    
+    // Promotor vê seus eventos + eventos ativos/pendentes
+    if (userType === 'promotor') {
+      return evento.promoter_id === user?.id || 
+             evento.status === 'ativo' || 
+             evento.status === 'pendente';
+    }
+    
+    // Estudante vê eventos ativos/pendentes + eventos cancelados em que está inscrito
+    if (userType === 'estudante') {
+      return evento.status === 'ativo' || 
+             evento.status === 'pendente' ||
+             (evento.status === 'cancelado' && userIsRegisteredInEvent(evento));
+    }
+    
+    // Usuário não logado vê apenas eventos ativos
+    return evento.status === 'ativo';
+  };
+
+  // Filtrar eventos baseado nas regras
+  const filteredEvents = events.filter(shouldShowEvent);
+
   const getParticipantesCount = (evento: any): number => {
-    // Priorizar participants_count (contagem real), depois participants (coluna da tabela)
     return evento.participants_count || evento.participants || 0;
   };
 
-  // Função para calcular porcentagem de ocupação
   const getOcupacaoPercentual = (evento: any): number => {
     const participantes = getParticipantesCount(evento);
     const maxParticipantes = evento.max_participants || 1;
     return Math.min(100, (participantes / maxParticipantes) * 100);
   };
 
-  // Participar: só estudante autenticado pode se inscrever direto
   const handleParticiparClick = useCallback((event) => {
     if (!isAuthenticated) {
       localStorage.setItem('eventoParaInscricao', JSON.stringify(event));
@@ -51,30 +79,18 @@ const Home = () => {
     setSelectedEvent(null);
   }, []);
 
-  // CORREÇÃO: useEffect com dependências adequadas
   useEffect(() => {
     console.log('🏠 Home: Carregando eventos...');
     loadEvents();
-  }, []); // ← Array vazio para executar apenas uma vez
+  }, []);
 
-  // Log para debug - CORRIGIDO
   useEffect(() => {
     if (events.length > 0) {
       console.log('🏠 Home: Eventos carregados:', events.length);
-      // Debug: verificar dados dos primeiros eventos
-      events.slice(0, 2).forEach((event, index) => {
-        console.log(`🏠 Evento ${index + 1}:`, {
-          title: event.title,
-          participants: event.participants,
-          participants_count: event.participants_count,
-          max_participants: event.max_participants,
-          ocupacao: `${getOcupacaoPercentual(event)}%`
-        });
-      });
+      console.log('🏠 Home: Eventos filtrados:', filteredEvents.length);
     }
-  }, [events.length]); // ← Só executa quando o length muda
+  }, [events.length, filteredEvents.length]);
 
-  // Dados do carrossel hero - CORRIGIDO
   useEffect(() => {
     const heroEventsData = [
       {
@@ -100,7 +116,6 @@ const Home = () => {
     setHeroEvents(heroEventsData);
   }, []);
 
-  // Categorias com contagem real dos eventos
   const categories = [
     { id: 1, name: 'Científicos', icon: '🔬', value: 'cientificos', color: '#03492a' },
     { id: 2, name: 'Culturais', icon: '🎭', value: 'culturais', color: '#03492a' },
@@ -110,13 +125,11 @@ const Home = () => {
     { id: 6, name: 'Desportivos', icon: '⚽', value: 'desportivos', color: '#03492a' },
   ];
 
-  // Calcular contagem por categoria
   const categoriesWithCount = categories.map(category => ({
     ...category,
-    count: events.filter(event => event.category === category.value).length
+    count: filteredEvents.filter(event => event.category === category.value).length
   }));
 
-  // Auto-rotate para hero carousel
   useEffect(() => {
     const timer = setTimeout(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % heroEvents.length);
@@ -133,8 +146,29 @@ const Home = () => {
     setCurrentSlide((prevSlide) => (prevSlide - 1 + heroEvents.length) % heroEvents.length);
   };
 
-  // Filtrar eventos em destaque (últimos 6 eventos)
-  const featuredEvents = events.slice(0, 6);
+  // ✅ USAR EVENTOS FILTRADOS para featured events
+  const featuredEvents = filteredEvents.slice(0, 6);
+
+  // ✅ FUNÇÃO PARA OBTER BADGE DE STATUS
+  const getStatusBadge = (evento: any) => {
+    const statusConfig = {
+      ativo: { label: 'Ativo', class: 'status-ativo', icon: '🟢' },
+      pendente: { label: 'Pendente', class: 'status-pendente', icon: '🟡' },
+      cancelado: { label: 'Cancelado', class: 'status-cancelado', icon: '🔴' },
+      concluido: { label: 'Concluído', class: 'status-concluido', icon: '✅' }
+    };
+
+    const config = statusConfig[evento.status as keyof typeof statusConfig] || statusConfig.pendente;
+    
+    return (
+      <span className={`status-badge ${config.class}`}>
+        {config.icon} {config.label}
+        {evento.status === 'cancelado' && userIsRegisteredInEvent(evento) && (
+          <span className="registered-badge"> (Inscrito)</span>
+        )}
+      </span>
+    );
+  };
 
   if (loading) {
     return (
@@ -247,12 +281,17 @@ const Home = () => {
             Os eventos mais recentes da comunidade académica
           </p>
 
-          {events.length === 0 ? (
+          {filteredEvents.length === 0 ? (
             <div className="no-events">
               <div className="no-events-content">
                 <div className="no-events-icon">📅</div>
                 <h3>Nenhum evento disponível</h3>
-                <p>Novos eventos serão adicionados em breve</p>
+                <p>
+                  {events.length > 0 
+                    ? 'Não há eventos que correspondam aos seus critérios de visualização.'
+                    : 'Novos eventos serão adicionados em breve'
+                  }
+                </p>
                 <button 
                   className="btn-primary" 
                   onClick={() => navigate('/eventos')}
@@ -267,9 +306,11 @@ const Home = () => {
                 {featuredEvents.map((event) => {
                   const participantesCount = getParticipantesCount(event);
                   const ocupacaoPercentual = getOcupacaoPercentual(event);
+                  const isUserRegistered = userIsRegisteredInEvent(event);
+                  const isEventCanceled = event.status === 'cancelado';
                   
                   return (
-                    <div key={event.id} className="event-card">
+                    <div key={event.id} className={`event-card ${isEventCanceled ? 'event-canceled' : ''}`}>
                       <div className="event-image">
                         <img 
                           src={event.image || '/default-event-image.jpg'} 
@@ -281,6 +322,12 @@ const Home = () => {
                         <div className="event-category-badge">
                           {event.category}
                         </div>
+                        
+                        {/* Badge de Status */}
+                        <div className="event-status-overlay">
+                          {getStatusBadge(event)}
+                        </div>
+
                         {/* Barra de progresso na imagem */}
                         <div className="event-ocupacao-overlay">
                           <div className="ocupacao-info">
@@ -322,11 +369,13 @@ const Home = () => {
                         </div>
                         <div className="event-buttons">
                           <button 
-                            className="event-btn" 
+                            className={`event-btn ${isEventCanceled ? 'btn-canceled' : ''}`}
                             onClick={() => handleParticiparClick(event)}
-                            disabled={ocupacaoPercentual >= 100}
+                            disabled={ocupacaoPercentual >= 100 || isEventCanceled}
+                            title={isEventCanceled ? 'Evento cancelado' : ocupacaoPercentual >= 100 ? 'Evento lotado' : 'Participar do evento'}
                           >
-                            {ocupacaoPercentual >= 100 ? 'Lotado' : 
+                            {isEventCanceled ? 'Cancelado' : 
+                             ocupacaoPercentual >= 100 ? 'Lotado' : 
                              isAuthenticated && userType === 'estudante' ? 'Participar' : 'Participar'}
                           </button>
                           <button 
@@ -342,13 +391,13 @@ const Home = () => {
                 })}
               </div>
 
-              {events.length > 6 && (
+              {filteredEvents.length > 6 && (
                 <div className="view-all-container">
                   <button 
                     className="btn-primary view-all-btn"
                     onClick={() => navigate('/eventos')}
                   >
-                    Ver Todos os Eventos ({events.length})
+                    Ver Todos os Eventos ({filteredEvents.length})
                   </button>
                 </div>
               )}

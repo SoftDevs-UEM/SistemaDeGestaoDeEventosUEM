@@ -66,7 +66,7 @@ const validarDataEvento = (data: string): boolean => {
   }
 };
 
-// ✅ FUNÇÕES PARA DATAS - ADICIONAR ESTAS FUNÇÕES
+// ✅ FUNÇÕES PARA DATAS
 const formatarDataSegura = (dataString: string | undefined | null): string => {
   if (!dataString) {
     return 'A carregar...';
@@ -110,6 +110,14 @@ const formatarDataCompletaSegura = (dataString: string | undefined | null): stri
     return 'Erro na data';
   }
 };
+
+// ✅ STATUS DISPONÍVEIS PARA EVENTOS
+const EVENT_STATUSES = [
+  { value: 'pendente', label: 'Pendente', color: '#f39c12', icon: '🟡' },
+  { value: 'ativo', label: 'Ativo', color: '#27ae60', icon: '🟢' },
+  { value: 'cancelado', label: 'Cancelado', color: '#e74c3c', icon: '🔴' },
+  { value: 'concluido', label: 'Concluído', color: '#3498db', icon: '✅' }
+];
 
 export default function Organizadores() {
   const navigate = useNavigate();
@@ -156,7 +164,8 @@ export default function Organizadores() {
     max_participants: '',
     target_audience: '',
     image: '',
-    requirements: ''
+    requirements: '',
+    status: 'pendente' as 'pendente' | 'ativo' | 'cancelado' | 'concluido'
   });
   
   const [success, setSuccess] = useState(false);
@@ -224,6 +233,38 @@ export default function Organizadores() {
     'Departamento de Veterinária'
   ];
 
+  // ✅ FUNÇÃO ÚNICA: Verificar se pode alterar status
+  const podeAlterarStatus = (evento: any): boolean => {
+    if (userType === 'admin') return true;
+    if (userType === 'promotor' && evento.promoter_id === user?.id) return true;
+    return false;
+  };
+
+  // ✅ FUNÇÃO ÚNICA: Verificar se o promotor pode editar o evento
+  const podeEditarEvento = (evento: any): boolean => {
+    if (userType === 'admin') return true;
+    return evento.promoter_id === user?.id;
+  };
+
+  // ✅ FUNÇÃO ÚNICA: Verificar se o promotor pode arquivar o evento
+  const podeArquivarEvento = (evento: any): boolean => {
+    if (!podeEditarEvento(evento)) return false;
+    const participantesCount = getParticipantesCount(evento);
+    return participantesCount === 0;
+  };
+
+  // ✅ FUNÇÃO ÚNICA: Obter contagem de participantes
+  const getParticipantesCount = (evento: any): number => {
+    return evento.participants_count || evento.participants || 0;
+  };
+
+  // ✅ FUNÇÃO ÚNICA: Calcular percentual de ocupação
+  const getOcupacaoPercentual = (evento: any): number => {
+    const participantes = getParticipantesCount(evento);
+    const maxParticipantes = evento.max_participants || 1;
+    return Math.min(100, (participantes / maxParticipantes) * 100);
+  };
+
   // ✅ EFEITO ATUALIZADO: Carregar dados do usuário
   useEffect(() => {
     if (user) {
@@ -234,37 +275,20 @@ export default function Organizadores() {
         departamento: user.departamento || ''
       });
       
-      // ✅ SE NÃO TEM DATAS, FORÇAR CARREGAMENTO
       if (!user.created_at || !user.updated_at) {
         loadUserData();
       }
     }
-  }, [user]);
+  }, [user, loadUserData]);
 
   // ✅ NOVO EFEITO: Carregar dados quando o componente monta
   useEffect(() => {
     if (isAuthenticated && userType && (userType === 'promotor' || userType === 'admin')) {
       loadUserData();
     }
-  }, [isAuthenticated, userType]);
+  }, [isAuthenticated, userType, loadUserData]);
 
-  // ✅ FUNÇÃO ATUALIZADA: Verificar se o promotor pode editar o evento
-  const podeEditarEvento = (evento: any) => {
-    // Admin pode editar qualquer evento
-    if (userType === 'admin') return true;
-    // Promotor só pode editar seus próprios eventos
-    return evento.promoter_id === user?.id;
-  };
-
-  // ✅ FUNÇÃO ATUALIZADA: Verificar se o promotor pode arquivar o evento
-  const podeArquivarEvento = (evento: any) => {
-    if (!podeEditarEvento(evento)) return false;
-    // Não pode arquivar evento com participantes
-    const participantesCount = getParticipantesCount(evento);
-    return participantesCount === 0;
-  };
-
-  // ✅ COMPONENTE ATUALIZADO: Botão de editar com verificação de permissão
+  // ✅ COMPONENTE: Botão de editar com verificação de permissão
   const renderBotaoEditar = (evento: any) => {
     if (!podeEditarEvento(evento)) {
       return null;
@@ -280,7 +304,37 @@ export default function Organizadores() {
     );
   };
 
-  // ✅ COMPONENTE ATUALIZADO: Botão de arquivar com verificação de permissão
+  // ✅ COMPONENTE: Seletor de status para eventos
+  const renderStatusSelector = (evento: any) => {
+    if (!podeAlterarStatus(evento)) {
+      const statusInfo = EVENT_STATUSES.find(s => s.value === evento.status) || EVENT_STATUSES[0];
+      return (
+        <span className={`status-badge ${evento.status}`} style={{ backgroundColor: statusInfo.color }}>
+          {statusInfo.icon} {statusInfo.label}
+        </span>
+      );
+    }
+
+    return (
+      <select 
+        value={evento.status} 
+        onChange={(e) => handleStatusChange(evento.id, e.target.value)}
+        className="status-selector"
+        style={{ 
+          borderLeftColor: EVENT_STATUSES.find(s => s.value === evento.status)?.color || '#f39c12',
+          backgroundColor: `${EVENT_STATUSES.find(s => s.value === evento.status)?.color}15`
+        }}
+      >
+        {EVENT_STATUSES.map(status => (
+          <option key={status.value} value={status.value}>
+            {status.icon} {status.label}
+          </option>
+        ))}
+      </select>
+    );
+  };
+
+  // ✅ COMPONENTE: Botão de arquivar com verificação de permissão
   const renderBotaoArquivar = (evento: any) => {
     if (!podeArquivarEvento(evento)) {
       const participantesCount = getParticipantesCount(evento);
@@ -325,17 +379,13 @@ export default function Organizadores() {
     setStatsLoading(true);
     
     try {
-      // ✅ FILTRAR APENAS EVENTOS DO PROMOTOR LOGADO
       const meusEventos = events.filter(event => {
-        // Admin pode ver todos os eventos
         if (userType === 'admin') {
           return !event.deleted_at;
         }
-        // Promotor vê apenas seus próprios eventos
         return event.promoter_id === user?.id && !event.deleted_at;
       });
   
-      // ✅ FILTRAR EVENTOS ARQUIVADOS DO PROMOTOR LOGADO
       const eventosArquivados = events.filter(event => {
         if (userType === 'admin') {
           return event.deleted_at;
@@ -344,15 +394,15 @@ export default function Organizadores() {
       });
       
       const eventosAtivos = meusEventos.filter(event => 
-        new Date(event.date) >= new Date() && event.status === 'ativo'
+        event.status === 'ativo'
       );
       
       const eventosFinalizados = meusEventos.filter(event => 
-        new Date(event.date) < new Date() || event.status === 'finalizado'
+        event.status === 'concluido' || (new Date(event.date) < new Date() && event.status !== 'cancelado')
       );
   
       const totalParticipantes = meusEventos.reduce((total, evento) => {
-        const participantes = evento.participants_count || evento.participants || 0;
+        const participantes = getParticipantesCount(evento);
         return total + participantes;
       }, 0);
   
@@ -364,11 +414,10 @@ export default function Organizadores() {
         totalParticipantes: totalParticipantes
       });
   
-      // ✅ ORDENAR EVENTOS RECENTES DO PROMOTOR
       const eventosOrdenados = [...meusEventos].sort((a, b) => 
         new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
       );
-      setRecentEvents(eventosOrdenados.slice(0, 5));
+      setRecentEvents(eventosOrdenados);
       setArquivedEvents(eventosArquivados);
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error);
@@ -385,7 +434,6 @@ export default function Organizadores() {
       setStatsLoading(false);
     }
   };
-  
 
   const handleBackToDashboard = () => {
     setActiveView('dashboard');
@@ -405,16 +453,17 @@ export default function Organizadores() {
       max_participants: '',
       target_audience: '',
       image: '',
-      requirements: ''
+      requirements: '',
+      status: 'pendente'
     });
     setSuccess(false);
     setSuccessMessage('');
   };
 
+  // ✅ FUNÇÃO ATUALIZADA: Editar evento com dados completos
   const handleEditarEvento = (evento: any) => {
     console.log('✏️ Editando evento:', evento);
     
-    // ✅ VERIFICAR PERMISSÃO ANTES DE EDITAR
     if (!podeEditarEvento(evento)) {
       alert('Não autorizado a editar este evento.');
       return;
@@ -456,9 +505,82 @@ export default function Organizadores() {
       max_participants: evento.max_participants?.toString() || '',
       target_audience: evento.target_audience || '',
       image: evento.image || '',
-      requirements: evento.requirements || ''
+      requirements: evento.requirements || '',
+      status: evento.status || 'pendente'
     });
     setActiveView('editar-evento');
+  };
+
+  // ✅ FUNÇÃO CORRIGIDA: Alterar status do evento
+  const handleStatusChange = async (eventId: number, novoStatus: string) => {
+    try {
+      const evento = events.find(event => event.id === eventId);
+      if (!evento) {
+        alert('Evento não encontrado.');
+        return;
+      }
+
+      if (!podeAlterarStatus(evento)) {
+        alert('Não autorizado a alterar o status deste evento.');
+        return;
+      }
+
+      // Validações específicas para mudanças de status
+      if (novoStatus === 'ativo' && userType === 'promotor') {
+        alert('Promotores não podem ativar eventos. O status será mantido como pendente para aprovação.');
+        return;
+      }
+
+      if (novoStatus === 'cancelado' && getParticipantesCount(evento) > 0) {
+        const confirmCancel = window.confirm(
+          `Este evento tem ${getParticipantesCount(evento)} participantes inscritos. ` +
+          `Tem certeza que deseja cancelar? Os participantes serão notificados.`
+        );
+        if (!confirmCancel) return;
+      }
+
+      console.log('🔄 Alterando status do evento:', {
+        eventId,
+        novoStatus,
+        eventoAtual: evento
+      });
+
+      // ✅ CORREÇÃO: Usar a função updateEvent melhorada
+      await updateEvent(eventId, { status: novoStatus });
+      
+      const statusInfo = EVENT_STATUSES.find(s => s.value === novoStatus);
+      setSuccessMessage(`✅ Status do evento atualizado para: ${statusInfo?.label}`);
+      setSuccess(true);
+      
+      // ✅ CORREÇÃO: Recarregar estatísticas após atualização
+      setTimeout(() => {
+        loadStatistics();
+      }, 1000);
+      
+      setTimeout(() => {
+        setSuccess(false);
+        setSuccessMessage('');
+      }, 3000);
+    } catch (error: any) {
+      console.error('❌ Erro ao alterar status:', error);
+      
+      // ✅ CORREÇÃO: A mensagem de erro já vem formatada do contexto
+      let mensagemErro = 'Erro ao alterar status do evento';
+      
+      if (error.message.includes('Não autorizado')) {
+        mensagemErro = 'Você não tem permissão para alterar este evento.';
+      } else if (error.message.includes('não encontrado')) {
+        mensagemErro = 'Evento não encontrado.';
+      } else if (error.message.includes('Erro interno')) {
+        mensagemErro = 'Erro no servidor. Tente novamente em alguns instantes.';
+      } else if (error.message.includes('conexão')) {
+        mensagemErro = 'Erro de conexão. Verifique sua internet.';
+      } else {
+        mensagemErro = error.message;
+      }
+      
+      alert(`Erro: ${mensagemErro}`);
+    }
   };
 
   const handleVerDetalhes = (evento: any) => {
@@ -547,7 +669,6 @@ export default function Organizadores() {
       return;
     }
 
-    // ✅ VERIFICAR PERMISSÃO
     if (!podeEditarEvento(evento)) {
       alert('Não autorizado a arquivar este evento.');
       return;
@@ -580,7 +701,6 @@ export default function Organizadores() {
         return;
       }
 
-      // ✅ VERIFICAR PERMISSÃO PARA RESTAURAR
       if (!podeEditarEvento(evento)) {
         alert('Não autorizado a restaurar este evento.');
         return;
@@ -610,22 +730,13 @@ export default function Organizadores() {
   };
 
   const getEventoState = (evento: any) => {
-    const hoje = new Date();
-    let dataEvento: Date;
-    
-    try {
-      dataEvento = new Date(evento.date);
-    } catch (error) {
-      return { label: 'Data inválida', class: 'pending', icon: '❓' };
-    }
-    
-    if (dataEvento < hoje) {
-      return { label: 'Finalizado', class: 'finished', icon: '✅' };
-    } else if (evento.status === 'ativo') {
-      return { label: 'Ativo', class: 'active', icon: '🟢' };
-    } else {
-      return { label: 'Pendente', class: 'pending', icon: '🟡' };
-    }
+    const statusInfo = EVENT_STATUSES.find(s => s.value === evento.status) || EVENT_STATUSES[0];
+    return { 
+      label: statusInfo.label, 
+      class: evento.status, 
+      icon: statusInfo.icon,
+      color: statusInfo.color
+    };
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -669,7 +780,6 @@ export default function Organizadores() {
           text: result.message
         });
         
-        // Recarregar dados para garantir sincronização
         await loadUserData();
         
         console.log('✅ Dados pessoais atualizados com sucesso');
@@ -697,7 +807,6 @@ export default function Organizadores() {
     e.preventDefault();
     setConfigMessage({ type: '', text: '' });
     
-    // Validações no frontend
     if (!senhaData.current_password) {
       setConfigMessage({
         type: 'error',
@@ -735,7 +844,6 @@ export default function Organizadores() {
           text: result.message
         });
         
-        // Limpar formulário
         setSenhaData({
           current_password: '',
           new_password: '',
@@ -772,17 +880,19 @@ export default function Organizadores() {
         throw new Error('Não é possível criar eventos em datas passadas. Por favor, selecione uma data futura.');
       }
 
+      // Promotores não podem criar eventos como ativos
+      const statusFinal = userType === 'admin' ? eventoData.status : 'pendente';
+
       const dadosParaEnviar = {
         ...eventoData,
         max_participants: parseInt(eventoData.max_participants) || 0,
-        // ✅ O promoter_id será automaticamente definido pelo backend com o ID do usuário logado
-        status: 'pendente',
+        status: statusFinal,
         date: eventoData.date ? new Date(eventoData.date).toISOString().split('T')[0] : ''
       };
       
       await createEvent(dadosParaEnviar);
       
-      setSuccessMessage('Evento criado com sucesso!');
+      setSuccessMessage('Evento criado com sucesso!' + (userType === 'promotor' ? ' Aguardando aprovação.' : ''));
       setSuccess(true);
       resetForm();
       
@@ -800,6 +910,7 @@ export default function Organizadores() {
     }
   };
 
+  // ✅ FUNÇÃO ATUALIZADA: Atualizar evento com status
   const handleAtualizarEvento = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!eventoEditando) return;
@@ -819,6 +930,11 @@ export default function Organizadores() {
         throw new Error('Não é possível atualizar eventos para datas passadas. Por favor, selecione uma data futura.');
       }
 
+      // Validação de status para promotores
+      if (userType === 'promotor' && eventoData.status === 'ativo' && eventoEditando.status !== 'ativo') {
+        throw new Error('Promotores não podem ativar eventos. O status será mantido como pendente para aprovação.');
+      }
+
       const dadosParaEnviar = {
         title: eventoData.title.trim(),
         description: eventoData.description.trim(),
@@ -830,6 +946,7 @@ export default function Organizadores() {
         max_participants: parseInt(eventoData.max_participants) || 0,
         target_audience: eventoData.target_audience.trim(),
         requirements: eventoData.requirements.trim(),
+        status: eventoData.status,
         image: eventoData.image !== eventoEditando.image ? eventoData.image : undefined
       };
 
@@ -863,19 +980,8 @@ export default function Organizadores() {
     }
   };
 
-  const getParticipantesCount = (evento: any): number => {
-    return evento.participants_count || evento.participants || 0;
-  };
+  // ========== FUNÇÕES DE RENDERIZAÇÃO ==========
 
-  const getOcupacaoPercentual = (evento: any): number => {
-    const participantes = getParticipantesCount(evento);
-    const maxParticipantes = evento.max_participants || 1;
-    return Math.min(100, (participantes / maxParticipantes) * 100);
-  };
-
-  // ========== FUNÇÕES DE RENDERIZAÇÃO COMPLETAS ==========
-
-  // ✅ ATUALIZAR a renderização do dashboard para mostrar mensagem personalizada
   const renderDashboardView = () => (
     <div className="dashboard-view">
       <div className="stats-section">
@@ -906,7 +1012,7 @@ export default function Organizadores() {
           <div className="stat-card finished-event-stat">
             <div className="stat-icon">✅</div>
             <div className="stat-info">
-              <h3>Eventos Finalizados</h3>
+              <h3>Eventos Concluídos</h3>
               <span className="stat-number">{eventStats.eventosFinalizados}</span>
               <span className="stat-percentage">
                 {eventStats.totalEventos > 0 ? Math.round((eventStats.eventosFinalizados / eventStats.totalEventos) * 100) : 0}% do total
@@ -927,8 +1033,8 @@ export default function Organizadores() {
 
       <div className="recent-events-full">
         <div className="section-header">
-          <h2>📋 {userType === 'promotor' ? 'Meus Eventos Recentes' : 'Eventos Recentes'}</h2>
-          <span className="section-badge">Últimos 5 eventos</span>
+          <h2>📋 {userType === 'promotor' ? 'Meus Eventos' : 'Todos os Eventos'}</h2>
+          <span className="section-badge">{recentEvents.length} eventos</span>
         </div>
         
         {recentEvents.length > 0 ? (
@@ -949,14 +1055,14 @@ export default function Organizadores() {
                   <div className="event-info">
                     <div className="event-header">
                       <h3>{evento.title}</h3>
-                      <span className={`event-status ${estado.class}`}>
-                        {estado.icon} {estado.label}
-                      </span>
-                      {userType === 'admin' && (
-                        <span className="event-promoter">
-                          👤 Promotor: {evento.promoter_name || `ID: ${evento.promoter_id}`}
-                        </span>
-                      )}
+                      <div className="status-section">
+                        {renderStatusSelector(evento)}
+                        {userType === 'admin' && (
+                          <span className="event-promoter">
+                            👤 Promotor: {evento.promoter_name || `ID: ${evento.promoter_id}`}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <p className="event-description">{evento.description}</p>
                     <div className="event-details">
@@ -1125,6 +1231,33 @@ export default function Organizadores() {
             </div>
           </div>
 
+          {/* ✅ CAMPO: Status do Evento (apenas para admin) */}
+          {userType === 'admin' && (
+            <div className="form-group">
+              <label htmlFor="status">Status do Evento *</label>
+              <select
+                id="status"
+                name="status"
+                value={eventoData.status}
+                onChange={handleInputChange}
+                required
+                className="status-select"
+                style={{ 
+                  borderLeftColor: EVENT_STATUSES.find(s => s.value === eventoData.status)?.color || '#f39c12'
+                }}
+              >
+                {EVENT_STATUSES.map(status => (
+                  <option key={status.value} value={status.value}>
+                    {status.icon} {status.label}
+                  </option>
+                ))}
+              </select>
+              <small className="form-help">
+                Apenas administradores podem definir o status como "Ativo"
+              </small>
+            </div>
+          )}
+
           <div className="form-group">
             <label htmlFor="description">Descrição *</label>
             <textarea
@@ -1216,7 +1349,7 @@ export default function Organizadores() {
                   Criando...
                 </>
               ) : (
-                '✅ Criar Evento'
+                `✅ Criar Evento ${userType === 'promotor' ? '(Pendente)' : ''}`
               )}
             </button>
             <button type="button" className="btn-secondary" onClick={handleBackToDashboard}>
@@ -1289,9 +1422,7 @@ export default function Organizadores() {
                         {evento.location}
                       </td>
                       <td className="event-status-cell">
-                        <span className={`status-badge ${estado.class}`}>
-                          {estado.icon} {estado.label}
-                        </span>
+                        {renderStatusSelector(evento)}
                       </td>
                       <td className="event-registrations">
                         <div className="registrations-count">
@@ -1539,6 +1670,39 @@ export default function Organizadores() {
             </div>
           </div>
 
+          {/* ✅ CAMPO DE STATUS NA EDIÇÃO */}
+          <div className="form-group">
+            <label htmlFor="status">Status do Evento *</label>
+            <select
+              id="status"
+              name="status"
+              value={eventoData.status}
+              onChange={handleInputChange}
+              required
+              className="status-select"
+              style={{ 
+                borderLeftColor: EVENT_STATUSES.find(s => s.value === eventoData.status)?.color || '#f39c12'
+              }}
+              disabled={userType === 'promotor' && eventoData.status === 'ativo' && eventoEditando?.status !== 'ativo'}
+            >
+              {EVENT_STATUSES.map(status => (
+                <option 
+                  key={status.value} 
+                  value={status.value}
+                  disabled={userType === 'promotor' && status.value === 'ativo' && eventoEditando?.status !== 'ativo'}
+                >
+                  {status.icon} {status.label} 
+                  {userType === 'promotor' && status.value === 'ativo' && eventoEditando?.status !== 'ativo' ? ' (Apenas Admin)' : ''}
+                </option>
+              ))}
+            </select>
+            {userType === 'promotor' && (
+              <small className="form-help">
+                Promotores não podem ativar eventos. Contacte o administrador para ativar seu evento.
+              </small>
+            )}
+          </div>
+
           <div className="form-group">
             <label htmlFor="description">Descrição *</label>
             <textarea
@@ -1639,7 +1803,6 @@ export default function Organizadores() {
   );
 
   const renderConfiguracoesView = () => {
-    // ✅ USAR AS NOVAS FUNÇÕES DE DATA
     const dataRegisto = user?.created_at ? formatarDataSegura(user.created_at) : 'A carregar...';
     const dataAtualizacao = user?.updated_at ? formatarDataCompletaSegura(user.updated_at) : dataRegisto;
 

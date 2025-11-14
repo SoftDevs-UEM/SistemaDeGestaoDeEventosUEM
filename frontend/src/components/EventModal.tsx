@@ -1,7 +1,34 @@
 import './EventModal.css';
 import React from 'react';
 
-const EventModal = ({ event, isOpen, onClose, onRegister }) => {
+interface Event {
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  type: string;
+  category: string;
+  max_participants: number;
+  status: 'pendente' | 'ativo' | 'cancelado' | 'finalizado' | 'concluido';
+  image: string;
+  requirements: string;
+  target_audience: string;
+  promoter_name: string;
+  participants_count: number;
+  participants: number;
+  user_is_registered?: boolean;
+}
+
+interface EventModalProps {
+  event: Event | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onRegister: (event: Event) => void;
+}
+
+const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onRegister }) => {
   if (!isOpen || !event) return null;
 
   // Previne o scroll da página quando o modal está aberto
@@ -21,7 +48,7 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
     onRegister(event);
   };
 
-  const handleOverlayClick = (e) => {
+  const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -31,7 +58,7 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
     onClose();
   };
 
-  // Funções para obter dados de participantes
+  // ✅ FUNÇÕES PARA OBTER DADOS DE PARTICIPANTES
   const getParticipantesCount = () => {
     return event.participants_count || event.participants || 0;
   };
@@ -42,10 +69,37 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
     return Math.min(100, (participantes / maxParticipantes) * 100);
   };
 
+  // ✅ FUNÇÃO PARA OBTER BADGE DE STATUS
+  const getStatusBadge = () => {
+    const statusConfig = {
+      ativo: { label: 'Ativo', class: 'status-ativo', icon: '🟢' },
+      pendente: { label: 'Pendente', class: 'status-pendente', icon: '🟡' },
+      cancelado: { label: 'Cancelado', class: 'status-cancelado', icon: '🔴' },
+      finalizado: { label: 'Finalizado', class: 'status-concluido', icon: '✅' },
+      concluido: { label: 'Concluído', class: 'status-concluido', icon: '✅' }
+    };
+
+    const config = statusConfig[event.status as keyof typeof statusConfig] || statusConfig.pendente;
+    
+    return (
+      <span className={`status-badge ${config.class}`}>
+        {config.icon} {config.label}
+        {event.status === 'cancelado' && event.user_is_registered && (
+          <span className="registered-badge"> (Inscrito)</span>
+        )}
+      </span>
+    );
+  };
+
   const participantesCount = getParticipantesCount();
   const ocupacaoPercentual = getOcupacaoPercentual();
   const isEventFull = ocupacaoPercentual >= 100;
   const vagasLivres = event.max_participants - participantesCount;
+  const isEventCanceled = event.status === 'cancelado';
+  const isEventFinished = event.status === 'finalizado' || event.status === 'concluido';
+
+  // ✅ VERIFICAR SE USUÁRIO PODE SE INSCREVER
+  const canRegister = !isEventFull && !isEventCanceled && !isEventFinished;
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
@@ -56,9 +110,9 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
             <div className="header-top">
               <span className="event-category">{event.category}</span>
               <div className="event-status">
-                {isEventFull ? (
-                  <span className="status-badge full">Lotado</span>
-                ) : (
+                {getStatusBadge()}
+                {isEventFull && <span className="status-badge full">Lotado</span>}
+                {!isEventFull && !isEventCanceled && !isEventFinished && (
                   <span className="status-badge available">{vagasLivres} vagas</span>
                 )}
               </div>
@@ -74,6 +128,12 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
                 <i className="fas fa-map-marker-alt"></i> 
                 {event.location}
               </span>
+              {event.promoter_name && (
+                <span>
+                  <i className="fas fa-user-tie"></i>
+                  {event.promoter_name}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -135,7 +195,8 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
                       <span>{new Date(event.date).toLocaleDateString('pt-BR', { 
                         weekday: 'short', 
                         day: 'numeric',
-                        month: 'short'
+                        month: 'short',
+                        year: 'numeric'
                       })}</span>
                     </div>
                   </div>
@@ -165,6 +226,14 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
                       <span>{event.category}</span>
                     </div>
                   </div>
+
+                  <div className="detail-item">
+                    <i className="fas fa-users"></i>
+                    <div>
+                      <strong>Público-Alvo</strong>
+                      <span>{event.target_audience || 'Todos os públicos'}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -177,33 +246,58 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
               Sobre o Evento
             </h3>
             <p className="compact-description">
-              {event.description && event.description.length > 150 
-                ? `${event.description.substring(0, 150)}...` 
-                : event.description || 'Descrição não disponível'
-              }
+              {event.description || 'Descrição não disponível'}
             </p>
           </div>
 
           {/* ✅ INFORMAÇÕES ADICIONAIS CONDICIONAIS - Só mostra se existirem */}
-          {(event.target_audience || event.requirements) && (
+          {event.requirements && (
             <div className="additional-info compact">
               <h3>
                 <i className="fas fa-list-alt"></i>
                 Informações Adicionais
               </h3>
               <div className="additional-grid">
-                {event.target_audience && (
-                  <div className="additional-item">
-                    <strong>Público-Alvo:</strong>
-                    <span>{event.target_audience}</span>
-                  </div>
-                )}
-                {event.requirements && (
-                  <div className="additional-item">
-                    <strong>Requisitos:</strong>
-                    <span>{event.requirements}</span>
-                  </div>
-                )}
+                <div className="additional-item">
+                  <strong>Requisitos:</strong>
+                  <span>{event.requirements}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ✅ MENSAGENS DE STATUS ESPECIAIS */}
+          {isEventCanceled && (
+            <div className="status-message canceled">
+              <i className="fas fa-exclamation-triangle"></i>
+              <div>
+                <strong>Evento Cancelado</strong>
+                <p>
+                  {event.user_is_registered 
+                    ? 'Este evento foi cancelado. Você está inscrito e receberá mais informações em breve.'
+                    : 'Este evento foi cancelado e não está mais disponível para inscrições.'
+                  }
+                </p>
+              </div>
+            </div>
+          )}
+
+          {isEventFinished && (
+            <div className="status-message finished">
+              <i className="fas fa-flag-checkered"></i>
+              <div>
+                <strong>Evento Concluído</strong>
+                <p>Este evento já foi realizado e não está mais disponível para inscrições.</p>
+              </div>
+            </div>
+          )}
+
+          {isEventFull && !isEventCanceled && !isEventFinished && (
+            <div className="status-message full">
+              <i className="fas fa-users-slash"></i>
+              <div>
+                <strong>Evento Lotado</strong>
+                <p>Todas as vagas foram preenchidas. Não é possível fazer novas inscrições.</p>
               </div>
             </div>
           )}
@@ -216,12 +310,21 @@ const EventModal = ({ event, isOpen, onClose, onRegister }) => {
             Fechar
           </button>
           <button 
-            className={`btn-modal-primary ${isEventFull ? 'disabled' : ''}`} 
+            className={`btn-modal-primary ${!canRegister ? 'disabled' : ''}`} 
             onClick={handleRegister}
-            disabled={isEventFull}
+            disabled={!canRegister}
+            title={
+              isEventCanceled ? 'Evento cancelado' :
+              isEventFinished ? 'Evento já realizado' :
+              isEventFull ? 'Evento lotado' :
+              'Inscrever-se no evento'
+            }
           >
             <i className="fas fa-user-plus"></i>
-            {isEventFull ? 'Evento Lotado' : 'Inscrever-se Agora'}
+            {isEventCanceled ? 'Evento Cancelado' :
+             isEventFinished ? 'Evento Concluído' :
+             isEventFull ? 'Evento Lotado' :
+             'Inscrever-se Agora'}
           </button>
         </div>
       </div>
