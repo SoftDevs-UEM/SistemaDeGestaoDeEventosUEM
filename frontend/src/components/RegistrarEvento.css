@@ -576,3 +576,70 @@
   color: #6c757d;
   font-size: 12px;
 } 
+
+/* Indicadores de método de pagamento */
+.method-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.method-indicator.mpesa {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #1976d2;
+}
+
+.method-indicator.emola {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #2e7d32;
+}
+
+.method-indicator.mkesh {
+  background-color: #fff3e0;
+  color: #ef6c00;
+  border-color: #ef6c00;
+}
+
+.method-indicator.netshop {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #7b1fa2;
+}
+
+.method-indicator i {
+  font-size: 14px;
+}
+
+/* Melhorias nos campos de formulário */
+.form-help {
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.input-error {
+  border-color: #e74c3c !important;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.error-message::before {
+  content: "⚠ ";
+  margin-right: 4px;
+}

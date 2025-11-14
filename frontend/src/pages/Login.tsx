@@ -20,6 +20,52 @@ type RegisteredUser = {
   departamento?: string;
 };
 
+// Funções de validação
+const validatePhoneNumber = (phone: string): boolean => {
+  // Remove todos os caracteres não numéricos
+  const cleanPhone = phone.replace(/\D/g, '');
+  
+  // Verifica se começa com 258 (código de Moçambique) seguido dos prefixos válidos
+  if (cleanPhone.startsWith('258')) {
+    const prefix = cleanPhone.substring(3, 5); // Pega os dígitos após 258
+    return ['82', '83', '84', '85', '86', '87'].includes(prefix);
+  }
+  
+  // Verifica se começa diretamente com os prefixos válidos (sem código do país)
+  const prefix = cleanPhone.substring(0, 2);
+  return ['82', '83', '84', '85', '86', '87'].includes(prefix);
+};
+
+const validateStudentNumber = (studentNumber: string): boolean => {
+  // Remove todos os caracteres não numéricos
+  const cleanNumber = studentNumber.replace(/\D/g, '');
+  
+  // Verifica se tem exatamente 8 dígitos
+  return /^\d{8}$/.test(cleanNumber);
+};
+
+// Função para formatar o telefone durante a digitação
+const formatPhoneNumber = (phone: string): string => {
+  const cleanPhone = phone.replace(/\D/g, '');
+  
+  if (cleanPhone.length === 0) return '';
+  
+  // Se começar com 258, formata como +258 XX XXX XXXX
+  if (cleanPhone.startsWith('258')) {
+    const rest = cleanPhone.substring(3);
+    if (rest.length <= 2) return `+258 ${rest}`;
+    if (rest.length <= 5) return `+258 ${rest.substring(0, 2)} ${rest.substring(2)}`;
+    if (rest.length <= 8) return `+258 ${rest.substring(0, 2)} ${rest.substring(2, 5)} ${rest.substring(5)}`;
+    return `+258 ${rest.substring(0, 2)} ${rest.substring(2, 5)} ${rest.substring(5, 8)}`;
+  }
+  
+  // Formata como XX XXX XXXX
+  if (cleanPhone.length <= 2) return cleanPhone;
+  if (cleanPhone.length <= 5) return `${cleanPhone.substring(0, 2)} ${cleanPhone.substring(2)}`;
+  if (cleanPhone.length <= 8) return `${cleanPhone.substring(0, 2)} ${cleanPhone.substring(2, 5)} ${cleanPhone.substring(5)}`;
+  return `${cleanPhone.substring(0, 2)} ${cleanPhone.substring(2, 5)} ${cleanPhone.substring(5, 8)}`;
+};
+
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -40,6 +86,12 @@ export default function Login() {
     nrEstudante: '',
     curso: '',
     departamento: ''
+  });
+  
+  // Estados para erros de validação
+  const [validationErrors, setValidationErrors] = useState({
+    telefone: '',
+    nrEstudante: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,8 +158,27 @@ export default function Login() {
       setError('');
       setLoading(true);
 
+      // Validações antes do envio
       if (registerData.password !== registerData.confirmPassword) {
         throw new Error('As senhas não coincidem');
+      }
+
+      // Validar telefone
+      if (!validatePhoneNumber(registerData.telefone)) {
+        setValidationErrors(prev => ({
+          ...prev,
+          telefone: 'Número de telefone inválido. Use os prefixos: 82, 83, 84, 85, 86 ou 87'
+        }));
+        throw new Error('Número de telefone inválido');
+      }
+
+      // Validar número de estudante se for estudante
+      if (registerData.tipo === 'estudante' && !validateStudentNumber(registerData.nrEstudante || '')) {
+        setValidationErrors(prev => ({
+          ...prev,
+          nrEstudante: 'Número de estudante deve ter exatamente 8 dígitos'
+        }));
+        throw new Error('Número de estudante inválido');
       }
 
       const response = await api.post('/register', registerData);
@@ -132,7 +203,10 @@ export default function Login() {
           navigate('/');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Falha ao registrar');
+      // Não setar o erro se já foi setado pelas validações específicas
+      if (!err.message.includes('Número de') && !err.message.includes('senhas')) {
+        setError(err.response?.data?.message || 'Falha ao registrar');
+      }
     } finally {
       setLoading(false);
     }
@@ -148,10 +222,98 @@ export default function Login() {
 
   const handleRegisterInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
     setRegisterData(prev => ({
       ...prev,
       [name]: value
     }));
+
+    // Limpar erros de validação quando o usuário começar a digitar
+    if (validationErrors[name as keyof typeof validationErrors]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+
+    // Validação em tempo real para telefone
+    if (name === 'telefone' && value) {
+      if (!validatePhoneNumber(value)) {
+        setValidationErrors(prev => ({
+          ...prev,
+          telefone: 'Número inválido. Use prefixos: 82, 83, 84, 85, 86 ou 87'
+        }));
+      } else {
+        setValidationErrors(prev => ({
+          ...prev,
+          telefone: ''
+        }));
+      }
+    }
+
+    // Validação em tempo real para número de estudante
+    if (name === 'nrEstudante' && value && registerData.tipo === 'estudante') {
+      if (!validateStudentNumber(value)) {
+        setValidationErrors(prev => ({
+          ...prev,
+          nrEstudante: 'Deve ter exatamente 8 dígitos'
+        }));
+      } else {
+        setValidationErrors(prev => ({
+          ...prev,
+          nrEstudante: ''
+        }));
+      }
+    }
+  };
+
+  // Handler específico para telefone com formatação
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const formattedPhone = formatPhoneNumber(value);
+    
+    setRegisterData(prev => ({
+      ...prev,
+      telefone: formattedPhone
+    }));
+
+    // Validação em tempo real
+    if (value && !validatePhoneNumber(value)) {
+      setValidationErrors(prev => ({
+        ...prev,
+        telefone: 'Número inválido. Use prefixos: 82, 83, 84, 85, 86 ou 87'
+      }));
+    } else {
+      setValidationErrors(prev => ({
+        ...prev,
+        telefone: ''
+      }));
+    }
+  };
+
+  // Handler específico para número de estudante (apenas números)
+  const handleStudentNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    // Permite apenas números
+    const numericValue = value.replace(/\D/g, '');
+    
+    setRegisterData(prev => ({
+      ...prev,
+      nrEstudante: numericValue
+    }));
+
+    // Validação em tempo real
+    if (numericValue && !validateStudentNumber(numericValue)) {
+      setValidationErrors(prev => ({
+        ...prev,
+        nrEstudante: 'Deve ter exatamente 8 dígitos'
+      }));
+    } else {
+      setValidationErrors(prev => ({
+        ...prev,
+        nrEstudante: ''
+      }));
+    }
   };
 
   const handleCancel = () => {
@@ -259,12 +421,18 @@ export default function Login() {
               <input 
                 type="tel"
                 name="telefone"
-                className="login-form-input" 
+                className={`login-form-input ${validationErrors.telefone ? 'input-error' : ''}`} 
                 value={registerData.telefone} 
-                onChange={handleRegisterInputChange}
-                placeholder="(+258) 8X XXX XXXX"
+                onChange={handlePhoneChange}
+                placeholder="82 XXX XXXX ou +258 82 XXX XXXX"
                 required 
               />
+              {validationErrors.telefone && (
+                <div className="validation-error">{validationErrors.telefone}</div>
+              )}
+              <div className="input-hint">
+                Prefixos válidos: 82, 83, 84, 85, 86, 87
+              </div>
             </div>
             
             <div className="login-form-group">
@@ -302,12 +470,19 @@ export default function Login() {
                   <input 
                     type="text"
                     name="nrEstudante"
-                    className="login-form-input" 
+                    className={`login-form-input ${validationErrors.nrEstudante ? 'input-error' : ''}`} 
                     value={registerData.nrEstudante} 
-                    onChange={handleRegisterInputChange}
-                    placeholder="Ex: 202301234"
+                    onChange={handleStudentNumberChange}
+                    placeholder="8 dígitos (ex: 20230123)"
+                    maxLength={8}
                     required 
                   />
+                  {validationErrors.nrEstudante && (
+                    <div className="validation-error">{validationErrors.nrEstudante}</div>
+                  )}
+                  <div className="input-hint">
+                    Apenas números, exatamente 8 dígitos
+                  </div>
                 </div>
                 
                 <div className="login-form-group">

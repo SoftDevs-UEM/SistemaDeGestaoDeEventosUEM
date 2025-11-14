@@ -34,6 +34,93 @@ interface Registration {
   status: string;
 }
 
+// Funções de validação para métodos de pagamento
+const validatePaymentNumber = (numero: string, metodo: string): { isValid: boolean; message: string } => {
+  // Remove todos os caracteres não numéricos
+  const cleanNumber = numero.replace(/\D/g, '');
+  
+  // Verifica se tem pelo menos 8 dígitos
+  if (cleanNumber.length !== 8) {
+    return { isValid: false, message: 'O número deve ter exatamente 8 dígitos' };
+  }
+
+  // Validações específicas por método de pagamento
+  switch (metodo) {
+    case 'M-Pesa':
+      if (!cleanNumber.startsWith('84') && !cleanNumber.startsWith('85')) {
+        return { 
+          isValid: false, 
+          message: 'M-Pesa: Número deve começar com 84 ou 85' 
+        };
+      }
+      break;
+      
+    case 'E-Mola':
+      if (!cleanNumber.startsWith('86') && !cleanNumber.startsWith('87')) {
+        return { 
+          isValid: false, 
+          message: 'E-Mola: Número deve começar com 86 ou 87' 
+        };
+      }
+      break;
+      
+    case 'M-Kesh':
+      if (!cleanNumber.startsWith('82') && !cleanNumber.startsWith('83')) {
+        return { 
+          isValid: false, 
+          message: 'M-Kesh: Número deve começar com 82 ou 83' 
+        };
+      }
+      break;
+      
+    case 'NetShop':
+      // NetShop pode aceitar qualquer prefixo
+      if (!/^\d{8}$/.test(cleanNumber)) {
+        return { 
+          isValid: false, 
+          message: 'NetShop: Número deve ter 8 dígitos' 
+        };
+      }
+      break;
+      
+    default:
+      return { 
+        isValid: false, 
+        message: 'Método de pagamento não reconhecido' 
+      };
+  }
+  
+  return { isValid: true, message: '' };
+};
+
+// Função para formatar o número durante a digitação
+const formatPaymentNumber = (numero: string): string => {
+  const cleanNumber = numero.replace(/\D/g, '');
+  
+  if (cleanNumber.length === 0) return '';
+  if (cleanNumber.length <= 2) return cleanNumber;
+  if (cleanNumber.length <= 5) return `${cleanNumber.substring(0, 2)} ${cleanNumber.substring(2)}`;
+  if (cleanNumber.length <= 8) return `${cleanNumber.substring(0, 2)} ${cleanNumber.substring(2, 5)} ${cleanNumber.substring(5)}`;
+  
+  return `${cleanNumber.substring(0, 2)} ${cleanNumber.substring(2, 5)} ${cleanNumber.substring(5, 8)}`;
+};
+
+// Função para obter dicas específicas por método
+const getPaymentMethodHint = (metodo: string): string => {
+  switch (metodo) {
+    case 'M-Pesa':
+      return 'M-Pesa: Use números que começam com 84 ou 85 (ex: 84 123 4567)';
+    case 'E-Mola':
+      return 'E-Mola: Use números que começam com 86 ou 87 (ex: 86 123 4567)';
+    case 'M-Kesh':
+      return 'M-Kesh: Use números que começam com 82 ou 83 (ex: 82 123 4567)';
+    case 'NetShop':
+      return 'NetShop: Use qualquer número de 8 dígitos (ex: 84 123 4567)';
+    default:
+      return 'Digite o número do celular para receber a solicitação de pagamento';
+  }
+};
+
 const RegistrarEvento = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -122,33 +209,65 @@ const RegistrarEvento = () => {
   const validateForm = () => {
     const errors: {[key: string]: string} = {};
 
-    if (!formData.pagamento.trim()) {
-      errors.pagamento = 'Número de pagamento é obrigatório';
-    } else if (!/^[\d\s\+\-\(\)]{8,}$/.test(formData.pagamento)) {
-      errors.pagamento = 'Número de pagamento inválido';
-    }
-
     if (!formData.metodoPagamento) {
       errors.metodoPagamento = 'Método de pagamento é obrigatório';
+    }
+
+    if (!formData.pagamento.trim()) {
+      errors.pagamento = 'Número de pagamento é obrigatório';
+    } else {
+      // Validação específica por método de pagamento
+      const validation = validatePaymentNumber(formData.pagamento, formData.metodoPagamento);
+      if (!validation.isValid) {
+        errors.pagamento = validation.message;
+      }
     }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleMethodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
+      // Limpar número quando mudar o método para evitar conflitos
+      pagamento: ''
     }));
 
-    // Limpar erro do campo quando usuário começar a digitar
+    // Limpar erro do campo
     if (formErrors[name]) {
       setFormErrors(prev => ({
         ...prev,
         [name]: ''
       }));
+    }
+  };
+
+  const handlePaymentNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const formattedValue = formatPaymentNumber(value);
+    
+    setFormData(prev => ({
+      ...prev,
+      pagamento: formattedValue
+    }));
+
+    // Validação em tempo real se já tiver método selecionado
+    if (formData.metodoPagamento && value) {
+      const validation = validatePaymentNumber(value, formData.metodoPagamento);
+      if (!validation.isValid) {
+        setFormErrors(prev => ({
+          ...prev,
+          pagamento: validation.message
+        }));
+      } else {
+        setFormErrors(prev => ({
+          ...prev,
+          pagamento: ''
+        }));
+      }
     }
   };
 
@@ -188,7 +307,7 @@ const RegistrarEvento = () => {
       const registrationData = {
         event_id: event.id,
         user_id: user.id,
-        pagamento: formData.pagamento.trim(),
+        pagamento: formData.pagamento.replace(/\D/g, ''), // Enviar apenas números
         metodo_pagamento: formData.metodoPagamento
       };
 
@@ -462,15 +581,13 @@ const RegistrarEvento = () => {
               <div className="form-section">
                 <h3>Dados de Pagamento</h3>
                 <div className="form-grid">
-
-
                   <div className="form-group">
                     <label htmlFor="metodoPagamento">Método de Pagamento *</label>
                     <select
                       id="metodoPagamento"
                       name="metodoPagamento"
                       value={formData.metodoPagamento}
-                      onChange={handleChange}
+                      onChange={handleMethodChange}
                       required
                       disabled={loading}
                       className={formErrors.metodoPagamento ? 'error' : ''}
@@ -489,7 +606,6 @@ const RegistrarEvento = () => {
                     </small>
                   </div>
 
-
                   <div className="form-group">
                     <label htmlFor="pagamento">Número para Pagamento *</label>
                     <input
@@ -497,18 +613,34 @@ const RegistrarEvento = () => {
                       id="pagamento"
                       name="pagamento"
                       value={formData.pagamento}
-                      onChange={handleChange}
+                      onChange={handlePaymentNumberChange}
                       required
-                      placeholder="Ex: 84 123 4567"
-                      disabled={loading}
+                      placeholder={
+                        formData.metodoPagamento 
+                          ? `Ex: ${getExampleNumber(formData.metodoPagamento)}`
+                          : "Ex: 84 123 4567"
+                      }
+                      disabled={loading || !formData.metodoPagamento}
                       className={formErrors.pagamento ? 'error' : ''}
+                      maxLength={11} // 8 dígitos + 2 espaços
                     />
                     {formErrors.pagamento && (
                       <span className="error-message">{formErrors.pagamento}</span>
                     )}
                     <small className="form-help">
-                      Digite o número do seu celular para receber a solicitação de pagamento
+                      {formData.metodoPagamento 
+                        ? getPaymentMethodHint(formData.metodoPagamento)
+                        : 'Selecione primeiro o método de pagamento'
+                      }
                     </small>
+                    
+                    {/* Indicador visual do método selecionado */}
+                    {formData.metodoPagamento && (
+                      <div className={`method-indicator ${formData.metodoPagamento.toLowerCase().replace('-', '')}`}>
+                        <i className={`fas ${getMethodIcon(formData.metodoPagamento)}`}></i>
+                        <span>{formData.metodoPagamento}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -594,6 +726,27 @@ const RegistrarEvento = () => {
       <Footer />
     </div>
   );
+};
+
+// Funções auxiliares
+const getExampleNumber = (metodo: string): string => {
+  switch (metodo) {
+    case 'M-Pesa': return '84 123 4567';
+    case 'E-Mola': return '86 123 4567';
+    case 'M-Kesh': return '82 123 4567';
+    case 'NetShop': return '1234 5678 9012 3456';
+    default: return '84 123 4567';
+  }
+};
+
+const getMethodIcon = (metodo: string): string => {
+  switch (metodo) {
+    case 'M-Pesa': return 'fa-mobile-alt';
+    case 'E-Mola': return 'fa-wallet';
+    case 'M-Kesh': return 'fa-credit-card';
+    case 'NetShop': return 'fa-shopping-bag';
+    default: return 'fa-shopping-bag';
+  }
 };
 
 export default RegistrarEvento;

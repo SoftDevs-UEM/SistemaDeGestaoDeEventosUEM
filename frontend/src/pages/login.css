@@ -283,6 +283,32 @@
   padding-right: 40px;
 }
 
+/* Estilos para validação */
+.input-error {
+  border-color: #e74c3c !important;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important;
+}
+
+.validation-error {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.validation-error::before {
+  content: "⚠ ";
+  margin-right: 4px;
+}
+
+.input-hint {
+  color: #7f8c8d;
+  font-size: 11px;
+  margin-top: 4px;
+  font-style: italic;
+}
+
 /* Responsividade */
 @media (max-width: 480px) {
   .login-base-container {
